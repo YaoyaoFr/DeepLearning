@@ -1,0 +1,193 @@
+<structure>
+	<autoencoders>
+        <input>
+            <type>Placeholder</type>
+            <input_shape>None,61,73,61</input_shape>
+            <dtype>float32</dtype>
+            <scope>input</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape></input_shape>
+            <dtype>float32</dtype>
+            <scope>learning_rate</scope>
+        </input>
+
+		<autoencoder>
+			<encoder>
+				<type>Convolution2D</type>
+				<kernel_shape>6,6,61,16</kernel_shape>
+				<activation>relu</activation>
+				<strides>1,1,1,1</strides>
+				<padding>VALID</padding>
+				<scope>conv_1</scope>
+				<batch_normalization>True</batch_normalization>
+			</encoder>
+
+
+			<decoder>
+				<type>DeConvolution2D</type>
+				<kernel_shape>6,6,61,16</kernel_shape>
+				<padding>VALID</padding>
+				<output_shape>None,61,73,2</output_shape>
+				<activation>tanh</activation>
+				<scope>reconstruction</scope>
+			</decoder>
+		</autoencoder>
+
+		<autoencoder>
+			<encoder>
+				<type>MaxPooling</type>
+				<kernel_shape>1,2,2,1</kernel_shape>
+				<strides>1,2,2,1</strides>
+				<padding>VALID</padding>
+				<scope>pool_1</scope>
+			</encoder>
+
+			<decoder>
+				<type>UnPooling</type>
+				<kernel_shape>2,2</kernel_shape>
+				<scope>unpool_1</scope>
+			</decoder>
+		</autoencoder>
+
+		<autoencoder>
+			<encoder>
+				<type>Convolution2D</type>
+				<kernel_shape>5,5,16,32</kernel_shape>
+				<strides>1,1,1,1</strides>
+				<padding>VALID</padding>
+				<activation>relu</activation>
+                <batch_normalization>True</batch_normalization>
+				<scope>conv_2</scope>
+			</encoder>
+
+			<decoder>
+				<type>DeConvolution2D</type>
+				<kernel_shape>5,5,16,32</kernel_shape>
+				<output_shape>pool_1</output_shape>
+				<padding>VALID</padding>
+				<activation>tanh</activation>
+				<scope>deconv_2</scope>
+			</decoder>
+		</autoencoder>
+
+		<autoencoder>
+			<encoder>
+				<type>MaxPooling</type>
+				<kernel_shape>1,2,2,1</kernel_shape>
+				<strides>1,2,2,1</strides>
+				<padding>VALID</padding>
+				<scope>pool_2</scope>
+			</encoder>
+
+			<decoder>
+				<type>UnPooling</type>
+				<kernel_shape>2,2</kernel_shape>
+				<scope>unpool_2</scope>
+			</decoder>
+		</autoencoder>
+
+		<autoencoder>
+			<encoder>
+				<type>Unfold</type>
+				<scope>unfold</scope>
+			</encoder>
+
+			<decoder>
+				<type>Fold</type>
+				<fold_shape>-1,12,15,32</fold_shape>
+				<scope>fold</scope>
+			</decoder>
+		</autoencoder>
+
+		<!--<autoencoder>-->
+			<!--<encoder>-->
+				<!--<type>FullyConnected</type>-->
+				<!--<kernel_shape>5760,500</kernel_shape>-->
+				<!--<activation>tanh</activation>-->
+                <!--<batch_normalization>True</batch_normalization>-->
+				<!--<scope>encode_1</scope>-->
+			<!--</encoder>-->
+
+			<!--<decoder>-->
+				<!--<type>FullyConnected</type>-->
+				<!--<kernel_shape>500,5760</kernel_shape>-->
+				<!--<activation>sigmoid</activation>-->
+				<!--<scope>decode_1</scope>-->
+			<!--</decoder>-->
+		<!--</autoencoder>-->
+
+		<!--<autoencoder>-->
+			<!--<encoder>-->
+				<!--<type>FullyConnected</type>-->
+				<!--<kernel_shape>500,61</kernel_shape>-->
+				<!--<activation>tanh</activation>-->
+                <!--<batch_normalization>True</batch_normalization>-->
+				<!--<scope>encoder</scope>-->
+				<!--<input>unfold</input>-->
+			<!--</encoder>-->
+
+			<!--<decoder>-->
+				<!--<type>FullyConnected</type>-->
+				<!--<kernel_shape>61,500</kernel_shape>-->
+				<!--<activation>sigmoid</activation>-->
+				<!--<scope>decode_2</scope>-->
+				<!--<input>encode</input>-->
+			<!--</decoder>-->
+		<!--</autoencoder>-->
+	</autoencoders>
+
+	<classifier>
+        <input>
+            <type>Placeholder</type>
+            <input_shape>None,5760</input_shape>
+            <dtype>float32</dtype>
+            <scope>input</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>None,2</input_shape>
+            <dtype>float32</dtype>
+            <scope>output</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape></input_shape>
+            <dtype>float32</dtype>
+            <scope>learning_rate</scope>
+        </input>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>5760,1024</kernel_shape>
+            <activation>relu</activation>
+			<batch_normalization>True</batch_normalization>
+            <scope>hidden_1</scope>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>1024,128</kernel_shape>
+            <activation>relu</activation>
+            <scope>hidden2</scope>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>128,2</kernel_shape>
+            <activation>relu</activation>
+			<batch_normalization>True</batch_normalization>
+            <scope>hidden3</scope>
+        </layer>
+
+        <layer>
+            <type>Softmax</type>
+            <scope>softmax</scope>
+            <input>hidden2</input>
+        </layer>
+	</classifier>
+</structure>

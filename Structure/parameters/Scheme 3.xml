@@ -1,0 +1,119 @@
+<structure>
+	<classifier>
+        <input>
+            <type>Placeholder</type>
+            <input_shape>None,200,200,1</input_shape>
+            <dtype>float32</dtype>
+            <scope>input</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>None,2</input_shape>
+            <dtype>float32</dtype>
+            <scope>output</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape></input_shape>
+            <dtype>float32</dtype>
+            <scope>learning_rate</scope>
+        </input>
+
+        <layer>
+            <type>Convolution2D</type>
+            <kernel_shape>5,5,1,4</kernel_shape>
+            <activation>tanh</activation>
+			<batch_normalization>True</batch_normalization>
+            <padding>VALID</padding>
+            <scope>conv_1</scope>
+            <input>input</input>
+        </layer>
+
+        <layer>
+            <type>MaxPooling</type>
+            <kernel_shape>1,2,2,1</kernel_shape>
+            <strides>1,2,2,1</strides>
+            <padding>VALID</padding>
+            <scope>pool_1</scope>
+            <input>conv_1</input>
+        </layer>
+
+        <layer>
+            <type>Convolution2D</type>
+            <kernel_shape>5,5,4,8</kernel_shape>
+            <activation>tanh</activation>
+            <padding>VALID</padding>
+			<batch_normalization>True</batch_normalization>
+            <scope>conv_2</scope>
+            <input>pool_1</input>
+        </layer>
+
+        <layer>
+            <type>MaxPooling</type>
+            <kernel_shape>1,2,2,1</kernel_shape>
+            <strides>1,2,2,1</strides>
+            <padding>VALID</padding>
+            <scope>pool_2</scope>
+            <input>conv_2</input>
+        </layer>
+
+        <layer>
+            <type>Convolution2D</type>
+            <kernel_shape>5,5,8,8</kernel_shape>
+            <activation>tanh</activation>
+            <padding>VALID</padding>
+			<batch_normalization>True</batch_normalization>
+            <scope>conv_3</scope>
+            <input>pool_2</input>
+        </layer>
+
+        <layer>
+            <type>MaxPooling</type>
+            <kernel_shape>1,2,2,1</kernel_shape>
+            <strides>1,2,2,1</strides>
+            <padding>VALID</padding>
+            <scope>pool_3</scope>
+            <input>conv_3</input>
+        </layer>
+
+        <layer>
+            <type>Unfold</type>
+            <scope>unfold</scope>
+            <input>pool_3</input>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>3528,512</kernel_shape>
+            <activation>sigmoid</activation>
+			<batch_normalization>True</batch_normalization>
+            <scope>hidden2</scope>
+            <input>hidden1</input>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>512,128</kernel_shape>
+            <activation>sigmoid</activation>
+			<batch_normalization>True</batch_normalization>
+            <scope>hidden2</scope>
+            <input>hidden1</input>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>128,2</kernel_shape>
+            <activation>sigmoid</activation>
+            <scope>hidden2</scope>
+            <input>hidden1</input>
+        </layer>
+
+        <layer>
+            <type>Softmax</type>
+            <scope>softmax</scope>
+            <input>hidden2</input>
+        </layer>
+	</classifier>
+</structure>
