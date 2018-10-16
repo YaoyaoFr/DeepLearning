@@ -4,51 +4,62 @@ import string
 import sys
 import time
 
+import os
 import h5py
 import numpy as np
 import numpy.ma as ma
+import pandas as pd
 from nipy import load_image
 from sklearn.preprocessing import scale
 
 
-def load_fold(subjs, experiment, fold):
-    '''
-    Load data in each fold given the corresponding subjects ids
-    :param subjs: All subjects
+def load_fold(dataset_group: h5py.Group,
+              fold_group: h5py.Group,
+              experiment: h5py.Group = None,
+              features: list = None,
+              dataset: str = None, ) -> dict:
+    """
+    load data in each fold given the corresponding data_group ids
+    :param dataset_group: list of all data_group
+    :param fold_group: The fold of cross validation
     :param experiment: The experiments settings
-    :param fold: The cross validation fold
-    :return: The data
-    '''
-    feature = experiment.attrs['feature']
-    features = [d.decode('utf-8') for d in feature]
+    :param features: the list of features to be loaded
+    :param dataset: the dataset to be loaded
+    :return: dictionary {'train_data' ,'valid_data', 'test_data' if exist}
+    """
+    if features is None:
+        features = [feature.decode() for feature in experiment.attrs['features']]
+    if dataset is None:
+        dataset = experiment.attrs['dataset']
 
-    data = dict()
-    for tvt in ['train', 'valid', 'test']:
-        if tvt in fold:
-            data_list = list()
-            for pid in fold[tvt]:
-                data_list.append(load_patient_data(patient=subjs[pid], features=features))
-            data_temp = np.array(data_list)
-            # data_temp = data_normalization(data=data_temp, axis=0)
-            # data_temp = split_slices(data_temp)
-            data['{:s} data'.format(tvt)] = data_temp
+    datas = {}
+    for flag in ['train', 'valid', 'test']:
+        if flag not in fold_group:
+            continue
 
-            label_list = list()
-            for pid in fold[tvt]:
-                label_list.append(subjs[pid].attrs["y"])
-            label_tmp = np.array(label_list)
-            # label_tmp = vecter2onehot(label_tmp, 2)
-            # label_tmp = repeatmap(label_tmp, num_repeat=61)
-            data['{:s} label'.format(tvt)] = label_tmp
-    return data
+        print('Loading  {:5s} data of {:5} in dataset: {:7s} ...'.format(flag, '_'.join(features), dataset))
+        data = np.array([load_subject_data(subject=dataset_group[subject],
+                                           features=features) for subject in fold_group[flag]])
+        label = vecter2onehot(np.array([dataset_group[subject_id].attrs['y'] for subject_id in fold_group[flag]]))
+        datas['{:s} data'.format(flag)] = data
+        datas['{:s} label'.format(flag)] = label
+    return datas
 
 
-def load_patient_data(patient, features):
-    data = []
+def load_subject_data(subject: h5py.Group, features: list) -> np.ndarray:
+    """
+    Load data from h5py file in terms of subject list
+    :param subject: group of subject to be loaded
+    :param features: list of features to be loaded
+    :return: An np.ndarray with shape of [data_shape, feature_num]
+    """
+    datas = []
     for feature in features:
-        data.append(np.expand_dims(np.array(patient[feature]), axis=-1))
-    data = np.concatenate(data, axis=-1)
-    return data
+        data = np.array(subject[feature])
+        data = np.expand_dims(data, axis=-1)
+        datas.append(data)
+    datas = np.squeeze(np.concatenate(datas, axis=-1))
+    return datas
 
 
 def load_nifti_data(data_path: str, mask: bool = False, normalization: bool = False):
@@ -59,6 +70,8 @@ def load_nifti_data(data_path: str, mask: bool = False, normalization: bool = Fa
     if mask:
         shape = np.shape(data)
         atlas_path = 'aal_{:s}.nii'.format('_'.join([str(i) for i in shape]))
+        if not os.path.exists(atlas_path):
+            atlas_path = 'Data/aal_{:s}.nii'.format('_'.join([str(i) for i in shape]))
         atlas = np.array(load_image(atlas_path).get_data()) == 0
         data[atlas] = 0
 
@@ -68,7 +81,9 @@ def load_nifti_data(data_path: str, mask: bool = False, normalization: bool = Fa
         data = (data - mean) / var
         if atlas is not None:
             data[atlas] = 0
-    return np.array(data)
+
+    data = np.array(data)
+    return data
 
 
 def hdf5_handler(filename, mode="r"):
@@ -129,7 +144,7 @@ def prepare_classify_data(folds: h5py.Group = None,
                 if new_shape is not None:
                     data_tmp = np.reshape(a=data_tmp, newshape=new_shape)
                 if normalization:
-                    data_tmp = data_normalization(data=data_tmp, axis=1, normalization=True, sigmoid=False)
+                    data_tmp, mean, std = data_normalization(data=data_tmp, axis=1, normalization=True, sigmoid=False)
 
                 tvt_label = '{:s} label'.format(tvt)
                 label_tmp = np.array(fold[tvt_label])
@@ -245,24 +260,27 @@ def repeatmap(data, num_repeat):
     return new_data
 
 
-def data_normalization(data, axis=-1, normalization=False, sigmoid=True):
+def data_normalization(data: np.ndarray or list,
+                       axis: int = 0,
+                       mean: np.ndarray = None,
+                       std: np.ndarray = None,
+                       normalization: bool = True,
+                       sigmoid: bool = False):
     # Format list to ndarray
     if isinstance(data, list):
         data = np.array(data)
 
     if normalization:
-        # Format data to two-dimension
-        shape = np.shape(data)
-        new_data = np.reshape(a=data,
-                              newshape=[np.prod(shape[0:-1]), shape[-1]],
-                              )
-        new_data = scale(X=new_data, axis=axis)
-        new_data = np.reshape(a=new_data,
-                              newshape=shape,
-                              )
+        if mean is None:
+            mean = np.mean(data, axis=axis)
+        if std is None:
+            std = np.std(data, axis=axis)
+            std[std == 0] = 1
+        new_data = (data - mean) / std
+
     if sigmoid:
         new_data = 1.0 / (1 + np.exp(-data)) - 0.5
-    return new_data
+    return new_data, mean, std
 
 
 def vecter2onehot(data, class_num=2):
@@ -303,3 +321,14 @@ def get_datas(dataset, feature, fold_indexes, indexes, tvt='train'):
         datas[fold_idx] = data
 
     return datas
+
+
+def get_subjects(pheno: pd.DataFrame, group: str) -> pd.DataFrame:
+    dx_group = {'health': 1, 'patient': 0, 'all': 2}[group]
+    pheno = pheno[pheno['DX_GROUP'] != dx_group]
+    ids = pheno['FILE_ID']
+    ids_encode = list()
+    for id in ids:
+        ids_encode.append(id.encode())
+    ids_encode = pd.Series(ids_encode)
+    return ids_encode

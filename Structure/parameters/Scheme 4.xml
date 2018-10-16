@@ -30,7 +30,7 @@
 				<type>DeConvolution2D</type>
 				<kernel_shape>6,6,61,16</kernel_shape>
 				<padding>VALID</padding>
-				<output_shape>None,61,73,2</output_shape>
+				<output_shape>None,61,73,61</output_shape>
 				<activation>tanh</activation>
 				<scope>reconstruction</scope>
 			</decoder>

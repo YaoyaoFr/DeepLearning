@@ -33,13 +33,21 @@ def load_patient(subj, tmpl):
     return subj, data
 
 
-def load_patients(subjs, tmpl, jobs=10):
+def load_patients(subjs, tmpl, jobs=1):
     partial_load_patient = partial(load_patient, tmpl=tmpl)
     msg = 'Processing {current} of {total}'
     return dict(run_progress(partial_load_patient, subjs, message=msg, jobs=jobs))
 
 
-def load_patients_to_file(hdf5, features, datasets):
+def load_subjects_to_file(hdf5: h5py.Group, features: list, datasets: list) -> None:
+    """
+    load the data of all subjects to a h5py file
+    :param hdf5: the handler of h5py file for storing subjects data
+    :param features: the list of feature that need to be stored
+    :param datasets: the list of dataset that need to be stored
+    :return: None
+    """
+
     for dataset in datasets:
         pheno = load_phenotypes(dataset)
         download_root = 'F:/OneDriveOffL/Data/Data/{:s}/Results'.format(dataset)
@@ -168,7 +176,8 @@ def load_phenotypes_FCP_RfMRIMaps():
     pheno_path = 'F:\OneDriveOffL\Data\Data\FCP\FCP_RfMRIMaps_Info.csv'
     pheno = pd.read_csv(pheno_path)
 
-    pheno['FILE_ID'] = pheno['Subject ID']
+    pheno['FILE_ID'] = pheno['Subject ID'].apply(
+        lambda x: ''.join(['0' for _ in np.arange(start=0, stop=3 - len(x))]) + x)
     pheno['DX_GROUP'] = pheno['DX']
     pheno['SITE'] = pheno['Site']
     pheno['SEX'] = pheno['Sex']
