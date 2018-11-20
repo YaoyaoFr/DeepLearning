@@ -1,7 +1,7 @@
 <Log>
 	<basic_path>F:/OneDriveOffL/Data/Result/DCAE</basic_path>
-	<restored_date>2018-10-02</restored_date>
-	<restored_time>21-50</restored_time>
-	<sub_folder_name></sub_folder_name>
+	<restored_date></restored_date>
+	<restored_time></restored_time>
+	<sub_folder_name>fold 1/fine_tune_Classifier</sub_folder_name>
 	<restored_epoch></restored_epoch>
 </Log>

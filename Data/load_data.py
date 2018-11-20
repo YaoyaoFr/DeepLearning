@@ -1,6 +1,7 @@
 import os
 import re
 import pandas as pd
+import scipy.io as sio
 from functools import partial
 from Data.utils_prepare_data import *
 from sklearn.preprocessing import scale
@@ -16,6 +17,7 @@ def load_patient(subj, tmpl):
                 'subject': subj.split('_')[-1],
             })
         data = load_nifti_data(data_path, mask=True, normalization=True)
+    # Calculate functional connectivity for .1D file
     elif tmpl.endswith('.1D'):
         df = pd.read_csv(format_config(tmpl, {
             'subject': subj,
@@ -29,11 +31,27 @@ def load_patient(subj, tmpl):
         functional = compute_connectivity(functional)
         functional = functional.astype(np.float32)
         data = functional
+    # Calculate functional connectivity for .mat file
+    elif tmpl.endswith('.mat'):
+        ROI_nums = 90
+        data_path = format_config(tmpl, {
+            'subject': subj,
+        })
+        ROI_signals = sio.loadmat(data_path)['ROISignals']
+        ROI_signals = ROI_signals[:, :ROI_nums]
+        ROI_signals = np.nan_to_num(ROI_signals)
+        ROI_signals = np.transpose(ROI_signals, [1, 0])
+        ROI_signals = scale(ROI_signals, axis=1)
+        functional = compute_connectivity(ROI_signals)
+        data = functional
+        pass
+    else:
+        pass
 
     return subj, data
 
 
-def load_patients(subjs, tmpl, jobs=1):
+def load_patients(subjs, tmpl, jobs=10):
     partial_load_patient = partial(load_patient, tmpl=tmpl)
     msg = 'Processing {current} of {total}'
     return dict(run_progress(partial_load_patient, subjs, message=msg, jobs=jobs))
@@ -47,15 +65,16 @@ def load_subjects_to_file(hdf5: h5py.Group, features: list, datasets: list) -> N
     :param datasets: the list of dataset that need to be stored
     :return: None
     """
+    features_path = {
+        'falff': 'fALFF_FunImgARCW/fALFFMap_{subject}.nii',
+        'vmhc': 'VMHC_FunImgARCWFsymS/zVMHCMap_{subject}.nii',
+        'reho': 'ReHo_FunImgARCWF/ReHoMap_{subject}.nii',
+        'FC': 'ROISignals_FunImgARCWF/ROISignals_{subject}.mat',
+    }
 
     for dataset in datasets:
         pheno = load_phenotypes(dataset)
         download_root = 'F:/OneDriveOffL/Data/Data/{:s}/Results'.format(dataset)
-        features_path = {
-            'falff': 'fALFF_FunImgARCW/fALFFMap_{subject}.nii',
-            'vmhc': 'VMHC_FunImgARCWFsymS/zVMHCMap_{subject}.nii',
-            'reho': 'ReHo_FunImgARCWF/ReHoMap_{subject}.nii',
-        }
         dataset_group = hdf5.require_group('{:s}/subjects'.format(dataset))
         file_ids = pheno['FILE_ID']
 

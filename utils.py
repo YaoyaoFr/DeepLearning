@@ -5,7 +5,7 @@ from Structure.classfier import Classifier, SupportVectorMachine
 from Data.utils_prepare_data import hdf5_handler
 
 
-def onehot2vector(data, class_num=2):
+def onehot_to_vector(data, class_num=2):
     data_tmp = np.zeros(shape=[np.size(data, 0)], dtype=int)
     for class_index in range(class_num):
         data_tmp[np.where(data[:, class_index] == 1)] = class_index
@@ -21,7 +21,6 @@ def run_classifier(folds=None, classifier: Classifier = None):
     :param classifier:
     :return:
     """
-
     if folds is None:
         hdf5_path = b'F:/OneDriveOffL/Data/Data/ABIDE/abide.hdf5'
         hdf5 = hdf5_handler(hdf5_path, 'a')

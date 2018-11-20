@@ -63,6 +63,18 @@ class Log:
         save_dir = '/'.join([self.basic_path, self.restored_date, self.restored_time])
         return save_dir
 
+    def get_restored_pa(self):
+        pas = {}
+        pas_list = self.sub_folder_name.split('/')
+        pas['fold'] = int(pas_list[0].split(' ')[1])
+        process_list = ['pre_train_SCAE', 'fine_tune_SCAE', 'pre_train_Classifier', 'fine_tune_Classifier']
+        pas['process'] = process_list.index(pas_list[1])
+        if pas['process'] == 'pre_train_SCAE' and len(pas_list) == 3:
+            pas['indexes'] = [int(i) for i in pas_list[2].split('-')]
+        else:
+            pas['indexes'] = None
+        return pas
+
     def write_graph(self):
         if not os.path.exists(self.file_path):
             os.makedirs(self.file_path)
@@ -107,24 +119,29 @@ class Log:
         print('Model saved in file: {:s}'.format(save_path))
         return save_path
 
-    def restore(self, restored_path: str = None) -> int:
+    def restore(self, restored_path: str = None, initialize: bool = True) -> int:
+        """
+        Restored neural network model with restore parameters.
+        :param restored_path: Restored model directly by save path.
+        :param initialize: Initialize the restore epoch after restored.
+        :return: The training epoch of restored model.
+        """
         if restored_path is None:
             restored_epoch = self.pa['restored_epoch']
-            if restored_epoch is None:
-                return 0
-
             restored_path = os.path.join(self.file_path,
-                                         'model/train.model_{:d}'.format(restored_epoch))
-            self.pa['restored_epoch'] = None
-        else:
-            restored_epoch = 0
+                                         'model/train.model_{:d}'.format(restored_epoch)) if restored_epoch else None
+
         try:
             self.saver.restore(self.sess, restored_path)
             print('Model restored from file: {:s}'.format(restored_path))
         except Exception as e:
+            print(e)
             return 0
 
-        return restored_epoch
+        if initialize:
+            self.pa['restored_epoch'] = None
+
+        return restored_epoch if restored_epoch else 0
 
     def save_features(self, debug_train, debug_test, train_label, test_label, epoch=None, save_path=None):
         if not epoch:

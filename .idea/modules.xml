@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/DCAE.iml" filepath="$PROJECT_DIR$/.idea/DCAE.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../SppNet/.idea/SppNet.iml" filepath="$PROJECT_DIR$/../SppNet/.idea/SppNet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../bn_exp/bn_exp/.idea/bn_exp.iml" filepath="$PROJECT_DIR$/../bn_exp/bn_exp/.idea/bn_exp.iml" />
     </modules>
   </component>
 </project>

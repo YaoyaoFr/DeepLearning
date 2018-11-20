@@ -17,7 +17,8 @@ def load_datas(cover: bool = False) -> h5py.File:
     hdf5_path = b'F:/OneDriveOffL/Data/Data/DCAE_data.hdf5'
     hdf5 = hdf5_handler(hdf5_path, 'a')
 
-    features = ['falff', 'reho', 'vmhc']
+    # features = ['falff', 'reho', 'vmhc', 'FC']
+    features = ['FC']
     datasets = ['ABIDE II', 'ABIDE', 'ADHD', 'FCP']
 
     if cover:
@@ -74,7 +75,10 @@ def prepare_folds(parameters: dict, folds_hdf5: h5py.File = None) -> None:
 def prepare_scheme(parameters: dict,
                    data_hdf5: h5py.File = None,
                    folds_hdf5: h5py.Group = None,
-                   scheme_hdf5: h5py.Group = None):
+                   scheme_hdf5: h5py.Group = None,
+                   standardization: bool = True,
+                   normalization: bool = True,
+                   ):
     if data_hdf5 is None:
         data_hdf5_path = b'F:/OneDriveOffL/Data/Data/DCAE_data.hdf5'
         data_hdf5 = hdf5_handler(data_hdf5_path, 'a')
@@ -106,7 +110,10 @@ def prepare_scheme(parameters: dict,
             label = np.array(fold['train label'])
             data = data[label == 0]
             data = np.concatenate((basic_data, data), axis=0)
-            data, mean, std = data_normalization(data=data, axis=0)
+            data, mean, std = data_normalization(data=data,
+                                                 axis=0,
+                                                 normalization=True
+                                                 )
             data = split_slices(data)
             create_dataset_hdf5(group=fold_new,
                                 name='pre training data',
@@ -170,8 +177,11 @@ def prepare_scheme(parameters: dict,
                 fold_data = load_fold(dataset_group=data_hdf5['{:s}/subjects'.format(dataset)],
                                       experiment=scheme_exp,
                                       fold_group=folds_hdf5['{:s}/{:d}'.format(dataset, fold_index)])
-                scaled_data = np.concatenate((health_data, fold_data['train data']), axis=0)
-                scaled_data, mean, std = data_normalization(data=scaled_data)
+                fold_data = np.concatenate((health_data, fold_data['train data']), axis=0)
+                fold_data, mean, std = data_normalization(data=fold_data,
+                                                          standardization=standardization,
+                                                          normalization=normalization,
+                                                          )
                 create_dataset_hdf5(group=fold,
                                     name='mean',
                                     data=mean,
@@ -181,17 +191,88 @@ def prepare_scheme(parameters: dict,
                                     data=std,
                                     )
 
-                pre_train_data = scaled_data[0:health_data_size]
+                pre_train_data = fold_data[0:health_data_size]
                 fold_data['pre train data'] = pre_train_data
-                fold_data['train data'] = scaled_data[health_data_size:]
+                fold_data['train data'] = fold_data[health_data_size:]
                 fold_data['valid data'], _, _ = data_normalization(data=fold_data['valid data'],
                                                                    mean=mean,
-                                                                   std=std)
+                                                                   std=std,
+                                                                   standardization=standardization,
+                                                                   normalization=normalization,
+                                                                   )
                 fold_data['test data'], _, _ = data_normalization(data=fold_data['test data'],
                                                                   mean=mean,
-                                                                  std=std)
+                                                                  std=std,
+                                                                  standardization=standardization,
+                                                                  normalization=normalization,
+                                                                  )
 
                 for tvt in ['pre train', 'train', 'valid', 'test']:
+                    for flag in ['data', 'label']:
+                        name = '{:s} {:s}'.format(tvt, flag)
+                        if name not in fold_data:
+                            continue
+
+                        create_dataset_hdf5(group=fold,
+                                            name=name,
+                                            data=fold_data[name],
+                                            )
+    elif scheme == 5:
+        for dataset in datasets:
+            folds = scheme_group.require_group('{:s}/{:s}'.format(dataset, features_str))
+            scheme_exp = folds.require_group('experiment')
+            scheme_exp.attrs['dataset'] = dataset
+            scheme_exp.attrs['features'] = [feature.encode() for feature in features]
+
+            # processing data for each fold
+            for fold_index in np.arange(start=1, stop=6):
+                fold = folds.require_group('fold {:d}'.format(fold_index))
+
+                # load and scaling
+                fold_data = load_fold(dataset_group=data_hdf5['{:s}/subjects'.format(dataset)],
+                                      experiment=scheme_exp,
+                                      fold_group=folds_hdf5['{:s}/{:d}'.format(dataset, fold_index)])
+
+                if normalization:
+                    fold_data['train data'], mean, std = data_normalization(data=fold_data['train data'],
+                                                                            standardization=standardization,
+                                                                            normalization=normalization,
+                                                                            )
+                    create_dataset_hdf5(group=fold,
+                                        name='mean',
+                                        data=mean,
+                                        )
+                    create_dataset_hdf5(group=fold,
+                                        name='std',
+                                        data=std,
+                                        )
+
+                    fold_data['valid data'], _, _ = data_normalization(data=fold_data['valid data'],
+                                                                       mean=mean,
+                                                                       std=std,
+                                                                       standardization=standardization,
+                                                                       normalization=normalization,
+                                                                       )
+                    fold_data['test data'], _, _ = data_normalization(data=fold_data['test data'],
+                                                                      mean=mean,
+                                                                      std=std,
+                                                                      standardization=standardization,
+                                                                      normalization=normalization,
+                                                                      )
+
+                for tvt in ['train', 'valid', 'test']:
+                    # Extract the AAL regions
+                    # name = '{:s} data'.format(tvt)
+                    # data = fold_data[name]
+                    # aal_hdf5_path = b'F:/OneDriveOffL/Data/Data/DCAE_aal.hdf5'
+                    # aal_hdf5 = hdf5_handler(aal_hdf5_path)
+                    # datas = list()
+                    # for region_index in np.arange(start=1, stop=91):
+                    #     mask = aal_hdf5['MNI/{:d}/mask'.format(region_index)] == 1
+                    #     data[mask] = 0
+                    #     datas.append(np.expand_dims(data, -1))
+                    # fold_data[name] = np.concatenate(datas, axis=-1)
+
                     for flag in ['data', 'label']:
                         name = '{:s} {:s}'.format(tvt, flag)
                         if name not in fold_data:
@@ -205,19 +286,18 @@ def prepare_scheme(parameters: dict,
 
 def main(parameters: dict):
     hdf5 = load_datas(cover=True)
-    prepare_folds(parameters=parameters)
-    parameters['datasets'] = ['ABIDE']
-    prepare_scheme(parameters=parameters)
+    # prepare_folds(parameters=parameters)
+    # parameters['datasets'] = ['ABIDE']
+    # prepare_scheme(parameters=parameters, standardization=True, normalization=True)
 
 
 if __name__ == '__main__':
     parameters = {
-        'features': ['falff'],
-        # 'datasets': ['ABIDE'],
+        'features': ['reho'],
         'datasets': ['ABIDE', 'ABIDE II', 'ADHD', 'FCP'],
         'fold_nums': [[0, 5], [0, 5], [0, 5], [0]],
         'groups': [['health', 'all'], ['health', 'all'], ['health', 'all'], ['all']],
-        'scheme': 4,
+        'scheme': 5,
     }
 
     main(parameters=parameters)

@@ -5,6 +5,8 @@
     <orderEntry type="jdk" jdkName="Python 3.5 (ECNN)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="acerta-abide" />
+    <orderEntry type="module" module-name="SppNet" />
+    <orderEntry type="module" module-name="bn_exp" />
   </component>
   <component name="TestRunnerService">
     <option name="PROJECT_TEST_RUNNER" value="Unittests" />

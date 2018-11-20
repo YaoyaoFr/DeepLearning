@@ -44,6 +44,17 @@ def show_reconstruction(fold: h5py.Group or dict = None,
                         model=None,
                         tag='show',
                         ):
+    """
+    Visualize reconstruction of autoencoder
+    :param fold: h5py.Group contains raw data and reconstruction data
+    :param data: data to be reconstructed
+    :param subject_num: the number of random selected subject
+    :param slice_num: the number of random selected slice
+    :param title: figure title
+    :param model: the autoencoder model used to encode the input data
+    :param tag: 'show' or 'save' the reconstruction data
+    :return:
+    """
     if fold is not None:
         for tvt in ['train', 'valid', 'test']:
             data = np.array(fold['{:s} data'.format(tvt)])

@@ -51,7 +51,7 @@ class SupportVectorMachine(Classifier):
             tvt_flag = '{:s} label'.format(tvt)
             shape = np.shape(data[tvt_flag])
             if len(shape) == 2:
-                data[tvt_flag] = onehot2vector(data[tvt_flag])
+                data[tvt_flag] = onehot_to_vector(data[tvt_flag])
 
 
 def ann_classify(folds: h5py.Group = None):

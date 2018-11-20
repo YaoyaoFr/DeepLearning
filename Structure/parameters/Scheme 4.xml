@@ -17,7 +17,7 @@
 		<autoencoder>
 			<encoder>
 				<type>Convolution2D</type>
-				<kernel_shape>6,6,61,16</kernel_shape>
+				<kernel_shape>6,6,61,32</kernel_shape>
 				<activation>relu</activation>
 				<strides>1,1,1,1</strides>
 				<padding>VALID</padding>
@@ -28,10 +28,10 @@
 
 			<decoder>
 				<type>DeConvolution2D</type>
-				<kernel_shape>6,6,61,16</kernel_shape>
+				<kernel_shape>6,6,61,32</kernel_shape>
 				<padding>VALID</padding>
 				<output_shape>None,61,73,61</output_shape>
-				<activation>tanh</activation>
+				<activation>sigmoid</activation>
 				<scope>reconstruction</scope>
 			</decoder>
 		</autoencoder>
@@ -55,7 +55,7 @@
 		<autoencoder>
 			<encoder>
 				<type>Convolution2D</type>
-				<kernel_shape>5,5,16,32</kernel_shape>
+				<kernel_shape>5,5,32,64</kernel_shape>
 				<strides>1,1,1,1</strides>
 				<padding>VALID</padding>
 				<activation>relu</activation>
@@ -65,10 +65,10 @@
 
 			<decoder>
 				<type>DeConvolution2D</type>
-				<kernel_shape>5,5,16,32</kernel_shape>
+				<kernel_shape>5,5,32,64</kernel_shape>
 				<output_shape>pool_1</output_shape>
 				<padding>VALID</padding>
-				<activation>tanh</activation>
+				<activation>relu</activation>
 				<scope>deconv_2</scope>
 			</decoder>
 		</autoencoder>
@@ -97,7 +97,7 @@
 
 			<decoder>
 				<type>Fold</type>
-				<fold_shape>-1,12,15,32</fold_shape>
+				<fold_shape>-1,12,15,64</fold_shape>
 				<scope>fold</scope>
 			</decoder>
 		</autoencoder>
@@ -142,7 +142,7 @@
 	<classifier>
         <input>
             <type>Placeholder</type>
-            <input_shape>None,5760</input_shape>
+            <input_shape>None,11520</input_shape>
             <dtype>float32</dtype>
             <scope>input</scope>
         </input>
@@ -163,18 +163,18 @@
 
         <layer>
             <type>FullyConnected</type>
-            <kernel_shape>5760,1024</kernel_shape>
+            <kernel_shape>11520,128</kernel_shape>
             <activation>relu</activation>
 			<batch_normalization>True</batch_normalization>
             <scope>hidden_1</scope>
         </layer>
 
-        <layer>
-            <type>FullyConnected</type>
-            <kernel_shape>1024,128</kernel_shape>
-            <activation>relu</activation>
-            <scope>hidden2</scope>
-        </layer>
+        <!--<layer>-->
+            <!--<type>FullyConnected</type>-->
+            <!--<kernel_shape>1024,128</kernel_shape>-->
+            <!--<activation>relu</activation>-->
+            <!--<scope>hidden2</scope>-->
+        <!--</layer>-->
 
         <layer>
             <type>FullyConnected</type>

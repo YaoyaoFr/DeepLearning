@@ -12,33 +12,33 @@
 
 		<fine_tune>
 			<train_batch_size>100</train_batch_size>
-			<learning_rate>0.0001</learning_rate>
-			<decay_step>10</decay_step>
-			<decay_rate>0.5</decay_rate>
+			<learning_rate>0.01</learning_rate>
+			<decay_step>20</decay_step>
+			<decay_rate>0.6</decay_rate>
 			<test_cycle>5</test_cycle>
 			<save_cycle>5</save_cycle>
-			<training_cycle>20</training_cycle>
+			<training_cycle>100</training_cycle>
 		</fine_tune>
 	</autoencoders>
 	<classifier>
 		<pre_train>
 			<train_batch_size>100</train_batch_size>
-			<learning_rate>0.001</learning_rate>
-			<decay_step>100</decay_step>
+			<learning_rate>0.01</learning_rate>
+			<decay_step>20</decay_step>
 			<decay_rate>0.8</decay_rate>
-			<test_cycle>5</test_cycle>
-			<save_cycle>5</save_cycle>
-			<training_cycle>500</training_cycle>
+			<test_cycle>1</test_cycle>
+			<save_cycle>1</save_cycle>
+			<training_cycle>10000</training_cycle>
 		</pre_train>
 
 		<fine_tune>
 			<train_batch_size>100</train_batch_size>
-			<learning_rate>0.0001</learning_rate>
-			<decay_step>10</decay_step>
-			<decay_rate>1</decay_rate>
+			<learning_rate>0.01</learning_rate>
+			<decay_step>20</decay_step>
+			<decay_rate>0.8</decay_rate>
 			<test_cycle>1</test_cycle>
 			<save_cycle>5</save_cycle>
-			<training_cycle>100</training_cycle>
+			<training_cycle>1000</training_cycle>
 		</fine_tune>
 	</classifier>
 </Training>

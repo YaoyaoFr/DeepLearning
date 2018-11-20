@@ -124,6 +124,8 @@ def parse_structure_parameter(arguments, tag, text):
             arguments[tag] = True
         elif text == 'False':
             arguments[tag] = False
+    elif tag in ['view_num', 'channel']:
+        arguments[tag] = int(text)
     else:
         arguments[tag] = text
     return arguments
@@ -146,3 +148,16 @@ def parse_log_parameter(log_parameters, tag, text):
     if tag == 'restored_epoch':
         text = int(text) if text else None
     log_parameters[tag] = text
+
+def parse_aal_regions(xml_file_path=None):
+    tree = ET.parse(xml_file_path)
+    root = tree.getroot()
+    data = root[1]
+    region_index = 0
+    region = []
+    for label in data:
+        name = label[1]
+        region.append(name.text)
+        region_index = region_index + 1
+    return region
+

@@ -17,17 +17,21 @@
       <w>mrirc</w>
       <w>ndarray</w>
       <w>nifti</w>
+      <w>onehot</w>
       <w>pheno</w>
       <w>reho</w>
       <w>resplit</w>
       <w>retr</w>
       <w>scae</w>
+      <w>spps</w>
       <w>stor</w>
       <w>strat</w>
+      <w>strd</w>
       <w>stru</w>
       <w>subfolder</w>
       <w>subjs</w>
       <w>tmpl</w>
+      <w>ttest</w>
       <w>tvts</w>
       <w>uploadfile</w>
       <w>vmax</w>
