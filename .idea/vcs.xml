@@ -9,6 +9,10 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../ADDetection" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../AD_Prediction" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../GCN" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../SppNet" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../wiseDNN" vcs="Git" />
   </component>
 </project>

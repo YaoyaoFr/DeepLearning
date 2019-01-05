@@ -8,6 +8,7 @@
       <w>backpro</w>
       <w>backpropagation</w>
       <w>convolutional</w>
+      <w>convs</w>
       <w>cyberduck</w>
       <w>datasets</w>
       <w>dcae</w>
@@ -19,6 +20,8 @@
       <w>nifti</w>
       <w>onehot</w>
       <w>pheno</w>
+      <w>preproc</w>
+      <w>pvalue</w>
       <w>reho</w>
       <w>resplit</w>
       <w>retr</w>
@@ -35,6 +38,7 @@
       <w>tvts</w>
       <w>uploadfile</w>
       <w>vmax</w>
+      <w>voxel</w>
     </words>
   </dictionary>
 </component>

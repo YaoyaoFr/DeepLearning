@@ -6,14 +6,19 @@ import time
 
 import os
 import h5py
+import math
 import numpy as np
-import numpy.ma as ma
 import pandas as pd
-from scipy import sparse
 from scipy import stats
 from nipy import load_image
-from sklearn.preprocessing import scale
-from Data.load_data import load_phenotypes
+import sklearn.preprocessing as prep
+
+from ops import graph as graph
+from ops.sparse import matrix_to_sparse, sparse_to_matrix
+
+global basic_path, project_name
+basic_path = 'F:/OneDriveOffL/Data/Data'
+project_name = 'DCAE'
 
 
 def load_fold(dataset_group: h5py.Group,
@@ -153,7 +158,7 @@ def prepare_classify_data(folds: h5py.Group = None,
                 label_tmp = np.array(fold[tvt_label])
 
                 if one_hot:
-                    label_tmp = vecter2onehot(label_tmp, 2)
+                    label_tmp = vector2onehot(label_tmp, 2)
 
                 data['{:s} data'.format(tvt)] = data_tmp
                 data[tvt_label] = label_tmp
@@ -168,6 +173,7 @@ def prepare_classify_data(folds: h5py.Group = None,
 def compute_connectivity(functional):
     with np.errstate(invalid="ignore"):
         corr = np.nan_to_num(np.corrcoef(functional))
+        # corr[np.eye(N=np.size(corr, 0)) == 1] = 0
         return corr
         # mask = np.invert(np.tri(corr.shape[0], k=-1, dtype=bool))
         # m = ma.masked_where(mask == 1, mask)
@@ -252,30 +258,19 @@ def split_slices(data, axis=[0, 3, 1, 2, 4]):
     return data
 
 
-def repeatmap(data, num_repeat):
-    shape = np.shape(data)
-    new_data = list()
-    for data_slice in data:
-        for i in range(num_repeat):
-            new_data.append(data_slice)
-    new_data = np.array(new_data)
-    new_data = np.reshape(new_data, [num_repeat * shape[0], -1])
-    return new_data
-
-
 def data_normalization(data: np.ndarray or list,
-                       axis: int = 0,
                        mean: np.ndarray = None,
                        std: np.ndarray = None,
-                       standardization: bool = True,
-                       normalization: bool = False,
+                       axis: int = 0,
+                       normalization: bool = True,
+                       standardization: bool = False,
                        sigmoid: bool = False
                        ):
     # Format list to ndarray
     if isinstance(data, list):
         data = np.array(data)
 
-    if standardization:
+    if normalization:
         if mean is None:
             mean = np.mean(data, axis=axis)
         if std is None:
@@ -283,19 +278,43 @@ def data_normalization(data: np.ndarray or list,
             std[std == 0] = 1
         data = (data - mean) / std
 
-    if normalization:
-        max = np.max(data, axis=axis)
-        min = np.min(data, axis=axis)
-        scale = max - min
+    if standardization:
+        max_v = np.max(data, axis=axis)
+        min_v = np.min(data, axis=axis)
+        scale = max_v - min_v
         scale[scale == 0] = 1
-        data = (data - min) / scale
+        data = (data - min_v) / scale
 
     if sigmoid:
         data = 1.0 / (1 + np.exp(-data)) - 0.5
     return data, mean, std
 
 
-def vecter2onehot(data, class_num=2):
+def data_normalization_fold(data_fold: h5py.Group,
+                            ):
+    datas = []
+    for index in data_fold:
+        if 'data' in index:
+            datas.append(np.array(data_fold[index]))
+        else:
+            continue
+
+    datas = np.concatenate(datas, axis=0)
+    shape = np.shape(datas)
+    datas = np.reshape(datas, [-1, np.prod(shape[1:])])
+    preprocessor = prep.StandardScaler().fit(datas)
+    for index in ['train data', 'valid data', 'test data']:
+        data = np.array(data_fold[index])
+        shape = np.shape(data)
+        data = np.reshape(data, [-1, np.prod(shape[1:])])
+        data = preprocessor.transform(data)
+        data = np.reshape(data, newshape=shape)
+        data_fold[index] = data
+
+    return data_fold
+
+
+def vector2onehot(data, class_num=2):
     data_tmp = np.zeros([np.size(data, 0), class_num])
     for class_index in range(class_num):
         data_tmp[np.where(data == class_index)[0], class_index] = 1
@@ -335,7 +354,7 @@ def get_datas(dataset, feature, fold_indexes, indexes, tvt='train'):
     return datas
 
 
-def get_subjects(pheno: pd.DataFrame, group: str) -> pd.DataFrame:
+def get_subjects(pheno: pd.DataFrame, group: str) -> pd.Series:
     dx_group = {'health': 1, 'patient': 0, 'all': 2}[group]
     pheno = pheno[pheno['DX_GROUP'] != dx_group]
     ids = pheno['FILE_ID']
@@ -395,55 +414,62 @@ def extract_regions(data: np.ndarray,
     return data_list
 
 
-def function_connectivity_ttest(normal_controls: np.ndarray,
-                                patients: np.ndarray,
-                                significance: float = 0.05,
-                                triangle='lower') -> dict:
+def t_test(normal_controls: np.ndarray,
+           patients: np.ndarray,
+           significance: float = 0.05,
+           mask: dict = None,
+           ) -> dict:
     """
-    Independent two-sample t-test of normal control and disease for each element of functional connectivity.
-    :param normal_controls: The functional connectivity of normal controls
-    :param patients: The functional connectivity of patients
+    Independent two-sample t-test of normal controls and patients for each element of the functional feature
+    :param normal_controls: The functional feature of normal controls with the shape of [data_size, width, height, (deep)]
+    :param patients: The functional feature of patients with the shape of [data_size, width, height, (deep)]
     :param significance: The threshold of statistic significance, default=0.05
-    :param triangle: The triangle of the output matrices, default='lower' indicate return lower triangle matrices
+    :param mask: The index of element to be test
     :return: A dictionary contains:
                 hypothesis: np.ndarray(bool), indicate whether accept the null hypothesis \mu_1=\mu_2
                 t_value: np.ndarray(float), the statistic value
                 p_value: np.ndarray(float), the calculated p-value
     """
+
     shape1 = np.shape(normal_controls)
     shape2 = np.shape(patients)
-    if len(shape1) > 3:
-        raise TypeError('The dimension of functional connectivity must be 3 but is {:d}.'.format(len(shape1)))
-    if len(shape2) > 3:
-        raise TypeError('The dimension of functional connectivity must be 3 but is {:d}.'.format(len(shape2)))
+    assert shape1[1:] == shape2[1:], 'The shape of normal controls and patients not match!'
 
-    if shape1[1] != shape2[1] or shape1[2] != shape2[2]:
-        raise TypeError(
-            'The dimension of two functional connectivity '
-            'doesn\'t match which are {:} and {:}'.format(shape1[1:3], shape2[1:3]))
-
-    shape = shape1[1:3]
+    shape = shape1[1:]
+    transpose_axes = [i for i in np.arange(start=1, stop=len(shape) + 1)]
+    transpose_axes.append(0)
+    normal_controls = np.transpose(normal_controls, axes=transpose_axes)
+    patients = np.transpose(patients, axes=transpose_axes)
 
     t_value = np.zeros(shape=shape, dtype=float)
     p_value = np.ones(shape=shape, dtype=float)
 
-    for row in range(shape[0]):
-        if triangle == 'lower':
-            start = 0
-            stop = row
-        elif triangle == 'upper':
-            start = row + 1
-            stop = shape[1]
-        for column in np.arange(start=start, stop=stop):
-            nc = normal_controls[:, row, column]
-            patient = patients[:, row, column]
-            result = stats.levene(nc, patient)
-            equal_var = result.pvalue > significance
-            result = stats.ttest_ind(nc, patient, equal_var=equal_var)
-            t_value[row, column] = result.statistic
-            p_value[row, column] = result.pvalue
+    if mask is not None:
+        indexes = mask
+    else:
+        indexes = matrix_to_sparse(np.ones(shape=shape))['indices']
 
-    hypothesis = p_value > significance
+    zero_count = 0
+    for index in indexes:
+        index = tuple(index)
+        nc = normal_controls[index]
+        patient = patients[index]
+
+        if not any(np.concatenate((nc, patient))):
+            zero_count += 1
+            # print('{:d}: {:}'.format(zero_count, index))
+            continue
+
+        result = stats.levene(nc, patient)
+        equal_var = result.pvalue > significance
+        (statistic, pvalue) = stats.ttest_ind(nc, patient, equal_var=equal_var)
+
+        if not math.isnan(statistic):
+            t_value[index] = statistic
+        if not math.isnan(pvalue):
+            p_value[index] = pvalue
+
+    hypothesis = p_value < significance
 
     return {
         'hypothesis': hypothesis,
@@ -452,68 +478,357 @@ def function_connectivity_ttest(normal_controls: np.ndarray,
     }
 
 
-def select_top_significance_ROIs(datasets: list = ['ABIDE'],
-                                 hdf5: h5py.Group = None,
-                                 top_k_ROI: int = 5,
-                                 top_k_relevant: int = 1,
-                                 ):
-    """
-    Select the top-k significance difference brain regions by independent two-sample t-test for functional connectivity.
-    :param datasets: A list of dataset to process
-    :param hdf5: The hdf5 file include all datasets
-    :param top_k_ROI: The number of ROIs to be selected by t-value.
-    :param top_k_relevant: The number to be selected which relevant to the ROIs selected by t-value
-    :return: A dict contains 
-    """
-    if hdf5 is None:
+def select_ROIs(feature_group: h5py.Group = None,
+                dataset: str = 'ABIDE',
+                feature: str = 'reho',
+                aal_atlas: np.ndarray = None,
+                top_k_ROI: int = 5,
+                ):
+    if feature_group is None:
         hdf5_path = b'F:/OneDriveOffL/Data/Data/DCAE_data.hdf5'
-        hdf5 = hdf5_handler(hdf5_path)
+        feature_group = hdf5_handler(hdf5_path)['{:s}/statistic/{:s}'.format(dataset, feature)]
 
-    result = {}
-    for dataset in datasets:
-        subjects_group = hdf5['{:s}/subjects'.format(dataset)]
-        pheno = load_phenotypes(dataset=dataset)
-        groups = {'normal_controls': 0,
-                  'patients': 1}
+    if aal_atlas is None:
+        aal_path = 'Data/AAL/aal_61_73_61.nii'
+        aal_atlas = load_nifti_data(aal_path)
 
-        FCs = {}
-        for group in groups:
-            subjects = list(pheno[pheno['DX_GROUP'] == groups[group]]['FILE_ID'])
-            FC = np.array([load_subject_data(subject_group=subjects_group[subject], features=['FC'])
-                           for subject in subjects])
-            FCs[group] = FC
+    if feature in ['reho', 'falff']:
+        t_value = np.array(feature_group['t_value'])
+        t_value = matrix_to_sparse(t_value)['sparse_matrix']
+        t_value = [item for item in t_value.items()]
 
-        result = function_connectivity_ttest(FCs['normal_controls'], FCs['patients'])
-        ROI_num = np.shape(result['t_value'])[0]
-        t_value = np.abs(result['t_value'])
-        t_value[result['hypothesis']] = 0
-        t_value_sparse = dict(sparse.dok_matrix(t_value))
-        sparse_items = [item for item in t_value_sparse.items()]
+        # Calculate the sum of t-value in each ROI
+        t_value_sum = {}
+        for t_tuple in t_value:
+            coordinate, t = t_tuple
+            ROI_index = aal_atlas[coordinate]
+            if ROI_index in t_value_sum:
+                t_value_sum[ROI_index] += t
+            else:
+                t_value_sum[ROI_index] = t
 
-        ROIs_result = [[ROI_index, 0, []] for ROI_index in range(ROI_num)]
+        # Divide the sum of t-value by voxel num in each brain region
+        path = b'F:/OneDriveOffL/Data/Data/DCAE_aal.hdf5'
+        aal = hdf5_handler(path)
+        # for ROI_index in t_value_sum:
+        #     t = t_value_sum[ROI_index]
+        #     voxel_num = aal['MNI/{:d}/voxel_num'.format(ROI_index)].value
+        #     t_value_sum[ROI_index] = t / voxel_num
 
-        for t_value_tuple in sparse_items:
-            coordinate, t_value = t_value_tuple
-            ROIs_result[coordinate[0]][1] += t_value
-            ROIs_result[coordinate[1]][1] += t_value
+        # Sort the sum of t-value
+        t_value_sum = [item for item in t_value_sum.items()]
+        t_value_sum = sorted(t_value_sum, key=lambda x: x[1], reverse=True)
+        return [ROI[0] for ROI in t_value_sum[:top_k_ROI]]
 
-            ROIs_result[coordinate[0]][2].append(t_value_tuple)
-            ROIs_result[coordinate[1]][2].append(((coordinate[1], coordinate[0]), t_value))
 
-        for ROI in ROIs_result:
-            ROI[2] = sorted(ROI[2], key=lambda x: x[1], reverse=True)
+def select_landmarks(dataset: str, feature: str, landmk_num: int):
+    hdf5_path = b'F:/OneDriveOffL/Data/Data/DCAE_data.hdf5'
+    statistic_group = hdf5_handler(hdf5_path)['{:s}/statistic/{:s}'.format(dataset, feature)]
+    p_value = np.array(statistic_group['p_value'])
+    hypothesis = np.array(statistic_group['hypothesis']).astype(bool)
+    p_value[hypothesis] = 0
+    p_value_sparse = matrix_to_sparse(p_value)['sparse_matrix']
+    p_value = sorted([item for item in p_value_sparse.items()], key=lambda x: x[1])
 
-        # Sort and select
-        ROIs_result = sorted(ROIs_result, key=lambda x: x[1], reverse=True)
-        ROIs = []
-        for index in range(top_k_ROI):
-            ROI = ROIs_result[index]
-            ROIs.append(ROI[0])
-            for index_relevant in range(top_k_relevant):
-                relevant_ROI = ROI[2][0][index_relevant][1]
-                if relevant_ROI not in ROIs:
-                    ROIs.append(relevant_ROI)
+    # In this code, we attached the pre-trained model which were trained with 40 landmarks
+    landmks = np.array([p_tuple[0] for p_tuple in p_value[:landmk_num]])
+    return landmks
 
-        result[dataset] = ROIs
 
-    return result
+#
+# def matrix_to_sparse(data: np.ndarray):
+#     """
+#     Transfer a matrix into a sparse format
+#     :param data: Input data
+#     :return:
+#     """
+#
+#     sparse_matrix = {}
+#
+#     shape = np.shape(data)
+#     if len(shape) >= 1:
+#         for x in range(shape[0]):
+#             if len(shape) >= 2:
+#                 for y in range(shape[1]):
+#                     if len(shape) >= 3:
+#                         for z in range(shape[2]):
+#                             if len(shape) >= 4:
+#                                 raise TypeError('expected rank <= 3 dense array or matrix')
+#                             else:
+#                                 if data[x, y, z] != 0:
+#                                     sparse_matrix[(x, y, z)] = data[x, y, z]
+#                     else:
+#                         if data[x, y] != 0:
+#                             sparse_matrix[(x, y)] = data[x, y]
+#             else:
+#                 if data[x] != 0:
+#                     sparse_matrix[x] = data[x]
+#     else:
+#         raise TypeError('expected rank >=1 dense array or matrix')
+#
+#     return sparse_matrix
+
+
+def get_folds_hdf5(file_name='folds') -> h5py.Group:
+    """
+    Load the folds hdf5 file which has the structure:
+    <{dataset}> string, The name of dataset optional in ['ABIDE', 'ABIDE II', 'ADHD', 'FCP'].
+        <{fold_index}> int, The index of folds
+            "train": list, The list of subjects within train set.
+            "valid": list The list subjects within validate set
+            "test": list, The list of subjects within test set.
+    :param file_name:
+    :return: the folds hdf5 file/group
+    """
+    hdf5_path = '{:s}/{:s}_{:s}.hdf5'.format(basic_path, project_name, file_name).encode()
+    return hdf5_handler(hdf5_path)
+
+
+def get_data_hdf5(file_name='data') -> h5py.Group:
+    """
+    Load the data hdf5 file which has the structure:
+    <{dataset}> string, The name of dataset optional in ['ABIDE', 'ABIDE II', 'ADHD', 'FCP'].
+        <statistic>
+            <{feature}> string,
+                "hypothesis"
+                "p_value"
+                "t_value"
+        <subjects>
+            "{feature}" np.ndarray, the data of corresponding feature optional in ['FC', 'falff', 'reho', 'vmhc'].
+    :param file_name:
+    :return:
+    """
+    hdf5_path = '{:s}/{:s}_{:s}.hdf5'.format(basic_path, project_name, file_name).encode()
+    return hdf5_handler(hdf5_path)
+
+
+class AAL:
+    """
+    Load the aal hdf5 file which has the structure:
+    <{space}> string, optional in ['MNI']
+        <{resolution}> string, a number list joint by '_', optional in ['61_73_61', '181_217_181']
+            "atlas": np.ndarray that consist of the label for each brain region
+            <metric> string, metric optional in ['Euclidean', 'Adjacent']
+                "distance": np.ndarray element in (i, j) indicate the distance between the i-th and j-th
+                            brain region with the metric
+                <{nearest-k}> string of the number of top-k nearest neighbor in the metric
+                    "adj_matrix": np.ndarray, the basic adjacency matrix
+                    "{depth}": np.ndarray, the adjacency matrix in the depth
+            <{brain_regions}> string, the index of brain regions range from [1, ROI_num]
+                "bound": np.ndarray with shape [3, 2] indicate the start and end coordinate
+                            in the corresponding space.
+                "dimension": np.ndarray with shape [3, 1] indicate the size of minimal cube contains
+                                the brain region
+                "mask": np.ndarray with shape of "dimension", and element 0 indicate that the corresponding voxel
+                            belong to this brain region.
+                "voxel_num": int indicate the number of voxel belong to this brain region.
+
+
+    Note: <>, "", '' indicate group, dataset and attribute respectively,
+    :return: hdf5 file contains the information of AAL atlas
+    """
+
+    def __init__(self, file_name='aal'):
+        hdf5_path = '{:s}/{:s}_{:s}.hdf5'.format(basic_path, project_name, file_name).encode()
+        self.aal_group = hdf5_handler(hdf5_path)
+
+    def get_aal_hdf5(self) -> h5py.Group:
+        return self.aal_group
+
+    def calculate_structure(self,
+                            space: str = 'MNI',
+                            resolution: str = '61_73_61',
+                            metric: str = 'Euclidean',
+                            nearest_k: int = 10,
+                            ):
+
+        basic_group = self.aal_group['{:s}/{:s}'.format(space, resolution)]
+        atlas = np.array(basic_group['atlas'])
+        ROI_num = int(np.max(atlas))
+
+        metric_group = basic_group.require_group(metric)
+        whole_brain_graph = np.zeros(shape=[ROI_num, ROI_num])
+        if metric == 'Euclidean':
+            distance = calculate_distance(atlas=atlas,
+                                          ROI_num=ROI_num,
+                                          metric=metric,
+                                          )
+            for region_index in np.arange(ROI_num):
+                # Firstly, we sort the list of distance to other regions for the chosen region
+                distance_to_ROI = sorted(matrix_to_sparse(distance[region_index, :])['sparse_matrix'].items(),
+                                         key=lambda x: x[1]
+                                         )
+
+                # Secondly, we select the nearest-k edges connected with chosen region,
+                # then set the corresponding element in the whole brain graph to 1.
+                nearest_k_list = [t[0] for t in distance_to_ROI[:nearest_k]]
+                nearest_k_to_ROI = np.zeros(shape=[ROI_num, 1])
+                nearest_k_to_ROI[nearest_k_list] = 1
+                whole_brain_graph[:, region_index] = np.squeeze(nearest_k_to_ROI)
+                whole_brain_graph[region_index, :] = np.squeeze(nearest_k_to_ROI)
+
+            create_dataset_hdf5(group=metric_group,
+                                name='distance',
+                                data=distance)
+            create_dataset_hdf5(group=metric_group.require_group('{:d}'.format(nearest_k)),
+                                name='adj_matrix',
+                                data=whole_brain_graph)
+        elif metric == 'Adjacent':
+            for i in range(ROI_num):
+                ROI_atlas = np.zeros(shape=np.shape(atlas))
+                ROI_atlas[atlas == i + 1] = 1
+                indices = matrix_to_sparse(ROI_atlas)['indices']
+                shape = np.shape(indices)
+
+                indices_expand = [indices]
+                for dim in range(shape[1]):
+                    expand_matrix1 = np.zeros(shape=shape)
+                    expand_matrix1[:, dim] = np.ones(shape=[shape[0], ])
+                    expand_matrix2 = -expand_matrix1
+                    indices_expand.append(indices + expand_matrix1)
+                    indices_expand.append(indices + expand_matrix2)
+                indices_expand = np.concatenate(indices_expand, axis=0)
+
+                ROI_atlas_expand = sparse_to_matrix(indices=indices_expand, shape=np.shape(atlas))
+
+                for j in range(i + 1, ROI_num):
+                    ROI_atlas_j = np.zeros(shape=np.shape(atlas))
+                    ROI_atlas_j[atlas == j + 1] = 1
+                    if np.sum(ROI_atlas_expand * ROI_atlas_j) > 0:
+                        whole_brain_graph[i, j] = 1
+                        whole_brain_graph[j, i] = 1
+            create_dataset_hdf5(group=metric_group,
+                                name='adj_matrix',
+                                data=whole_brain_graph)
+        return whole_brain_graph
+
+    def get_adj_matrix(self,
+                       nearest_k: int = None,
+                       depth: int = 0,
+                       sparse: str = 'dense',
+                       space: str = 'MNI',
+                       resolution: str = '61_73_61',
+                       metric: str = 'Euclidean',
+                       ROI_num: int = 90,
+                       ):
+        if metric == 'Euclidean':
+            if depth == 0:
+                adj_matrix = np.array(self.aal_group['{:s}/{:s}/{:s}/{:d}/adj_matrix'
+                                      .format(space, resolution, metric, nearest_k)])
+            else:
+                adj_matrix = np.array(self.aal_group['{:s}/{:s}/{:s}/{:d}/{:d}'
+                                      .format(space, resolution, metric, nearest_k, depth)])
+
+            if sparse == 'sparse':
+                shape = np.shape(adj_matrix)
+                adj_sparse = matrix_to_sparse(adj_matrix)['sparse_matrix']
+                indices = np.array([list(item[0]) for item in adj_sparse.items()])
+                values = np.array([item[1] for item in adj_sparse.items()])
+                return indices, values, shape, adj_matrix
+            return adj_matrix
+        elif metric == 'Adjacent':
+            adj_matrix = np.array(self.aal_group['{:s}/{:s}/{:s}/adj_matrix'
+                                  .format(space, resolution, metric)])
+            adj_matrix = adj_matrix[:ROI_num, :ROI_num]
+            return adj_matrix
+
+
+def calculate_distance(atlas: np.ndarray,
+                       ROI_num: int = 116,
+                       metric: str = 'Euclidean'):
+    distance = None
+
+    if metric == 'Euclidean':
+        # Calculate the cluster centers for each brain region
+        cluster_centers = []
+        sparse_atlas = matrix_to_sparse(atlas)['sparse_matrix']
+        for region_index in np.arange(ROI_num) + 1:
+            voxels = filter(lambda x: x[1] == region_index, sparse_atlas.items())
+            voxels = np.array([np.array(c) for c, _ in voxels])
+            cluster_center = np.mean(voxels, axis=0)
+            cluster_centers.append(cluster_center)
+            print('Center of region {:d} is {}'.format(region_index, cluster_center))
+        cluster_centers = np.array(cluster_centers)
+
+        repeat_centers = np.repeat(a=np.expand_dims(cluster_centers, axis=1),
+                                   axis=1,
+                                   repeats=ROI_num)
+
+        distance = np.sqrt(np.sum(np.square(repeat_centers -
+                                            np.transpose(repeat_centers,
+                                                         axes=[1, 0, 2])),
+                                  axis=2))
+        return distance
+
+
+def get_structure(ROI_num: int = 116,
+                  measure: str = 'Euclidean',
+                  atlas: str = 'AAL',
+                  distance: np.ndarray = None,
+                  nearest_k: int = 10):
+    # Select nearest-k regions by distance matrix for each region,
+    # and build a whole brain graph with element 1 in location (i,j)
+    # indicate that there exist a connection between brain region i and j.
+
+    if distance is None:
+        atlas = AAL().aal_group['{:s}/{:s}/{:s}'.format()]
+        distance = calculate_distance(atlas=atlas,
+                                      ROI_num=ROI_num,
+                                      metric=measure,
+                                      )
+
+    whole_brain_graph = np.zeros(shape=[ROI_num, ROI_num])
+    for region_index in np.arange(ROI_num):
+        # Firstly, we sort the list of distance to other regions for the chosen region
+        distance_to_ROI = sorted(matrix_to_sparse(distance[region_index, :])['sparse_matrix'].items(),
+                                 key=lambda x: x[1]
+                                 )
+
+        # Secondly, we select the nearest-k edges connected with chosen region,
+        # then set the corresponding element in the whole brain graph to 1.
+        nearest_k_list = [t[0] for t in distance_to_ROI[:nearest_k]]
+        nearest_k_to_ROI = np.zeros(shape=[ROI_num, 1])
+        nearest_k_to_ROI[nearest_k_list] = 1
+        whole_brain_graph[:, region_index] = np.squeeze(nearest_k_to_ROI)
+        whole_brain_graph[region_index, :] = np.squeeze(nearest_k_to_ROI)
+
+    return whole_brain_graph
+
+
+def calculate_adjacency_matrix(nearest_k_list: list = [10],
+                               max_depth: int = [5],
+                               metric: str = 'Euclidean'
+                               ):
+    aal_hdf5 = AAL().aal_group
+    metric_group = aal_hdf5['MNI/61_73_61'].require_group('{:s}'.format(metric))
+    distance = np.array(metric_group['distance'])
+    # create_dataset_hdf5(group=metric_group,
+    #                     name='distance',
+    #                     data=distance)
+
+    v_num = 90
+    for depth, nearest_k in zip(max_depth, nearest_k_list):
+        structure = get_structure(distance=distance[:v_num, :v_num],
+                                  nearest_k=nearest_k)
+        nearest_k_group = metric_group.require_group(str(nearest_k))
+        create_dataset_hdf5(group=nearest_k_group,
+                            name='adj_matrix',
+                            data=structure)
+
+        g = graph.Graph(adj_matrix=structure, v_num=90)
+        # g.diffuse(max_depth=5)
+        # sum_items = None
+        for l in np.arange(start=1, stop=depth):
+            adj_matrix = g.adj_by_depth(l)
+            create_dataset_hdf5(group=nearest_k_group,
+                                name=str(l),
+                                data=adj_matrix)
+
+            # sum_items, graph_latex = latex.graph_matmul(graph=current_graph,
+            #                                             adj_matrix=adj_matrix,
+            #                                             sum_items=sum_items)
+            # current_graph = math.graph_conv(current_graph=current_graph,
+            #                                 adj_matrix=adj_matrix)
+
+            # print('$${:s}$$'.format(graph_latex))
+        # print(current_graph)

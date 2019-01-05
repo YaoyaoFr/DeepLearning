@@ -88,3 +88,4 @@ def get_slice(dataset, feature, fold_idx, subject_idx, slice_idx):
     recons_slice = np.reshape(recons_slice, [shape[0], shape[1]])
 
     return data_slice, recons_slice
+

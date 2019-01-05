@@ -1,9 +1,10 @@
 from Structure.nn import DeepNeuralNetwork
-from utils import *
+from DCAE_utils import *
 from sklearn import svm
-from Structure.layers import *
+from Structure.Layer import *
 from Data.utils_prepare_data import *
-from Structure.parameters.xml_parse import *
+from Structure.XMLFiles.xml_parse import *
+from abc import ABCMeta
 
 
 class Classifier(object, metaclass=ABCMeta):

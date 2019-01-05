@@ -4,11 +4,11 @@ import time
 import logging
 import scipy.io as sio
 import tensorflow as tf
-from Structure.parameters.xml_parse import parse_log_parameters
+from Structure.XMLFiles.xml_parse import parse_log_parameters
 
 
 class Log:
-    pa = parse_log_parameters('Structure/parameters/Log.xml')
+    pa = parse_log_parameters('Structure/XMLFiles/Log.xml')
     basic_path = pa['basic_path']
     restored_date = pa['restored_date']
     restored_time = pa['restored_time']
@@ -65,6 +65,8 @@ class Log:
 
     def get_restored_pa(self):
         pas = {}
+        if self.sub_folder_name is None:
+            return None
         pas_list = self.sub_folder_name.split('/')
         pas['fold'] = int(pas_list[0].split(' ')[1])
         process_list = ['pre_train_SCAE', 'fine_tune_SCAE', 'pre_train_Classifier', 'fine_tune_Classifier']
@@ -94,7 +96,10 @@ class Log:
         value = list()
         for res_key in sorted(res):
             tag = '{:5s} {:s}'.format(log_type, res_key)
-            value.append(tf.Summary.Value(tag=tag, simple_value=res[res_key]))
+            try:
+                value.append(tf.Summary.Value(tag=tag, simple_value=res[res_key]))
+            except:
+                continue
             train_summaries = tf.Summary(value=value)
 
             error_str += '{:5s}: {:.5e}  '.format(res_key, res[res_key])
@@ -119,9 +124,13 @@ class Log:
         print('Model saved in file: {:s}'.format(save_path))
         return save_path
 
-    def restore(self, restored_path: str = None, initialize: bool = True) -> int:
+    def restore(self,
+                restored_epoch: int = None,
+                restored_path: str = None,
+                initialize: bool = True) -> int:
         """
         Restored neural network model with restore parameters.
+        :param restored_epoch: Restored model by epoch
         :param restored_path: Restored model directly by save path.
         :param initialize: Initialize the restore epoch after restored.
         :return: The training epoch of restored model.

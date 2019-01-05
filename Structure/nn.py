@@ -1,71 +1,22 @@
 import os
 import sys
+
+from Structure.AutoEncoder import AutoEncoder
 from Structure.utils_structure import get_metrics
 from abc import ABCMeta, abstractmethod
 
 import h5py
 import numpy as np
+import scipy.io as sio
 import tensorflow as tf
 
 from Log.log import Log
-from Data.utils_prepare_data import vecter2onehot, extract_regions, select_top_significance_ROIs
-from Structure.layers import get_layer_by_arguments
+from Data.utils_prepare_data import vector2onehot, extract_regions, select_landmarks, AAL
+from Structure.Layer.layers import get_layer_by_arguments
 from Visualize.visualize import show_reconstruction
 from Data.utils_prepare_data import create_dataset_hdf5
-from Structure.parameters.xml_parse import parse_structure_parameters, parse_training_parameters
-
-
-class AutoEncoder:
-    model = dict()
-    input_tensor = None
-    encoder_tensor = None
-    decoder_tensor = None
-    mean_square_error = None
-    learning_rate = None
-    global_step = None
-    minimizer = None
-
-    def __init__(self, parameters, log):
-        self.parameters = parameters
-        self.log = log
-        self.encoder = get_layer_by_arguments(arguments=self.parameters['encoder'])
-        self.decoder = get_layer_by_arguments(arguments=self.parameters['decoder'])
-
-    def build_encoder(self, input_tensor):
-        with self.log.graph.as_default():
-            # Build encoder
-            self.input_tensor = input_tensor
-            self.encoder_tensor = self.encoder(self.input_tensor)
-
-    def build_decoder(self, input_tensor):
-        with self.log.graph.as_default():
-            # Build decoder
-            output_shape = tf.shape(self.input_tensor)
-            self.decoder_tensor = self.decoder(input_tensor=input_tensor, output_shape=output_shape)
-
-    # def set_optimizer(self):
-    #     if self.encoder_tensor is None or self.decoder_tensor is None:
-    #         print('The encoder or decoder is None!')
-    #         return
-    #
-    #     # mean_square_error function
-    #     self.mean_square_error = tf.reduce_mean(tf.square(tf.subtract(self.input_tensor, self.decoder_tensor)))
-    #
-    #     # training
-    #     self.lr_place = self.inputs['lr_place']
-    #     self.global_step = tf.Variable(0, trainable=False)
-    #     optimizer = tf.train.AdamOptimizer(self.lr_place)
-    #     self.minimizer = optimizer.minimize(loss=self.mean_square_error,
-    #                                         global_step=self.global_step)
-    #
-    #     print('Autoencoder Structure Initialized.')
-
-    # def get_encoder(self, data, sess):
-    #     encoder_data = sess.run(fetches=[self.encoder_tensor],
-    #                             feed_dict={
-    #                                 self.input_tensor: data
-    #                             })
-    #     return encoder_data
+from Structure.XMLFiles.xml_parse import parse_xml_file
+from Data.generator import MultiInstance_patch
 
 
 class NeuralNetwork(object, metaclass=ABCMeta):
@@ -78,6 +29,49 @@ class NeuralNetwork(object, metaclass=ABCMeta):
 
     def __init__(self):
         pass
+
+    def build_optimizer(self, output_tensor, output_place, lr_place=tf.Tensor, if_acc: bool = False):
+        results = dict()
+
+        # Cost function
+        metrics = get_metrics(output_tensor=output_tensor,
+                              output_place=output_place,
+                              )
+        results.update(metrics)
+
+        if len(tf.get_collection('L2_loss')) > 0:
+            l2_loss = tf.add_n(tf.get_collection('L2_loss'))
+        else:
+            l2_loss = tf.Variable(0.0, trainable=False)
+
+        results['L2 Penalty'] = l2_loss
+
+        # build minimizer
+        init_op_all = tf.all_variables()
+        global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            optimizer = tf.train.AdamOptimizer(lr_place, name='optimizer')
+            minimizer = optimizer.minimize(results['cross_entropy'] + l2_loss,
+                                           global_step=global_step,
+                                           name='minimizer',
+                                           )
+
+        # minimizer = optimizer.minimize(loss=results['MSE'] + 5e-3 * l2_loss,
+        #                                global_step=global_step,
+        #                                name='minimizer')
+
+        # Initialize minimizer
+        init_op_minimizer = tf.variables_initializer(set(tf.all_variables()) -
+                                                     set(init_op_all))
+        self.initialization(init_op_minimizer, name='minimizer')
+        print('SAE Optimizer initialized.')
+        self.optimizer.update(
+            {'results': results,
+             'output_place': output_place,
+             'minimizer': minimizer,
+             'global_step': global_step,
+             })
 
     @abstractmethod
     def build_structure(self, *args, **kwargs):
@@ -103,59 +97,12 @@ class NeuralNetwork(object, metaclass=ABCMeta):
     def fine_tune_fold(self, *args, **kwargs):
         raise NotImplementedError
 
-    def build_optimizer(self, output_tensor, output_place, lr_place=tf.Tensor, if_acc: bool = False):
-        results = dict()
-
-        # Cost function
-        metrics = get_metrics(output_tensor=output_tensor, output_place=output_place, if_acc=if_acc)
-        results.update(metrics)
-
-        square_error = tf.square(tf.subtract(x=output_place,
-                                             y=output_tensor))
-        square_errors = tf.reduce_mean(square_error, np.arange(1, len(square_error.get_shape())), name='square_errors')
-        l2_loss = tf.reduce_sum([tf.reduce_sum(tf.square(tensor)) for tensor in self.structure['parameters']]) / 2
-        results['L2 Penalty'] = l2_loss
-
-        # build minimizer
-        results['learning rate'] = lr_place
-        optimizer = tf.train.AdamOptimizer(lr_place, name='optimizer')
-        init_op_all = tf.all_variables()
-        global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
-        minimizer = optimizer.minimize(loss=results['MSE'] + 1e-3 * l2_loss,
-                                       global_step=global_step,
-                                       name='minimizer')
-
-        # Initialize minimizer
-        init_op_minimizer = tf.variables_initializer(set(tf.all_variables()) -
-                                                     set(init_op_all))
-        self.initialization(init_op_minimizer, name='minimizer')
-        print('SAE Optimizer initialized.')
-        self.optimizer.update(
-            {'results': results,
-             'output_place': output_place,
-             'lr_place': lr_place,
-             'minimizer': minimizer,
-             'global_step': global_step,
-             'square_errors': square_errors,
-             })
-
-        if if_acc:
-            # Accuracy
-            prediction = tf.argmax(output_tensor, 1)
-            label = tf.argmax(output_place, 1)
-            correct_prediction = tf.cast(x=tf.equal(prediction,
-                                                    tf.argmax(output_place, 1)),
-                                         dtype=tf.float32)
-            self.optimizer['accuracies'] = correct_prediction
-
-            prediction = tf.concat((tf.expand_dims(prediction, -1), tf.expand_dims(label, -1)), axis=-1)
-            self.optimizer['prediction'] = prediction
-
     def initialization(self, init_op=None, name='', sess=None):
         if sess is None:
             sess = self.sess
         if init_op is None:
-            init_op = self.init_op
+            init_op = tf.global_variables_initializer()
+            name = 'all'
 
         sess.run(init_op)
         print('Parameters {:s} initialized.'.format(name))
@@ -188,8 +135,8 @@ class StackedConvolutionAutoEncoder(NeuralNetwork):
         structure_xml_path = 'Structure/parameters/Scheme {:d}.xml'.format(scheme)
         self.stru_pa = parse_structure_parameters(structure_xml_path)['autoencoders']
         train_pa = parse_training_parameters('Structure/parameters/Training.xml')['autoencoders']
-        self.pre_train_pa = train_pa['pre_train']
-        self.fine_tune_pa = train_pa['fine_tune']
+        self.train_pa['pre_train'] = train_pa['pre_train']
+        self.train_pa['fine_tune'] = train_pa['fine_tune']
 
         with self.log.graph.as_default():
             init_op_all = tf.all_variables()
@@ -287,8 +234,8 @@ class StackedConvolutionAutoEncoder(NeuralNetwork):
                     if_save: bool = True,
                     ):
         data_size = np.size(data, 0)
-        batch_size = self.pre_train_pa['train_batch_size']
-        learning_rate = self.pre_train_pa['learning_rate']
+        batch_size = self.train_pa['pre_train']['train_batch_size']
+        learning_rate = self.train_pa['pre_train']['learning_rate']
 
         encoders = list()
         reconstructions = list()
@@ -331,6 +278,7 @@ class StackedConvolutionAutoEncoder(NeuralNetwork):
                                if_save=if_save,
                                new_line=True,
                                )
+            print()
 
         encoder = np.concatenate(encoders, 0)
         reconstruction = np.concatenate(reconstructions, 0)
@@ -374,7 +322,6 @@ class StackedConvolutionAutoEncoder(NeuralNetwork):
             message = '{:4d}/{:d}\t'.format(train_step + 1, train_steps)
             self.log.write_log(res=results_batch, epoch=global_step, pre_fix=message)
 
-        print()
         results = {'MSE': np.mean(mses_batch)}
         self.log.write_log(res=results,
                            epoch=epoch,
@@ -464,7 +411,7 @@ class StackedConvolutionAutoEncoder(NeuralNetwork):
             save_path = self.backpropagation(data=data,
                                              start_epoch=start_epoch,
                                              show_flag=False,
-                                             train_pa=self.pre_train_pa)
+                                             train_pa=self.train_pa['pre_train'])
 
             restore_path = None
             start_index = None
@@ -491,7 +438,7 @@ class StackedConvolutionAutoEncoder(NeuralNetwork):
 
         save_path = self.backpropagation(data=data,
                                          start_epoch=start_epoch,
-                                         train_pa=self.fine_tune_pa)
+                                         train_pa=self.train_pa['fine_tune'])
         return save_path
 
     def encode_folds(self, folds, save_dir: str = None, save_path: str = None):
@@ -562,32 +509,35 @@ class DeepNeuralNetwork(NeuralNetwork):
     inputs = {}
 
     def __init__(self,
-                 graph: tf.Graph = None,
                  log: Log = None,
+                 scheme: int or str = 1,
+                 graph: tf.Graph = None,
                  subfolder_name: str = None,
-                 scheme: int = 1,
                  ):
         self.set_graph(log=log, graph=graph, sub_folder_name=subfolder_name)
-        structure_xml_path = 'Structure/parameters/Scheme {:d}.xml'.format(scheme)
-        self.str_pa = parse_structure_parameters(structure_xml_path)['classifier']
-        train_pa = parse_training_parameters('Structure/parameters/Training.xml')['classifier']
-        self.pre_train_pa = train_pa['pre_train']
-        self.fine_tune_pa = train_pa['fine_tune']
+
+        self.scheme = scheme
+        if isinstance(scheme, int):
+            # Deprecated soon
+            xml = parse_xml_file('Structure/XMLFiles/Scheme {:d}.xml'.format(scheme))
+        elif isinstance(scheme, str):
+            xml = parse_xml_file('Structure/XMLFiles/{:s}.xml'.format(scheme))
+        self.train_pa = xml['training']['classifier']
+        self.str_pa = xml['classifier']
         with self.log.graph.as_default():
             init_op_all = tf.all_variables()
             for placeholder in self.str_pa['input']:
-                layer = get_layer_by_arguments(arguments=placeholder)
+                layer = get_layer_by_arguments(arguments=placeholder, parameters=self.train_pa['parameters'])
                 self.input_layers[placeholder['scope']] = layer
                 self.inputs[placeholder['scope']] = layer()
 
-            for layer_pa in self.str_pa['layers']:
-                layer = get_layer_by_arguments(arguments=layer_pa)
+            for layer_pa in self.str_pa['layer']:
+                layer = get_layer_by_arguments(arguments=layer_pa, parameters=self.train_pa['parameters'])
                 self.op_layers.append(layer)
 
-            self.log.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1000, name='saver')
-            self.init_op = tf.variables_initializer(set(tf.all_variables()) -
-                                                    set(init_op_all))
-            self.initialization(self.init_op, name='DNN weights')
+            self.init_op_weights = tf.variables_initializer(set(tf.all_variables()) -
+                                                            set(init_op_all))
+            self.initialization(self.init_op_weights, name='DNN weights')
 
     def build_structure(self, input_tensor: tf.Tensor = None, input_place: tf.Tensor = None):
         if input_tensor is not None:
@@ -598,24 +548,37 @@ class DeepNeuralNetwork(NeuralNetwork):
             input_place = self.inputs['input']
             tensor = input_place
 
+        init_op_all = tf.all_variables()
+
+        self.structure = {}
         tensors = dict()
         parameters = list()
         for layer in self.op_layers:
-            tensor = layer(tensor)
+            if layer.pa['type'] == 'GraphNN':
+                self.structure['correlation'] = self.inputs['correlation']
+                tensor = layer(input_tensor=tensor,
+                               input_place=self.inputs['correlation'],
+                               training=self.inputs['training'])
+            else:
+                tensor = layer(tensor,
+                               training=self.inputs['training'])
             layer_tensor = layer.tensors
-            tensors[layer.scope] = layer_tensor
+            tensors[layer.pa['scope']] = layer_tensor
             if 'weight' in layer_tensor:
-                parameters.append(layer_tensor['weight'])
+                if isinstance(layer_tensor['weight'], list):
+                    parameters.extend(layer_tensor['weight'])
+                else:
+                    parameters.append(layer_tensor['weight'])
             # if 'bias' in layer_tensor:
             #     parameters.append(layer_tensor['bias'])
 
         output_tensor = tensor
 
-        self.structure = {'input_place': input_place,
-                          'output_tensor': output_tensor,
-                          'tensors': tensors,
-                          'parameters': parameters,
-                          }
+        self.structure.update({'input_place': input_place,
+                               'output_tensor': output_tensor,
+                               'tensors': tensors,
+                               'parameters': parameters,
+                               })
         print('Build Deep Neural Network.')
         self.build_optimizer(output_tensor=output_tensor,
                              output_place=self.inputs['output'],
@@ -623,22 +586,79 @@ class DeepNeuralNetwork(NeuralNetwork):
                              if_acc=True,
                              )
 
+        self.init_op_optimizer = tf.variables_initializer(set(tf.all_variables()) -
+                                                          set(init_op_all))
+        self.initialization(self.init_op_optimizer, name='Optimizer')
+        self.log.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1000, name='saver')
+
+    def early_stop(self,
+                   epoch,
+                   pa: dict,
+                   results_train: dict,
+                   results_valid: dict,
+                   results_test: dict,
+                   ):
+        if not pa['early_stop']:
+            pa['max_acc_valid'] = results_valid['Accuracy']
+            pa['max_acc_train'] = results_train['Accuracy']
+            pa['max_acc_test'] = results_test['Accuracy']
+            pa['epoch'] = epoch + 1
+
+            if (epoch + 1) % pa['save_cycle'] == 0:
+                save_path = self.log.save_model(epoch=epoch + 1)
+
+            return pa
+
+        if 'max_acc_valid' in pa:
+            max_acc_valid = pa['max_acc_valid']
+            max_acc_test = pa['max_acc_test']
+        else:
+            max_acc_valid = 0
+            max_acc_test = 0
+
+        pa['epoch'] += 1
+        if results_valid['Accuracy'] > max_acc_valid:
+            pa['max_acc_valid'] = results_valid['Accuracy']
+            pa['max_acc_train'] = results_train['Accuracy']
+            pa['max_acc_test'] = results_test['Accuracy']
+            pa['max_epoch'] = epoch
+            pa['save_path'] = self.log.save_model(epoch=epoch)
+            pa['tolerant_count'] = 0
+        else:
+            if pa['decay_count'] > pa['decay_patience']:
+                pa['epoch'] = pa['training_cycle']
+                return pa
+
+            if pa['tolerant_count'] > pa['decay_step']:
+                pa['tolerant_count'] = 0
+                pa['decay_count'] += 1
+                pa['learning_rate'] *= pa['decay_rate']
+                if 'save_path' in pa:
+                    self.log.restore(restored_path=pa['save_path'])
+                return pa
+
+            pa['tolerant_count'] += 1
+
+        return pa
+
     def backpropagation_epoch(self, data: np.ndarray,
                               label: np.ndarray,
                               train_pa: dict,
                               epoch: int,
+                              zo_data: np.ndarray = None,
+                              learning_rate: float = None,
                               regions: int or list = None):
-        # Shuffle
-        data_label = list(zip(data, label))
-        np.random.shuffle(data_label)
-        data, label = zip(*data_label)
-        data = np.array(data)
-        label = np.array(label)
+        # Shuffle ?
+        random_index = np.random.permutation(len(label))
+        data = data[random_index, :, :]
+        label = label[random_index]
 
         # Start training
         batch_size = train_pa['train_batch_size']
-        learning_rate = train_pa['learning_rate']
-        learning_rate = learning_rate * train_pa['decay_rate'] ** np.floor(epoch / train_pa['decay_step'])
+
+        if learning_rate is None:
+            learning_rate = train_pa['learning_rate']
+            learning_rate = learning_rate * train_pa['decay_rate'] ** np.floor(epoch / train_pa['decay_step'])
 
         mses = list()
         accs = list()
@@ -651,48 +671,65 @@ class DeepNeuralNetwork(NeuralNetwork):
             feed_dict = {}
             input_placeholder = self.structure['input_place']
             if isinstance(input_placeholder, list):
-                train_data_batch_regions = extract_regions(data=train_data_batch, regions=regions)
+                if 'input_num' in self.train_pa['parameters']:
+                    landmarks = select_landmarks(dataset=self.train_pa['parameters']['dataset'],
+                                                 feature=self.train_pa['parameters']['feature'],
+                                                 landmk_num=self.train_pa['parameters']['input_num'])
+                    train_data_batch_regions = MultiInstance_patch(images=train_data_batch,
+                                                                   landmarks=landmarks,
+                                                                   patch_size=self.train_pa['parameters']['patch_size'],
+                                                                   numofscales=1,
+                                                                   )
+                else:
+                    train_data_batch_regions = extract_regions(data=train_data_batch, regions=regions)
+
                 if len(train_data_batch_regions) != len(input_placeholder):
                     raise TypeError('Length doesn\'t match!')
                 for train_data_batch_region, input_place in zip(train_data_batch_regions, input_placeholder):
                     feed_dict[input_place] = train_data_batch_region
             else:
+                if 'correlation' in self.structure:
+                    zo_data_batch = zo_data[train_step * batch_size: (train_step + 1) * batch_size]
+                    feed_dict[self.structure['correlation']] = zo_data_batch
                 feed_dict[input_placeholder] = train_data_batch
 
-            feed_dict[self.optimizer['output_place']] = train_label_batch
-            feed_dict[self.optimizer['lr_place']] = learning_rate
+            feed_dict.update({self.optimizer['output_place']: train_label_batch,
+                              self.inputs['learning_rate']: learning_rate,
+                              self.inputs['training']: True,
+                              })
+
+            fetches = {'results': self.optimizer['results'],
+                       'minimizer': self.optimizer['minimizer'],
+                       'tensors': self.structure['tensors'],
+                       'global_step': self.optimizer['global_step'],
+                       }
 
             # Backpropagation
-            results_batch, _, predict, mses_batch, global_step, accs_batch, = \
-                self.sess.run(fetches=[self.optimizer['results'],
-                                       self.optimizer['minimizer'],
-                                       self.optimizer['prediction'],
-                                       self.optimizer['square_errors'],
-                                       self.optimizer['global_step'],
-                                       self.optimizer['accuracies'],
-                                       ],
-                              feed_dict=feed_dict,
-                              )
-
-            mses.extend(mses_batch)
-            accs.extend(accs_batch)
+            result_batch = self.sess.run(fetches=fetches,
+                                         feed_dict=feed_dict,
+                                         )
+            mses.extend(result_batch['results']['square_errors'])
+            accs.extend(result_batch['results']['accuracies'])
             message = '{:4d}/{:d}\t'.format(train_step + 1, train_steps)
-            self.log.write_log(res=results_batch, epoch=global_step, pre_fix=message)
+            self.log.write_log(res=result_batch['results'], epoch=result_batch['global_step'], pre_fix=message)
+
         results = {'MSE': np.mean(mses),
                    'Accuracy': np.mean(accs),
                    }
         self.log.write_log(res=results, epoch=epoch, new_line=True)
+        return results
 
     def feedforward(self,
                     data: np.ndarray,
                     label: np.ndarray,
                     epoch: int,
+                    zo_data: np.ndarray = None,
                     tag: str = 'Valid',
-                    regions: list = None):
-        batch_size = self.pre_train_pa['train_batch_size']
-        learning_rate = self.pre_train_pa['learning_rate'] * self.pre_train_pa['decay_rate'] ** np.floor(
-            epoch / self.pre_train_pa['decay_step'])
-
+                    regions: list = None,
+                    if_save: bool = True,
+                    ):
+        # batch_size = self.train_pa['pre_train']['train_batch_size']
+        batch_size = np.size(a=data, axis=0)
         mses = list()
         accs = list()
         train_data_size = np.size(data, axis=0)
@@ -704,35 +741,56 @@ class DeepNeuralNetwork(NeuralNetwork):
             feed_dict = {}
             input_placeholder = self.structure['input_place']
             if isinstance(input_placeholder, list):
-                train_data_batch_regions = extract_regions(data=train_data_batch, regions=regions)
+                if 'input_num' in self.train_pa['parameters']:
+                    landmarks = select_landmarks(dataset=self.train_pa['parameters']['dataset'],
+                                                 feature=self.train_pa['parameters']['feature'],
+                                                 landmk_num=self.train_pa['parameters']['input_num'])
+                    train_data_batch_regions = MultiInstance_patch(images=train_data_batch,
+                                                                   landmarks=landmarks,
+                                                                   patch_size=self.train_pa['parameters']['patch_size'],
+                                                                   numofscales=1,
+                                                                   )
+                else:
+                    train_data_batch_regions = extract_regions(data=train_data_batch, regions=regions)
                 if len(train_data_batch_regions) != len(input_placeholder):
                     raise TypeError('Length doesn\'t match!')
 
                 for train_data_batch_region, input_place in zip(train_data_batch_regions, input_placeholder):
                     feed_dict[input_place] = train_data_batch_region
             else:
+                if 'correlation' in self.structure:
+                    zo_data_batch = zo_data[train_step * batch_size: (train_step + 1) * batch_size]
+                    feed_dict[self.structure['correlation']] = zo_data_batch
                 feed_dict[input_placeholder] = train_data_batch
 
-            feed_dict[self.optimizer['output_place']] = train_label_batch
-            feed_dict[self.optimizer['lr_place']] = learning_rate
+            feed_dict.update({self.optimizer['output_place']: train_label_batch,
+                              self.inputs['training']: False,
+                              })
 
-            # Backpropagation
-            results_batch, predict, mses_batch, accs_batch, tensors, = \
-                self.sess.run(fetches=[self.optimizer['results'],
-                                       self.optimizer['prediction'],
-                                       self.optimizer['square_errors'],
-                                       self.optimizer['accuracies'],
-                                       self.structure['tensors'],
-                                       ],
-                              feed_dict=feed_dict,
-                              )
+            fetches = {'results': self.optimizer['results'],
+                       'tensors': self.structure['tensors'],
+                       'global_step': self.optimizer['global_step'],
+                       }
+            for layer in self.op_layers:
+                layer_name = layer.pa['scope']
+                bn_pa = {}
+                if 'output_bn' in layer.tensors:
+                    bn_pa['aft_mean'] = layer.tensors['aft_mean']
+                    bn_pa['aft_var'] = layer.tensors['aft_var']
+                fetches[layer_name] = bn_pa
 
-            mses.extend(mses_batch)
-            accs.extend(accs_batch)
+            # Feedforward
+            result_batch = self.sess.run(fetches=fetches,
+                                         feed_dict=feed_dict,
+                                         )
+            mses.extend(result_batch['results']['square_errors'])
+            accs.extend(result_batch['results']['accuracies'])
+
         results = {'MSE': np.mean(mses),
                    'Accuracy': np.mean(accs),
                    }
-        self.log.write_log(res=results, epoch=epoch, log_type=tag, new_line=True)
+        self.log.write_log(res=results, epoch=epoch, log_type=tag, new_line=True, if_save=if_save)
+        return results
 
     def backpropagation(self, data: dict,
                         train_pa: dict,
@@ -740,40 +798,69 @@ class DeepNeuralNetwork(NeuralNetwork):
                         regions: int or list = None,
                         ):
         self.write_graph()
-        save_path = None
-        if regions is None:
-            dataset = self.input_layers['input'].dataset
-            regions = select_top_significance_ROIs(datasets=[dataset])[dataset]
+        if regions is None and hasattr(self.input_layers['input'], 'ROIs'):
+            regions = self.input_layers['input'].ROIs
 
-        for epoch in np.arange(start=start_epoch, stop=train_pa['training_cycle']):
-            self.backpropagation_epoch(data=data['train data'],
-                                       label=data['train label'],
-                                       train_pa=train_pa,
-                                       epoch=epoch + 1,
-                                       regions=regions,
-                                       )
+        # Mask data with adjacency matrix
+        zo_data = {}
+        adj_matrix = AAL().get_adj_matrix(metric='Adjacent')
+        adj_matrix = np.expand_dims(np.expand_dims(adj_matrix, axis=0), axis=-1)
+        for tvt in ['train', 'valid', 'test']:
+            name = '{:s} data'.format(tvt)
+            zo_data[name] = data[name]
+            data[name] = data[name] * adj_matrix
+
+        epoch = 0
+        early_stop_pa = {'epoch': 0,
+                         'decay_count': 0,
+                         'tolerant_count': 0,
+                         'decay_rate': train_pa['decay_rate'],
+                         'decay_step': train_pa['decay_step'],
+                         'save_cycle': train_pa['save_cycle'],
+                         'learning_rate': train_pa['learning_rate'],
+                         'decay_patience': train_pa['decay_patience'],
+                         'training_cycle': train_pa['training_cycle'],
+                         'early_stop': train_pa['early_stop']
+                         }
+        while epoch < train_pa['training_cycle']:
+            results_train = self.backpropagation_epoch(data=data['train data'],
+                                                       label=data['train label'],
+                                                       zo_data=zo_data['train data'],
+                                                       train_pa=train_pa,
+                                                       epoch=epoch + 1,
+                                                       regions=regions,
+                                                       )
 
             if (epoch + 1) % train_pa['test_cycle'] == 0:
                 # Valid
-                self.feedforward(data=data['valid data'],
-                                 label=data['valid label'],
-                                 epoch=epoch + 1,
-                                 tag='Valid',
-                                 regions=regions,
-                                 )
-
+                results_valid = self.feedforward(data=data['valid data'],
+                                                 label=data['valid label'],
+                                                 zo_data=zo_data['valid data'],
+                                                 epoch=epoch + 1,
+                                                 tag='Valid',
+                                                 regions=regions,
+                                                 )
                 # Test
-                self.feedforward(data=data['test data'],
-                                 label=data['test label'],
-                                 epoch=epoch + 1,
-                                 tag='Test',
-                                 regions=regions,
-                                 )
+                results_test = self.feedforward(data=data['test data'],
+                                                label=data['test label'],
+                                                zo_data=zo_data['test data'],
+                                                epoch=epoch + 1,
+                                                tag='Test',
+                                                regions=regions,
+                                                )
 
-            if (epoch + 1) % train_pa['save_cycle'] == 0:
-                save_path = self.log.save_model(epoch=epoch + 1)
+                early_stop_pa = self.early_stop(epoch=epoch,
+                                                pa=early_stop_pa,
+                                                results_train=results_train,
+                                                results_valid=results_valid,
+                                                results_test=results_test,
+                                                )
+                epoch = early_stop_pa['epoch']
 
-        return save_path
+            # if (epoch + 1) % train_pa['save_cycle'] == 0:
+            #     save_path = self.log.save_model(epoch=epoch + 1)
+
+        return early_stop_pa
 
     def pre_train_fold(self,
                        fold: h5py.Group,
@@ -782,14 +869,16 @@ class DeepNeuralNetwork(NeuralNetwork):
             raise TypeError('The fold must be type of h5py.Group.')
 
         self.build_structure()
+        self.initialization()
+
         start_epoch = self.log.restore()
 
         data = {'train data': np.array(fold['train data']),
-                'train label': vecter2onehot(np.array(fold['train label'])),
+                'train label': vector2onehot(np.array(fold['train label'])),
                 'valid data': np.array(fold['valid data']),
-                'valid label': vecter2onehot(np.array(fold['valid label'])),
+                'valid label': vector2onehot(np.array(fold['valid label'])),
                 'test data': np.array(fold['test data']),
-                'test label': vecter2onehot(np.array(fold['test label'])),
+                'test label': vector2onehot(np.array(fold['test label'])),
                 }
 
         # set subfolder name
@@ -798,12 +887,12 @@ class DeepNeuralNetwork(NeuralNetwork):
         subfolder_name = '{:s}/{:s}'.format(fold_name, index_str)
         self.log.set_filepath_by_subfolder(subfolder_name=subfolder_name)
 
-        save_path = self.backpropagation(data=data,
-                                         start_epoch=start_epoch,
-                                         train_pa=self.pre_train_pa,
-                                         regions=regions,
-                                         )
-        return save_path
+        results = self.backpropagation(data=data,
+                                       start_epoch=start_epoch,
+                                       train_pa=self.train_pa['pre_train'],
+                                       regions=regions,
+                                       )
+        return results
 
     def fine_tune_fold(self,
                        fold: h5py.Group,
@@ -817,11 +906,11 @@ class DeepNeuralNetwork(NeuralNetwork):
         start_epoch = self.log.restore()
 
         data = {'train data': np.array(fold['train data']),
-                'train label': vecter2onehot(np.array(fold['train label'])),
+                'train label': vector2onehot(np.array(fold['train label'])),
                 'valid data': np.array(fold['valid data']),
-                'valid label': vecter2onehot(np.array(fold['valid label'])),
+                'valid label': vector2onehot(np.array(fold['valid label'])),
                 'test data': np.array(fold['test data']),
-                'test label': vecter2onehot(np.array(fold['test label'])),
+                'test label': vector2onehot(np.array(fold['test label'])),
                 }
 
         # set subfolder name
@@ -832,6 +921,6 @@ class DeepNeuralNetwork(NeuralNetwork):
 
         save_path = self.backpropagation(data=data,
                                          start_epoch=start_epoch,
-                                         train_pa=self.fine_tune_pa,
+                                         train_pa=self.train_pa['fine_tune'],
                                          )
         return save_path

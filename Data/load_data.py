@@ -1,9 +1,12 @@
 import os
 import re
+import h5py
+import numpy as np
 import pandas as pd
 import scipy.io as sio
 from functools import partial
-from Data.utils_prepare_data import *
+from Data.utils_prepare_data import run_progress, format_config, load_nifti_data, \
+    compute_connectivity, create_dataset_hdf5, hdf5_handler, load_subject_data
 from sklearn.preprocessing import scale
 
 
@@ -210,3 +213,22 @@ def load_phenotypes_FCP_RfMRIMaps():
                   'SITE',
                   'STRAT'
                   ]]
+
+
+def load_subjects_data(dataset: str,
+                       feature: str,
+                       group: int = None,
+                       hdf5: h5py.Group = None):
+    if hdf5 is None:
+        hdf5_path = b'F:/OneDriveOffL/Data/Data/DCAE_data.hdf5'
+        hdf5 = hdf5_handler(hdf5_path)
+
+    subjects_group = hdf5['{:s}/subjects'.format(dataset)]
+    pheno = load_phenotypes(dataset=dataset)
+    if group is None:
+        subjects = list(pheno['FILE_ID'])
+    else:
+        subjects = list(pheno[pheno['DX_GROUP'] == group]['FILE_ID'])
+    feature_data = np.array([load_subject_data(subject_group=subjects_group[subject], features=[feature])
+                             for subject in subjects])
+    return feature_data
