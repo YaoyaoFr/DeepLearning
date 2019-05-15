@@ -2,7 +2,7 @@ import h5py
 import scipy.io as sio
 import numpy as np
 from Structure.classfier import Classifier, SupportVectorMachine
-from Data.utils_prepare_data import hdf5_handler
+from data.utils_prepare_data import hdf5_handler
 
 
 def onehot_to_vector(data, class_num=2):
@@ -88,4 +88,6 @@ def get_slice(dataset, feature, fold_idx, subject_idx, slice_idx):
     recons_slice = np.reshape(recons_slice, [shape[0], shape[1]])
 
     return data_slice, recons_slice
+
+
 

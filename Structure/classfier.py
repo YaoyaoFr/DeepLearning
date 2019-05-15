@@ -1,9 +1,9 @@
-from Structure.nn import DeepNeuralNetwork
+from Structure.DeepNerualNetwork.DeepNeuralNetwork import DeepNeuralNetwork
 from DCAE_utils import *
 from sklearn import svm
 from Structure.Layer import *
-from Data.utils_prepare_data import *
-from Structure.XMLFiles.xml_parse import *
+from data.utils_prepare_data import *
+from Structure.Schemes.xml_parse import *
 from abc import ABCMeta
 
 

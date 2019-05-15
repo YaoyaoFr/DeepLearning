@@ -1,6 +1,6 @@
 from Structure.nn import *
 from Structure.classfier import *
-from Data.utils_prepare_data import *
+from data.utils_prepare_data import *
 
 
 class Architecture:
@@ -28,13 +28,13 @@ class Architecture:
             process_tag = process_list[process_index]
             print('Start process {:s}'.format(process_tag.replace('_', ' ')))
             if process_tag == 'pre_train_SCAE':
-                self.scae.pre_train_fold(fold=fold, start_index=start_index),
+                self.scae.train_fold(fold=fold, start_index=start_index),
             elif process_tag == 'fine_tune_SCAE':
                 self.scae.build_structure()
                 self.scae.fine_tune_fold(fold=fold)
                 self.scae.encode_fold(fold=fold)
             elif process_tag == 'pre_train_Classifier':
-                self.classifier.pre_train_fold(fold=fold)
+                self.classifier.train_fold(fold=fold)
             elif process_tag == 'fine_tune_Classifier':
                 self.scae.build_structure()
                 self.classifier.fine_tune_fold(fold=fold,

@@ -4,11 +4,11 @@ import time
 import logging
 import scipy.io as sio
 import tensorflow as tf
-from Structure.XMLFiles.xml_parse import parse_log_parameters
+from Structure.Schemes.xml_parse import parse_log_parameters
 
 
 class Log:
-    pa = parse_log_parameters('Structure/XMLFiles/Log.xml')
+    pa = parse_log_parameters('Structure/Schemes/Log.xml')
     basic_path = pa['basic_path']
     restored_date = pa['restored_date']
     restored_time = pa['restored_time']
@@ -19,18 +19,26 @@ class Log:
     file_path = None
     train_writer = None
 
-    def __init__(self, graph=None, sess=None, restored_date=None, restore_time=None, sub_folder_name=None):
-        self.set_file_path(restored_date, restore_time, sub_folder_name)
+    def __init__(self,
+                 graph=None,
+                 sess=None,
+                 restored_date=None,
+                 restore_time=None,
+                 sub_folder_name=None):
+        self.set_file_path(restored_date=restored_date,
+                           restore_time=restore_time,
+                           sub_folder_name=sub_folder_name,
+                           )
         self.set_graph(graph=graph, sess=sess)
 
     def set_graph(self, graph=None, sess=None):
         if graph:
             self.graph = graph
         else:
-            self.graph = tf.get_default_graph()
+            self.graph = tf.Graph()
 
         if not sess:
-            with tf.Session(graph=graph) as sess:
+            with tf.Session(graph=self.graph) as sess:
                 self.sess = sess
 
     def set_file_path(self, restored_date=None, restore_time=None, sub_folder_name=None):
@@ -87,7 +95,7 @@ class Log:
                   epoch: int,
                   log_type: str = 'Train',
                   if_save: bool = True,
-                  if_print: bool = True,
+                  show_info: bool = True,
                   pre_fix: str = None,
                   new_line: bool = False,
                   ):
@@ -104,7 +112,7 @@ class Log:
 
             error_str += '{:5s}: {:.5e}  '.format(res_key, res[res_key])
 
-        if if_print:
+        if show_info:
             if new_line:
                 error_str = '\r\n' + error_str + '\r\n'
             else:
@@ -117,11 +125,12 @@ class Log:
     def close(self):
         self.train_writer.close()
 
-    def save_model(self, epoch):
+    def save_model(self, epoch, show_info: bool = True):
         save_path = os.path.join(self.file_path,
                                  'model/train.model_{:d}'.format(epoch))
         self.saver.save(self.sess, save_path)
-        print('Model saved in file: {:s}'.format(save_path))
+        if show_info:
+            print('Model saved in file: {:s}'.format(save_path))
         return save_path
 
     def restore(self,
