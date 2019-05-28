@@ -169,17 +169,15 @@ class EdgeToNodeWithGLasso(LayerObject):
 
         L = tf.Variable(dtype=tf.float32,
                         initial_value=tf.truncated_normal(
-                            shape=[in_channels,
-                                   out_channels,
-                                   int(n_features * (n_features + 1) / 2)],
+                            shape=[in_channels, out_channels, int(n_features * (n_features + 1) / 2)],
                             mean=0,
-                            stddev=0.001),
+                            stddev=0.00001),
                         )
 
         # build weights
         L_tril = tf.contrib.distributions.fill_triangular(L) + \
-                 0.2 * tf.eye(num_rows=n_features,
-                              batch_shape=[in_channels, out_channels])
+                 tf.eye(num_rows=n_features,
+                        batch_shape=[in_channels, out_channels])
 
         self.tensors['L'] = L_tril
 
@@ -233,28 +231,39 @@ class EdgeToNodeWithGLasso(LayerObject):
                                                      output=output)
         self.tensors.update(regularizer_results)
 
-        SICE_regularizer = self.tensors['Trace']
+        # -------------------------------------------------------------------------------------------------------------
+        # Weighted the f-value of the filters
+        SICE_regularizer = self.tensors['Log determinant'] + self.tensors['Trace']
+        mean, var = tf.nn.moments(SICE_regularizer, axes=[1], keep_dims=True)
+        SICE_regularizer = tf.subtract(SICE_regularizer, mean)
+        SICE_regularizer = tf.div(SICE_regularizer, tf.sqrt(var))
 
-        # Reshape the regularizer to shape of [batch_size, n_class, out_channels]
-        SICE_regularizer = tf.transpose(tf.reshape(SICE_regularizer,
-                                                   shape=[-1, self.pa['n_class'], self.pa['kernel_shape'][3]]),
-                                        perm=[2, 0, 1])
+        softmax_unsupervise = tf.nn.softmax(-SICE_regularizer, axis=0)
 
-        regularizer_softmax = tf.nn.softmax(-SICE_regularizer, axis=0)
+        # Reshape the regularizer to shape of [batch_size, n_class, out_channels] and softmax
+        softmax_supervise = tf.nn.softmax(tf.reshape(SICE_regularizer,
+                                                     shape=[-1, self.pa['n_class'], self.pa['kernel_shape'][3]]),
+                                          axis=-1)
+
+        # Transpose to [out_channels, batch_size, n_class] and mask with label
+        softmax_supervise = tf.transpose(softmax_supervise, perm=[2, 0, 1]) * output_tensor
+        # Reshape to previous shape
+        softmax_supervise = tf.reshape(tf.transpose(softmax_supervise, perm=[1, 2, 0]),
+                                       shape=[-1, self.pa['n_class'] * self.pa['kernel_shape'][3]])
+
         regularizer_softmax = tf.cond(training,
-                                      lambda: regularizer_softmax * output_tensor,
-                                      lambda: regularizer_softmax)
-        regularizer_softmax = tf.reshape(tf.transpose(regularizer_softmax, perm=[1, 2, 0]),
-                                         shape=[-1, self.pa['n_class'] * self.pa['kernel_shape'][3]])
+                                      lambda: softmax_supervise,
+                                      lambda: softmax_unsupervise)
         self.tensors['Regularizer softmax'] = regularizer_softmax
-
+        # -------------------------------------------------------------------------------------------------------------
+        #
         SICE_regularizer = self.tensors['Log determinant'] + \
                            self.tensors['Trace'] + \
                            self.pa['lambda'] * self.tensors['Norm 1']
         self.tensors['SICE regularizer'] = SICE_regularizer
 
-        tf.add_to_collection('L1_loss', tf.reduce_sum(tf.multiply(SICE_regularizer, regularizer_softmax)))
-        # tf.add_to_collection('L1_loss', tf.reduce_sum(SICE_regularizer))
+        tf.add_to_collection('SICE_loss', tf.reduce_mean(tf.multiply(SICE_regularizer, regularizer_softmax)))
+        tf.add_to_collection('L1_loss', self.pa['lambda'] * tf.reduce_mean(self.tensors['Norm 1']))
 
         # output = tf.transpose(tf.multiply(tf.transpose(output, perm=[1, 2, 0, 3]), regularizer_softmax),
         #                       perm=[2, 0, 1, 3])
@@ -286,7 +295,7 @@ class EdgeToNodeWithGLasso(LayerObject):
 
 
 def build_SICE_regularizer(weight, L, output):
-    logdet = -tf.reduce_sum(tf.log(tf.square(tf.matrix_diag_part(L))))
+    logdet = -tf.reduce_sum(tf.log(tf.square(tf.matrix_diag_part(L))), axis=(0, 2))
     # trace = tf.trace(tf.transpose(output, perm=[0, 3, 1, 2]))
     trace = tf.reduce_sum(output, axis=(1, 2))
     norm_1 = tf.reduce_sum(input_tensor=tf.abs(weight), axis=(0, 1, 2))
