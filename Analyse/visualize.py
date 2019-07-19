@@ -1,9 +1,12 @@
+import os
+
 import h5py
 # import scipy
+import matplotlib as mpl
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, colors as colors
 
 
 def matrix_to_image(data):
@@ -118,3 +121,104 @@ def show(data: np.ndarray, reconstruction: np.ndarray = None, titles: list = Non
 def save(data, reconstruction, titles):
     for idx in range(len(data)):
         pass
+
+
+def save_or_exhibit(weight,
+                    save_path: str,
+                    prefix: str,
+                    if_save: bool = True,
+                    if_show: bool = False,
+                    if_absolute: bool = False,
+                    if_diagonal: bool = False,
+                    vmax: float = None,
+                    vmin: float = None,
+                    ):
+    """
+    Save or show the figure of the given weights
+    :param weight: The given weights with shape [row, col, (channels)]
+    :param save_path: The absolute path of saving directory
+    :param prefix: Prefix of figure
+    :param if_save: The flag of whether saving the figure to file
+    :param if_show: The flag of whether showing the weights in platform
+    :param if_absolute: The flag of whether save or exhibit absolute of the weights
+    :param if_diagonal: The flag of whether save or exhibit the diagonal element of the weights
+    :param vmax: Deprecated soon. The maximum value of given weights
+    :param vmin: Deprecated soon. The minimum value of given weights
+    :return:
+    """
+    if not os.path.exists(save_path):
+        os.makedirs(save_path, exist_ok=True)
+
+    weight = np.squeeze(weight)
+    if len(np.shape(weight)) <= 2:
+        weight = np.expand_dims(weight, axis=-1)
+
+    if if_absolute:
+        weight = np.abs(weight)
+
+    out_channels = np.shape(weight)[2]
+
+    if if_show:
+        row_num = int(np.sqrt(out_channels))
+        plt.figure()
+        for channel in range(out_channels):
+            w = weight[..., channel]
+            if if_diagonal:
+                w[np.eye(90) == 1] = 0
+
+            plt.subplot(row_num, row_num, channel + 1)
+            extent = (1, 90, 1, 90)
+            color_map = customize_colormap(w)
+            im = plt.imshow(w, cmap=color_map, extent=extent)
+            plt.colorbar(im)
+        plt.show()
+    plt.close()
+
+    if if_save:
+        for channel in range(out_channels):
+            plt.figure()
+            w = weight[..., channel]
+            if if_diagonal:
+                w[np.eye(90) == 1] = 0
+
+            extent = (1, 90, 1, 90)
+            color_map = customize_colormap(w)
+            im = plt.imshow(w, cmap=color_map, extent=extent)
+            plt.colorbar(im)
+            plt.savefig(os.path.join(save_path, '{:s} channel {:d}.jpg'.format(prefix, channel + 1)))
+            plt.close()
+
+
+def customize_colormap(matrix: np.ndarray = None):
+    if matrix is None:
+        vmax = 1
+        vmin = -1
+    else:
+        vmax = np.max(matrix)
+        vmin = np.min(matrix)
+        assert vmin <= 0 <= vmax, 'Data distribution must span the ' \
+                                  'positive and negative half of the number axis'
+
+    if vmax > -vmin:
+        color_max = 1
+        color_min = -vmin / vmax
+    else:
+        color_max = vmax / -vmin
+        color_min = 1
+    color_middle = color_min / (color_max + color_min)
+
+    color_dict = {'alpha': [(0.0, 1, 1),
+                            (0.5, 1, 1),
+                            (1.0, 1, 1)],
+                  'red': [(0.0, 1 - color_min, 1 - color_min),
+                          (color_middle, 1.0, 1.0),
+                          (1.0, 1, 1)],
+                  'green': [(0.0, 1 - color_min, 1 - color_min),
+                            (color_middle, 1.0, 1.0),
+                            (1.0, 1 - color_max, 1 - color_max)],
+                  'blue': [(0.0, 1, 1),
+                           (color_middle, 1.0, 1.0),
+                           (1.0, 1 - color_max, 1 - color_max)],
+                  }
+    color_map = colors.LinearSegmentedColormap(segmentdata=color_dict, name='test')
+    return color_map

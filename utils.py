@@ -1,7 +1,7 @@
 import h5py
-import scipy.io as sio
 import numpy as np
-from Structure.classfier import Classifier, SupportVectorMachine
+import scipy.io as sio
+# from Structure.classfier import Classifier, SupportVectorMachine
 from data.utils_prepare_data import hdf5_handler
 
 
@@ -12,33 +12,33 @@ def onehot_to_vector(data, class_num=2):
     return data_tmp
 
 
-def run_classifier(folds=None, classifier: Classifier = None):
-    """
-
-    :param model_dir_path: The directory path of the saved model.
-    :param dataset: The dataset to be prepared.
-    :param folds:
-    :param classifier:
-    :return:
-    """
-    if folds is None:
-        hdf5_path = b'F:/OneDriveOffL/Data/Data/ABIDE/abide.hdf5'
-        hdf5 = hdf5_handler(hdf5_path, 'a')
-        folds = hdf5['experiments/falff_whole']
-
-    if classifier is None:
-        classifier = SupportVectorMachine()
-
-    datas = list()
-    for fold_idx in folds:
-        data = dict()
-        fold = folds[fold_idx]
-        for tvt in ['train', 'valid', 'test']:
-            for flag in ['data', 'label']:
-                tvt_flag = '{:s} {:s}'.format(tvt, flag)
-                data_tmp = np.array(fold['{:s} encoder'.format(tvt_flag)])
-                data[tvt_flag] = data_tmp
-        classifier.run(data)
+# def run_classifier(folds=None, neural_network: Classifier = None):
+#     """
+#
+#     :param model_dir_path: The directory path of the saved model.
+#     :param dataset: The dataset to be prepared.
+#     :param folds:
+#     :param neural_network:
+#     :return:
+#     """
+#     if folds is None:
+#         hdf5_path = b'F:/OneDriveOffL/Data/Data/ABIDE/abide.hdf5'
+#         hdf5 = hdf5_handler(hdf5_path, 'a')
+#         folds = hdf5['experiments/falff_whole']
+#
+#     if neural_network is None:
+#         neural_network = SupportVectorMachine()
+#
+#     datas = list()
+#     for fold_idx in folds:
+#         data = dict()
+#         fold = folds[fold_idx]
+#         for tvt in ['train', 'valid', 'test']:
+#             for flag in ['data', 'label']:
+#                 tvt_flag = '{:s} {:s}'.format(tvt, flag)
+#                 data_tmp = np.array(fold['{:s} encoder'.format(tvt_flag)])
+#                 data[tvt_flag] = data_tmp
+#         neural_network.run(data)
 
 
 def calculate_MSE(folds: h5py.Group = None, model=None):
@@ -88,6 +88,5 @@ def get_slice(dataset, feature, fold_idx, subject_idx, slice_idx):
     recons_slice = np.reshape(recons_slice, [shape[0], shape[1]])
 
     return data_slice, recons_slice
-
 
 

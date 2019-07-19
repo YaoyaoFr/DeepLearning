@@ -1,7 +1,9 @@
 <component name="ProjectDictionaryState">
   <dictionary name="Yao">
     <words>
+      <w>abrv</w>
       <w>accs</w>
+      <w>attrs</w>
       <w>autoencoder</w>
       <w>autoencoders</w>
       <w>autoendoer</w>
@@ -13,20 +15,28 @@
       <w>cyberduck</w>
       <w>datasets</w>
       <w>dcae</w>
+      <w>disadv</w>
       <w>falff</w>
       <w>feedforward</w>
       <w>ftpdownload</w>
+      <w>iden</w>
+      <w>karyotype</w>
       <w>mrirc</w>
       <w>ndarray</w>
       <w>nifti</w>
       <w>onehot</w>
+      <w>parcellation</w>
+      <w>parcellations</w>
       <w>pheno</w>
       <w>preproc</w>
+      <w>pretrain</w>
       <w>pvalue</w>
+      <w>regularizer</w>
       <w>reho</w>
       <w>resplit</w>
       <w>retr</w>
       <w>scae</w>
+      <w>sice</w>
       <w>spps</w>
       <w>stor</w>
       <w>strat</w>
@@ -35,10 +45,13 @@
       <w>subfolder</w>
       <w>subjs</w>
       <w>tmpl</w>
+      <w>tril</w>
       <w>ttest</w>
       <w>tvts</w>
+      <w>unsupervise</w>
       <w>uploadfile</w>
       <w>vmax</w>
+      <w>vmin</w>
       <w>voxel</w>
     </words>
   </dictionary>

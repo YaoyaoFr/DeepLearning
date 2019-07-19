@@ -1,5 +1,5 @@
 from Structure.DeepNerualNetwork.DeepNeuralNetwork import DeepNeuralNetwork
-from DCAE_utils import *
+from utils import *
 from sklearn import svm
 from Structure.Layer import *
 from data.utils_prepare_data import *

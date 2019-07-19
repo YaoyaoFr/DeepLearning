@@ -3,12 +3,14 @@ from Structure.Layer.Convolution import Convolution, Convolutions, DeConvolution
     DepthwiseDeConvolution
 from Structure.Layer.BasicLayer import Placeholder, Placeholders, FullyConnected, Unfolds, Fold, Unfold, Softmax, \
     MaxPooling, MaxPoolings, SpatialPyramidPool3D, UnPooling, UnPooling3D
-from Structure.Layer.BrainNetCNN import EdgeToEdge, EdgeToNode, EdgeToNodeElementWise, NodeToGraph, EdgeToNodeWithGLasso
+from Structure.Layer.BrainNetCNN import EdgeToEdge, EdgeToNode, NodeToGraph
+from Structure.Layer.CNNElementWise import EdgeToNodeElementWise
+from Structure.Layer.CNNWithGLasso import EdgeToEdgeWithGLasso, EdgeToNodeWithGLasso, EdgeToNodeWithGLassoTest
 from Structure.Layer.GraphNN import GraphConnected
 from Structure.Layer.GraphCNN import GraphCNN
 
 
-def get_layer_by_arguments(arguments, parameters=None):
+def build_layer(arguments, parameters=None):
     type = arguments['type']
 
     # Set the convolution function corresponding to the layer type
@@ -86,6 +88,8 @@ def get_layer_by_arguments(arguments, parameters=None):
             EdgeToNode,
         'EdgeToNodeElementWise':
             EdgeToNodeElementWise,
+        'EdgeToEdgeWithGLasso':
+            EdgeToEdgeWithGLasso,
         'EdgeToNodeWithGLasso':
             EdgeToNodeWithGLasso,
         'NodeToGraph':

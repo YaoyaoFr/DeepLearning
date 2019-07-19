@@ -9,14 +9,14 @@ import h5py
 import numpy as np
 import tensorflow as tf
 
-from Structure.Layer.LayerConstruct import get_layer_by_arguments
+from Structure.Layer.LayerConstruct import build_layer
 from Analyse.visualize import show_reconstruction
 from data.utils_prepare_data import create_dataset_hdf5
 
 
 class StackedConvolutionAutoEncoder(NeuralNetwork):
     autoencoders = list()
-    inputs = dict()
+    input_placeholders = dict()
     tensors = dict()
     parameters = list()
     results = dict()
@@ -34,7 +34,7 @@ class StackedConvolutionAutoEncoder(NeuralNetwork):
             for ae_pa in self.stru_pa['autoencoder']:
                 self.autoencoders.append(AutoEncoder(parameters=ae_pa, log=self.log))
             for placeholder in self.stru_pa['input']:
-                self.inputs[placeholder['scope']] = get_layer_by_arguments(arguments=placeholder)()
+                self.inputs[placeholder['scope']] = build_layer(arguments=placeholder)()
 
             self.log.saver = tf.train.Saver(tf.global_variables(), max_to_keep=1000, name='saver')
             self.init_op = tf.variables_initializer(set(tf.all_variables()) -

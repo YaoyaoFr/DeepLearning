@@ -8,11 +8,12 @@ from Structure.Schemes.xml_parse import parse_log_parameters
 
 
 class Log:
-    pa = parse_log_parameters('Structure/Schemes/Log.xml')
-    basic_path = pa['basic_path']
-    restored_date = pa['restored_date']
-    restored_time = pa['restored_time']
-    sub_folder_name = pa['sub_folder_name']
+    basic_path = 'F:/OneDriveOffL/Data/Result/DeepLearning'
+    restored_date = None
+    restored_time = None
+    sub_folder_name = None
+    pa = {'restored_epoch': 0,
+          }
 
     graph = None
     sess = None
@@ -125,9 +126,10 @@ class Log:
     def close(self):
         self.train_writer.close()
 
-    def save_model(self, epoch, show_info: bool = True):
-        save_path = os.path.join(self.file_path,
-                                 'model/train.model_{:d}'.format(epoch))
+    def save_model(self, epoch, show_info: bool = True, save_path: str = None):
+        if save_path is None:
+            save_path = os.path.join(self.file_path,
+                                     'model/train.model_{:d}'.format(epoch))
         self.saver.save(self.sess, save_path)
         if show_info:
             print('Model saved in file: {:s}'.format(save_path))
@@ -145,12 +147,14 @@ class Log:
         :return: The training epoch of restored model.
         """
         if restored_path is None:
-            restored_epoch = self.pa['restored_epoch']
+            if restored_epoch is None:
+                restored_epoch = self.pa['restored_epoch']
             restored_path = os.path.join(self.file_path,
                                          'model/train.model_{:d}'.format(restored_epoch)) if restored_epoch else None
 
         try:
             self.saver.restore(self.sess, restored_path)
+            restored_epoch = int(restored_path.split('_')[-1])
             print('Model restored from file: {:s}'.format(restored_path))
         except Exception as e:
             print(e)
