@@ -3,30 +3,50 @@
     <words>
       <w>abrv</w>
       <w>accs</w>
+      <w>allasd</w>
+      <w>amyg</w>
       <w>attrs</w>
       <w>autoencoder</w>
       <w>autoencoders</w>
       <w>autoendoer</w>
       <w>backpro</w>
       <w>backpropagation</w>
+      <w>bmed</w>
+      <w>bmid</w>
       <w>boldsymbol</w>
+      <w>bsup</w>
+      <w>cnnsw</w>
       <w>convolutional</w>
       <w>convs</w>
+      <w>couldn</w>
       <w>cyberduck</w>
       <w>datasets</w>
       <w>dcae</w>
       <w>disadv</w>
+      <w>dparsf</w>
       <w>falff</w>
       <w>feedforward</w>
+      <w>filt</w>
       <w>ftpdownload</w>
+      <w>gdor</w>
+      <w>gmed</w>
+      <w>goperc</w>
+      <w>gtriang</w>
+      <w>hadamard</w>
       <w>iden</w>
+      <w>infos</w>
       <w>karyotype</w>
+      <w>limbic</w>
+      <w>lrelu</w>
       <w>mrirc</w>
       <w>ndarray</w>
       <w>nifti</w>
+      <w>omid</w>
       <w>onehot</w>
+      <w>osup</w>
       <w>parcellation</w>
       <w>parcellations</w>
+      <w>pcun</w>
       <w>pheno</w>
       <w>preproc</w>
       <w>pretrain</w>
@@ -35,6 +55,7 @@
       <w>reho</w>
       <w>resplit</w>
       <w>retr</w>
+      <w>rglobal</w>
       <w>scae</w>
       <w>sice</w>
       <w>spps</w>

@@ -1,10 +1,8 @@
 import os
 import sys
 import time
-import logging
 import scipy.io as sio
 import tensorflow as tf
-from Structure.Schemes.xml_parse import parse_log_parameters
 
 
 class Log:

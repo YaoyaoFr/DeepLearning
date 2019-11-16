@@ -2,16 +2,16 @@ import numpy as np
 
 from Log.log import Log
 from Structure.Framework import Framework
-from data.utils_prepare_data import basic_path, hdf5_handler
+from NeuroimageDataProcessing.utils import basic_path, hdf5_handler
 
 
 def main():
-    start_time = 8
+    start_time = 1
     stop_time = 10
     save = True
 
     log = Log()
-    scheme = 'CNNWithGLasso'
+    scheme = 'CNNSmallWorld'
 
     frame = Framework(scheme=scheme, log=log)
     # Training

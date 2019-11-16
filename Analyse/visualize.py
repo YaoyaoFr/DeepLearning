@@ -161,6 +161,7 @@ def save_or_exhibit(weight,
     if if_show:
         row_num = int(np.sqrt(out_channels))
         plt.figure()
+        plt.title(prefix)
         for channel in range(out_channels):
             w = weight[..., channel]
             if if_diagonal:

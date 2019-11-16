@@ -1,17 +1,17 @@
 import os
 import sys
 
-from Structure.DeepNerualNetwork.AutoEncoder import AutoEncoder
-from Structure.DeepNerualNetwork.DeepNeuralNetwork import DeepNeuralNetwork
-from Structure.DeepNerualNetwork.NeuralNetwork import NeuralNetwork
+from DeepNerualNetwork.AutoEncoder import AutoEncoder
+from DeepNerualNetwork.DeepNeuralNetwork import DeepNeuralNetwork
+from DeepNerualNetwork import NeuralNetwork
 
 import h5py
 import numpy as np
 import tensorflow as tf
 
-from Structure.Layer.LayerConstruct import build_layer
+from Layer.LayerConstruct import build_layer
 from Analyse.visualize import show_reconstruction
-from data.utils_prepare_data import create_dataset_hdf5
+from NeuroimageDataProcessing.utils import create_dataset_hdf5
 
 
 class StackedConvolutionAutoEncoder(NeuralNetwork):

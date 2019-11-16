@@ -1,6 +1,6 @@
-from Structure.nn import *
-from Structure.classfier import *
-from data.utils_prepare_data import *
+from Log.log import Log
+from DeepNerualNetwork.DeepNeuralNetwork import DeepNeuralNetwork
+from NeuroimageDataProcessing.utils import *
 
 
 class Architecture:

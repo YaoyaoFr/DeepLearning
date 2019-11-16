@@ -2,14 +2,7 @@ import h5py
 import numpy as np
 import scipy.io as sio
 # from Structure.classfier import Classifier, SupportVectorMachine
-from data.utils_prepare_data import hdf5_handler
-
-
-def onehot_to_vector(data, class_num=2):
-    data_tmp = np.zeros(shape=[np.size(data, 0)], dtype=int)
-    for class_index in range(class_num):
-        data_tmp[np.where(data[:, class_index] == 1)] = class_index
-    return data_tmp
+from NeuroimageDataProcessing.utils import hdf5_handler
 
 
 # def run_classifier(folds=None, neural_network: Classifier = None):

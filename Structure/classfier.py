@@ -1,9 +1,7 @@
-from Structure.DeepNerualNetwork.DeepNeuralNetwork import DeepNeuralNetwork
+from DeepNerualNetwork.DeepNeuralNetwork import DeepNeuralNetwork
 from utils import *
 from sklearn import svm
-from Structure.Layer import *
-from data.utils_prepare_data import *
-from Structure.Schemes.xml_parse import *
+from NeuroimageDataProcessing.utils import *
 from abc import ABCMeta
 
 
@@ -52,7 +50,7 @@ class SupportVectorMachine(Classifier):
             tvt_flag = '{:s} label'.format(tvt)
             shape = np.shape(data[tvt_flag])
             if len(shape) == 2:
-                data[tvt_flag] = onehot_to_vector(data[tvt_flag])
+                data[tvt_flag] = onehot2vector(data[tvt_flag])
 
 
 def ann_classify(folds: h5py.Group = None):
