@@ -15,6 +15,7 @@
       <w>bmid</w>
       <w>boldsymbol</w>
       <w>bsup</w>
+      <w>calor</w>
       <w>cnnsw</w>
       <w>convolutional</w>
       <w>convs</w>
@@ -22,6 +23,7 @@
       <w>cyberduck</w>
       <w>datasets</w>
       <w>dcae</w>
+      <w>denoised</w>
       <w>disadv</w>
       <w>dparsf</w>
       <w>falff</w>
@@ -67,6 +69,7 @@
       <w>subjs</w>
       <w>tmpl</w>
       <w>tril</w>
+      <w>triu</w>
       <w>ttest</w>
       <w>tvts</w>
       <w>unsupervise</w>

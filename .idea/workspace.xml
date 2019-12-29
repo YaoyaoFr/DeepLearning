@@ -1,0 +1,1698 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/Layer/GraphNN.py" line="67" />
+    <bookmark url="file://$PROJECT_DIR$/Layer/CNNGLasso.py" line="390" />
+    <bookmark url="file://$PROJECT_DIR$/../utils/AAL/ROI.py" line="188" />
+  </component>
+  <component name="ChangeListManager">
+    <list id="c81550a2-55a4-4ea0-a39e-fbd9e5f576b2" name="Revert &quot;Deep Convolutional Auto-Encoders model -v1.0&quot;" comment="" />
+    <list id="9de56dda-4bb3-4c00-a0a3-ead961cdaec4" name="Deep Convolutional Auto-Encoders model -v1.0" comment="Deep Convolutional Auto-Encoders model -v1.0" />
+    <list id="3cb07002-422b-4c18-b9ec-98211cdb7846" name="Revert: Deep Convolutional Auto-Encoders model -v1.0" comment="" />
+    <list default="true" id="f680c7e1-81c9-4715-a193-c1aaa66af7ee" name="Default" comment="Backup for update code to tensorflow v2.0&#10;&#10;Date: 2019.11.16">
+      <change beforePath="$PROJECT_DIR$/../ADDetection/src/add_dataset.py" afterPath="$PROJECT_DIR$/../ADDetection/src/add_dataset.py" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/Yao.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/Yao.xml" />
+      <change beforePath="$PROJECT_DIR$/Analyse/visualize.py" afterPath="$PROJECT_DIR$/Analyse/visualize.py" />
+      <change beforePath="$PROJECT_DIR$/Log/log.py" afterPath="$PROJECT_DIR$/Log/log.py" />
+      <change beforePath="$PROJECT_DIR$/Main.py" afterPath="$PROJECT_DIR$/Main.py" />
+      <change beforePath="$PROJECT_DIR$/Structure/classfier.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/Structure/nn.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/Structure/scae_tl.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/Test/test.py" afterPath="$PROJECT_DIR$/Test/test.py" />
+      <change beforePath="$PROJECT_DIR$/utils.py" afterPath="$PROJECT_DIR$/utils.py" />
+      <change beforePath="$PROJECT_DIR$/../GCN/gcn/layers.py" afterPath="$PROJECT_DIR$/../GCN/gcn/layers.py" />
+      <change beforePath="$PROJECT_DIR$/../GCN/gcn/metrics.py" afterPath="$PROJECT_DIR$/../GCN/gcn/metrics.py" />
+      <change beforePath="$PROJECT_DIR$/../GCN/gcn/models.py" afterPath="$PROJECT_DIR$/../GCN/gcn/models.py" />
+      <change beforePath="$PROJECT_DIR$/../GCN/gcn/utils.py" afterPath="$PROJECT_DIR$/../GCN/gcn/utils.py" />
+      <change beforePath="$PROJECT_DIR$/../SppNet/alexnet_spp.py" afterPath="$PROJECT_DIR$/../SppNet/alexnet_spp.py" />
+      <change beforePath="$PROJECT_DIR$/../wiseDNN/Code/Generator.py" afterPath="$PROJECT_DIR$/../wiseDNN/Code/Generator.py" />
+      <change beforePath="$PROJECT_DIR$/../wiseDNN/Code/Loss.py" afterPath="$PROJECT_DIR$/../wiseDNN/Code/Loss.py" />
+      <change beforePath="$PROJECT_DIR$/../wiseDNN/Code/Main.py" afterPath="$PROJECT_DIR$/../wiseDNN/Code/Main.py" />
+      <change beforePath="$PROJECT_DIR$/../wiseDNN/Code/Model.py" afterPath="$PROJECT_DIR$/../wiseDNN/Code/Model.py" />
+      <change beforePath="$PROJECT_DIR$/../wiseDNN/Model/ReadMe.css" afterPath="$PROJECT_DIR$/../wiseDNN/Model/ReadMe.css" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_SICE.coverage" NAME="test_SICE Coverage Results" MODIFIED="1561387299557" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DCAE$Main__1_.coverage" NAME="Main (1) Coverage Results" MODIFIED="1543415547592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../wiseDNN/Code" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_keras.coverage" NAME="test_keras Coverage Results" MODIFIED="1573958697721" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../DeepLearning_v2.0/Test" />
+    <SUITE FILE_PATH="coverage/DeepLearning$test_colormap.coverage" NAME="test_colormap Coverage Results" MODIFIED="1561773997708" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DCAE$test__1_.coverage" NAME="test (1) Coverage Results" MODIFIED="1543366794048" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../wiseDNN" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$DatasetParcellation.coverage" NAME="DatasetParcellation Coverage Results" MODIFIED="1576659166601" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/Dataset" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$xml_parse.coverage" NAME="xml_parse Coverage Results" MODIFIED="1575358861120" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Schemes" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_ridge_regression.coverage" NAME="test_ridge_regression Coverage Results" MODIFIED="1572338119487" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DCAE$bn_train.coverage" NAME="bn_train Coverage Results" MODIFIED="1542703740308" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../bn_exp/bn_exp" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$SparseInverseCovariance.coverage" NAME="SparseInverseCovariance Coverage Results" MODIFIED="1576658499475" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/Dataset" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_Dll.coverage" NAME="test_Dll Coverage Results" MODIFIED="1558919546052" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DCAE$prepare_data.coverage" NAME="prepare_data Coverage Results" MODIFIED="1552353629021" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Data" />
+    <SUITE FILE_PATH="coverage/DCAE$main.coverage" NAME="main Coverage Results" MODIFIED="1551239031809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Documents/WeChat Files/Yao19920411/Files" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$output.coverage" NAME="output Coverage Results" MODIFIED="1562577273392" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/circos" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$Result.coverage" NAME="Result Coverage Results" MODIFIED="1563325631801" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Analyse" />
+    <SUITE FILE_PATH="coverage/DCAE$XWCNNmain2.coverage" NAME="XWCNNmain2 Coverage Results" MODIFIED="1557115361921" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/XXY" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$DataBase.coverage" NAME="DataBase Coverage Results" MODIFIED="1576741355828" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/Dataset" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$SICE_test.coverage" NAME="SICE_test Coverage Results" MODIFIED="1559116765370" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$prepare_data.coverage" NAME="prepare_data Coverage Results" MODIFIED="1560909677425" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/data" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$ROI.coverage" NAME="ROI Coverage Results" MODIFIED="1564127567188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/AAL" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$files.coverage" NAME="files Coverage Results" MODIFIED="1559527259305" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/pdf" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$DatFile.coverage" NAME="DatFile Coverage Results" MODIFIED="1572504846288" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/Others" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$Upgrade_code_tf2.coverage" NAME="Upgrade_code_tf2 Coverage Results" MODIFIED="1573889922364" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.." />
+    <SUITE FILE_PATH="coverage/DCAE$model.coverage" NAME="model Coverage Results" MODIFIED="1534774862381" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Structure" />
+    <SUITE FILE_PATH="coverage/DCAE$layers.coverage" NAME="layers Coverage Results" MODIFIED="1534303423770" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Structure" />
+    <SUITE FILE_PATH="coverage/DCAE$prepare_data__1_.coverage" NAME="prepare_data (1) Coverage Results" MODIFIED="1557318804119" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/data" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_2__1_.coverage" NAME="test_2 (1) Coverage Results" MODIFIED="1559111961640" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_psd.coverage" NAME="test_psd Coverage Results" MODIFIED="1559632265252" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$GraphNeuralNetwork.coverage" NAME="GraphNeuralNetwork Coverage Results" MODIFIED="1562761423109" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Structure/DeepNerualNetwork" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$analyse_weight.coverage" NAME="analyse_weight Coverage Results" MODIFIED="1563360953020" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Analyse" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$SICSVM.coverage" NAME="SICSVM Coverage Results" MODIFIED="1576916143550" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Model" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_2.coverage" NAME="test_2 Coverage Results" MODIFIED="1576822832954" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DCAE$convolutional_autoencoder.coverage" NAME="convolutional_autoencoder Coverage Results" MODIFIED="1534843511038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../TensorFlow-Convolutional-AutoEncoder" />
+    <SUITE FILE_PATH="coverage/DCAE$XWCNNmain2__1_.coverage" NAME="XWCNNmain2 (1) Coverage Results" MODIFIED="1557212112554" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/BrainNetCNN" />
+    <SUITE FILE_PATH="coverage/DCAE$test_2.coverage" NAME="test_2 Coverage Results" MODIFIED="1557303863009" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$Main__1_.coverage" NAME="Main (1) Coverage Results" MODIFIED="1557538050157" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$SchemeData__1_.coverage" NAME="SchemeData Coverage Results" MODIFIED="1575277741628" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/Dataset" />
+    <SUITE FILE_PATH="coverage/DCAE$architecture.coverage" NAME="architecture Coverage Results" MODIFIED="1546909921521" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Structure" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test__1_.coverage" NAME="test Coverage Results" MODIFIED="1575256245301" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$result.coverage" NAME="result Coverage Results" MODIFIED="1562076246491" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Analyse" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$PDF.coverage" NAME="PDF Coverage Results" MODIFIED="1559531191441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/pdf" />
+    <SUITE FILE_PATH="coverage/DCAE$download_data.coverage" NAME="download_data Coverage Results" MODIFIED="1538029369895" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Data" />
+    <SUITE FILE_PATH="coverage/DCAE$scae_tl.coverage" NAME="scae_tl Coverage Results" MODIFIED="1538487245532" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Structure" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$Main.coverage" NAME="Main Coverage Results" MODIFIED="1576984685912" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DCAE$Main.coverage" NAME="Main Coverage Results" MODIFIED="1557382643693" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test.coverage" NAME="test Coverage Results" MODIFIED="1576810342866" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DCAE$utils.coverage" NAME="utils Coverage Results" MODIFIED="1535877720188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$analyse_result.coverage" NAME="analyse_result Coverage Results" MODIFIED="1576915484788" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Analyse" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$NN.coverage" NAME="NN Coverage Results" MODIFIED="1576839525545" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Model" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_data.coverage" NAME="test_data Coverage Results" MODIFIED="1559289121603" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$SchemeData.coverage" NAME="SchemeData Coverage Results" MODIFIED="1576844641667" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/Dataset" />
+    <SUITE FILE_PATH="coverage/DCAE$test__2_.coverage" NAME="test Coverage Results" MODIFIED="1536311352508" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$plot.coverage" NAME="plot Coverage Results" MODIFIED="1576740508906" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Documents/WeChat Files/Yao19920411/FileStorage/File/2019-12" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$Upgrade_tensorflow_v2.coverage" NAME="Upgrade_tensorflow_v2 Coverage Results" MODIFIED="1573870409584" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DCAE$test.coverage" NAME="test Coverage Results" MODIFIED="1557367830804" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$matrix.coverage" NAME="matrix Coverage Results" MODIFIED="1562678678086" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/ops" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$analyse_main.coverage" NAME="analyse_main Coverage Results" MODIFIED="1560585228135" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Analyse" />
+    <SUITE FILE_PATH="coverage/DCAE$load_data.coverage" NAME="load_data Coverage Results" MODIFIED="1539589470608" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Data" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$load_files.coverage" NAME="load_files Coverage Results" MODIFIED="1566093177943" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/NeuroimageDataProcessing" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$utils.coverage" NAME="utils Coverage Results" MODIFIED="1566374993340" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/NeuroimageDataProcessing" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_Local_cluster.coverage" NAME="test_Local_cluster Coverage Results" MODIFIED="1571735186745" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_csc.coverage" NAME="test_csc Coverage Results" MODIFIED="1573868963661" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DCAE$scae.coverage" NAME="scae Coverage Results" MODIFIED="1537058262031" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Structure" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_colormap.coverage" NAME="test_colormap Coverage Results" MODIFIED="1561710032070" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DCAE$test_history.coverage" NAME="test_history Coverage Results" MODIFIED="1557195882999" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$graph_lasso_.coverage" NAME="graph_lasso_ Coverage Results" MODIFIED="1576658295039" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="E:/Miniconda3/envs/python35/Lib/site-packages/sklearn/covariance" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$SICE_test__1_.coverage" NAME="SICE_test (1) Coverage Results" MODIFIED="1559184991380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$ParametersTuning.coverage" NAME="ParametersTuning Coverage Results" MODIFIED="1574754206951" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DCAE$utils_prepare_data.coverage" NAME="utils_prepare_data Coverage Results" MODIFIED="1546833531042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Data" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$test_SICE_bn_analyse.coverage" NAME="test_SICE_bn_analyse Coverage Results" MODIFIED="1561602211385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Test" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$atlas_analyse.coverage" NAME="atlas_analyse Coverage Results" MODIFIED="1562551221507" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../utils/AAL" />
+    <SUITE FILE_PATH="coverage/DeepLearning_Yao$Framework.coverage" NAME="Framework Coverage Results" MODIFIED="1566787549155" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Structure" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="DCAE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="Main.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="375">
+              <caret line="19" column="27" lean-forward="true" selection-start-line="19" selection-start-column="27" selection-end-line="19" selection-end-column="27" />
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="analyse_result.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Analyse/analyse_result.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="152">
+              <caret line="263" column="26" lean-forward="true" selection-start-line="263" selection-start-column="26" selection-end-line="263" selection-end-column="26" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Framework.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Model/Framework.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="267">
+              <caret line="137" column="0" lean-forward="true" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#41#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SICSVM.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Model/SICSVM.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="766">
+              <caret line="49" column="25" lean-forward="true" selection-start-line="49" selection-start-column="25" selection-end-line="49" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SVM.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Model/SVM.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="339">
+              <caret line="122" column="48" lean-forward="false" selection-start-line="122" selection-start-column="43" selection-end-line="122" selection-end-column="48" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>self.pa['conv_fun'] = self.pa['conv_fun']</find>
+      <find>tf.get</find>
+      <find>self.scheme</find>
+      <find>scheme_name</find>
+      <find>tf.compat.v1</find>
+      <find>tf.compat.v1.</find>
+      <find>1</find>
+      <find>adjacency_matrix</find>
+      <find>load_ni</find>
+      <find>parse_xml_file</find>
+      <find>restore_epoch</find>
+      <find>dec</find>
+      <find>XMLParser</find>
+      <find>structure[</find>
+      <find>structure['</find>
+      <find>self.structur</find>
+      <find>max_epoch</find>
+      <find>stop_patience</find>
+      <find>decay_step</find>
+      <find>leaning</find>
+      <find>\</find>
+      <find>leaning_rate</find>
+      <find>DCAE_results</find>
+      <find>self.structure</find>
+      <find>self.fol</find>
+      <find>error</find>
+      <find>global</find>
+      <find>path</find>
+      <find>dir</find>
+      <find>save_results</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>test</replace>
+      <replace>:</replace>
+      <replace>SAME</replace>
+      <replace>VALID</replace>
+      <replace>xavier_initializer</replace>
+      <replace>tf.contrib.layers.xavier_initializer()</replace>
+      <replace>initializer = self.initializer</replace>
+      <replace>self.pa['bias']</replace>
+      <replace>self.weight</replace>
+      <replace>self.pa['num']</replace>
+      <replace>item1</replace>
+      <replace>item2</replace>
+      <replace>item3</replace>
+      <replace>item4</replace>
+      <replace>item5</replace>
+      <replace>self.pa['training']</replace>
+      <replace>self.pa['early_stop']</replace>
+      <replace>(</replace>
+      <replace>)</replace>
+      <replace>tf.</replace>
+      <replace>A</replace>
+      <replace>enc</replace>
+      <replace>/</replace>
+      <replace>learning_rate</replace>
+      <replace>Results</replace>
+      <replace>self.models</replace>
+    </replaceStrings>
+    <dirStrings>
+      <dir>F:\OneDrive - emails.bjut.edu.cn\Program\Python\DCAE</dir>
+      <dir>F:\OneDrive\Program\Python\utils</dir>
+    </dirStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Yaoyao &lt;freeyy1314@gmail.com&gt;" />
+      </list>
+    </option>
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="E2EwithGLasso" />
+      </map>
+    </option>
+    <option name="RESET_MODE" value="HARD" />
+    <option name="SET_USER_NAME_GLOBALLY" value="false" />
+    <favorite-branches>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="b2" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </favorite-branches>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/Schemes/xml_parse.py" />
+        <option value="$PROJECT_DIR$/Structure/nn.py" />
+        <option value="$PROJECT_DIR$/Model/StackedAutoEncoder.py" />
+        <option value="$PROJECT_DIR$/Layer/LayerConstruct.py" />
+        <option value="$PROJECT_DIR$/Layer/LayerObject.py" />
+        <option value="$PROJECT_DIR$/Structure/Framework.py" />
+        <option value="$PROJECT_DIR$/Model/CNNSmallWorld.py" />
+        <option value="$PROJECT_DIR$/Model/DeepNeuralNetwork.py" />
+        <option value="$PROJECT_DIR$/Model/ConvolutionalNeuralNetwork.py" />
+        <option value="$PROJECT_DIR$/../utils/circos/output.py" />
+        <option value="$PROJECT_DIR$/Layer/CNNElementWise.py" />
+        <option value="$PROJECT_DIR$/Layer/BrainNetCNN.py" />
+        <option value="$PROJECT_DIR$/Model/MachineLearning.py" />
+        <option value="$PROJECT_DIR$/Schemes/BrainNetCNN.xml" />
+        <option value="$PROJECT_DIR$/Test/test_history.py" />
+        <option value="$PROJECT_DIR$/Schemes/SVM.xml" />
+        <option value="$PROJECT_DIR$/Structure/utils_structure.py" />
+        <option value="$PROJECT_DIR$/Layer/CNNGLasso.py" />
+        <option value="$PROJECT_DIR$/Model/CNNGraphicalLasso.py" />
+        <option value="$PROJECT_DIR$/Schemes/CNNElementWise.xml" />
+        <option value="$PROJECT_DIR$/Schemes/CNNGLasso.xml" />
+        <option value="$PROJECT_DIR$/Model/NeuralNetwork.py" />
+        <option value="$PROJECT_DIR$/Model/StackedAutoEncoders.py" />
+        <option value="$PROJECT_DIR$/Model/SupportVectorMachine.py" />
+        <option value="$PROJECT_DIR$/Model/GLassoSVM.py" />
+        <option value="$PROJECT_DIR$/Model/SparseInverseCovarianceSVM.py" />
+        <option value="$PROJECT_DIR$/Schemes/SICSVM.xml" />
+        <option value="$PROJECT_DIR$/ParametersTuning.py" />
+        <option value="$PROJECT_DIR$/Test/test.py" />
+        <option value="$PROJECT_DIR$/Test/test_2.py" />
+        <option value="$PROJECT_DIR$/Log/log.py" />
+        <option value="$PROJECT_DIR$/../utils/Dataset/utils.py" />
+        <option value="$PROJECT_DIR$/Model/CNNGLasso.py" />
+        <option value="$PROJECT_DIR$/Model/CNNSM.py" />
+        <option value="$PROJECT_DIR$/Analyse/visualize.py" />
+        <option value="$PROJECT_DIR$/Model/NN.py" />
+        <option value="$PROJECT_DIR$/../utils/Dataset/DatasetParcellation.py" />
+        <option value="$PROJECT_DIR$/../utils/Dataset/SparseInverseCovariance.py" />
+        <option value="$PROJECT_DIR$/../utils/Dataset/DataBase.py" />
+        <option value="$PROJECT_DIR$/../utils/Dataset/SchemeData.py" />
+        <option value="$PROJECT_DIR$/Layer/BasicLayer.py" />
+        <option value="$PROJECT_DIR$/Layer/AutoEncoder.py" />
+        <option value="$PROJECT_DIR$/Schemes/DenoisedAutoEncoder.xml" />
+        <option value="$PROJECT_DIR$/Model/utils_model.py" />
+        <option value="$PROJECT_DIR$/Model/SAE.py" />
+        <option value="$PROJECT_DIR$/Analyse/analyse_result.py" />
+        <option value="$PROJECT_DIR$/Model/Framework.py" />
+        <option value="$PROJECT_DIR$/Model/SVM.py" />
+        <option value="$PROJECT_DIR$/Model/SICSVM.py" />
+        <option value="$PROJECT_DIR$/Main.py" />
+        <option value="$PROJECT_DIR$/Main.py" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="JsbtTreeLayoutManager">
+    <layout place="tools.popupGrunt">
+      <scroll-view-position x="0" y="0" />
+    </layout>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-7" />
+    <option name="width" value="1694" />
+    <option name="height" value="1017" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>Python</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>PyPep8NamingInspection</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope">
+        <subPane subId="Project Files">
+          <expand>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="DCAE" type="cbb8eebc:String" user="DCAE" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="DCAE" type="cbb8eebc:String" user="DCAE" />
+              <item name="DeepLearning" type="cbb8eebc:String" user="DeepLearning" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="DCAE" type="cbb8eebc:String" user="DCAE" />
+              <item name="DeepLearning" type="cbb8eebc:String" user="DeepLearning" />
+              <item name="Structure" type="cbb8eebc:String" user="Structure" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="DCAE" type="cbb8eebc:String" user="DCAE" />
+              <item name="DeepLearning" type="cbb8eebc:String" user="DeepLearning" />
+              <item name="Structure" type="cbb8eebc:String" user="Structure" />
+              <item name="DeepNerualNetwork" type="cbb8eebc:String" user="DeepNerualNetwork" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scratches" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepLearning" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepLearning" type="462c0819:PsiDirectoryNode" />
+              <item name="Analyse" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepLearning" type="462c0819:PsiDirectoryNode" />
+              <item name="Layer" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepLearning" type="462c0819:PsiDirectoryNode" />
+              <item name="Log" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepLearning" type="462c0819:PsiDirectoryNode" />
+              <item name="Model" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepLearning" type="462c0819:PsiDirectoryNode" />
+              <item name="Schemes" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepLearning" type="462c0819:PsiDirectoryNode" />
+              <item name="Test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+              <item name="AAL" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+              <item name="circos" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DeepLearning-Yao" type="b2602c69:ProjectViewProjectNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+              <item name="Dataset" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/Analyse/analyse_result.py" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="python.debugger.dataview.autoresize" value="false" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="202" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="202" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="202" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="201" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder3" value="3" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="202" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="202" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="202" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="201" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder3" value="3" />
+    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://F:/OneDrive/Program/Python/DeepLearning/Schemes/CNNElementWise.xml" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\OneDrive\Program\Python\DeepLearning\Model" />
+      <recent name="F:\OneDrive\Program\Python\DeepLearning\Test" />
+      <recent name="F:\OneDrive - emails.bjut.edu.cn\Program\Python\DeepLearning\" />
+      <recent name="F:\OneDrive - emails.bjut.edu.cn\Program\Python\utils" />
+      <recent name="F:\OneDrive - emails.bjut.edu.cn\Program\Python\DeepLearning" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="F:\OneDrive\Program\Python\DeepLearning\Schemes" />
+      <recent name="F:\OneDrive\Program\Python\DeepLearning_v2.0\Scheme" />
+      <recent name="F:\OneDrive\Program\Python\DeepLearning_v2.0\Model" />
+      <recent name="F:\OneDrive\Program\Python\DeepLearning_v2.0" />
+      <recent name="F:\OneDrive\Program\Python\DeepLearning\Layer\SparseInverseCovariance" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.Main">
+    <configuration default="true" type="DjangoTestsConfigurationType" factoryName="Django tests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="TensorFlow-Convolutional-AutoEncoder" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="TARGET" value="" />
+      <option name="SETTINGS_FILE" value="" />
+      <option name="CUSTOM_SETTINGS" value="false" />
+      <option name="USE_OPTIONS" value="false" />
+      <option name="OPTIONS" value="" />
+    </configuration>
+    <configuration default="true" type="PyBehaveRunConfigurationType" factoryName="Behave">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="TensorFlow-Convolutional-AutoEncoder" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+    </configuration>
+    <configuration default="true" type="PyLettuceRunConfigurationType" factoryName="Lettuce">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="TensorFlow-Convolutional-AutoEncoder" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+    </configuration>
+    <configuration name="Main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DeepLearning" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="NN" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DeepLearning" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/NN.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="SICSVM" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DeepLearning" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/SICSVM.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="SchemeData" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../utils/Dataset" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="utils" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../utils/Dataset/SchemeData.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="analyse_result" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Analyse" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DeepLearning" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Analyse/analyse_result.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <module name="TensorFlow-Convolutional-AutoEncoder" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Doctests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="TensorFlow-Convolutional-AutoEncoder" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Nosetests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="TensorFlow-Convolutional-AutoEncoder" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="_new_regexPattern" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Twisted Trial">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="TensorFlow-Convolutional-AutoEncoder" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="TensorFlow-Convolutional-AutoEncoder" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="py.test">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="TensorFlow-Convolutional-AutoEncoder" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+    </configuration>
+    <list size="5">
+      <item index="0" class="java.lang.String" itemvalue="Python.Main" />
+      <item index="1" class="java.lang.String" itemvalue="Python.SchemeData" />
+      <item index="2" class="java.lang.String" itemvalue="Python.NN" />
+      <item index="3" class="java.lang.String" itemvalue="Python.analyse_result" />
+      <item index="4" class="java.lang.String" itemvalue="Python.SICSVM" />
+    </list>
+    <recent_temporary>
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="Python.Main" />
+        <item index="1" class="java.lang.String" itemvalue="Python.SICSVM" />
+        <item index="2" class="java.lang.String" itemvalue="Python.analyse_result" />
+        <item index="3" class="java.lang.String" itemvalue="Python.SchemeData" />
+        <item index="4" class="java.lang.String" itemvalue="Python.NN" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f680c7e1-81c9-4715-a193-c1aaa66af7ee" name="Default" comment="" />
+      <changelist id="3cb07002-422b-4c18-b9ec-98211cdb7846" name="Revert: Deep Convolutional Auto-Encoders model -v1.0" comment="" />
+      <changelist id="c81550a2-55a4-4ea0-a39e-fbd9e5f576b2" name="Revert &quot;Deep Convolutional Auto-Encoders model -v1.0&quot;" comment="" />
+      <changelist id="9de56dda-4bb3-4c00-a0a3-ead961cdaec4" name="Deep Convolutional Auto-Encoders model -v1.0" comment="" />
+      <created>1534300755909</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1534300755909</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Basic Deep Convolutional Auto-Encoders model">
+      <created>1535081996197</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1535081996197</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Basic Deep Convolutional Auto-Encoders model&#10;v1.1">
+      <created>1539416938402</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1539416938402</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Basic Deep Convolutional Auto-Encoders model -v1.2">
+      <created>1539417030194</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1539417030194</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Revert &quot;Basic Deep Convolutional Auto-Encoders model -v1.2&quot;&#10;&#10;This reverts commit c9b99e9">
+      <created>1539417179936</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1539417179936</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539417277360</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1539417277360</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539419414808</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1539419414808</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539420363178</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1539420363178</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539420397708</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1539420397708</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539420453517</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1539420453517</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539420479334</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1539420479334</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539420924316</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1539420924316</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539420945322</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1539420945322</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539421038597</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1539421038597</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539421089087</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1539421089087</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Deep Convolutional Auto-Encoders model -v1.0&#10;&#10;Don't create folds dataset in DCAE_folds.hdf5">
+      <created>1539422206715</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1539422206715</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Revert &quot;Deep Convolutional Auto-Encoders model -v1.0&quot;&#10;&#10;This reverts commit 8b7436b">
+      <created>1539422616779</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1539422616780</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539439234528</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1539439234528</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Deep Convolutional Auto-Encoders model -v1.0&#10;&#10;old version of prepare_data.py">
+      <created>1539439475177</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1539439475177</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539441082175</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1539441082175</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539441093268</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1539441093268</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539441345124</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1539441345124</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Deep Convolutional Auto-Encoders model -v1.0">
+      <created>1539441357180</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1539441357180</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Deep Convolutional Auto-Encoders model -v1.1&#10;&#10;Change list:&#10;1. Discard some subjects with 0 value of features in dataset ABIDE II, FCP&#10;2. Split data pre-processing into 3 parts and store in 3 files: DCAE_data.hdf5, DCAE_folds.hdf5 and DCAE_scheme.hdf5&#10;3. Preprocessing data as follows:&#10;     (1) Per-example mean subtraction and unit variance&#10;     (2) Feature Standardization of pre_train_data and train data in each fold, then save the mean and std used for feature standardization of valid data and test data.">
+      <created>1539653369869</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1539653369869</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Deep Convolutional Auto-Encoders model -v1.2&#10;&#10;Change list:&#10;1. Add scheme 5: multi-view convolutional neural network with spatial pyramid pooling.&#10;2. ROIs are selected by independent two-sample t-test of functional connectivity.">
+      <created>1542685453471</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1542685453472</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Deep Convolutional Auto-Encoders model -v2.0&#10;&#10;Date: 2019.01.05">
+      <created>1546673180307</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1546673180307</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Deep learning framework with BrainNetCNN/EW and GraphCNN configuration&#10;&#10;Date: 2019.05.15">
+      <created>1557882884994</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1557882884994</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Deep learning framework with BrainNetCNN/EW and GraphCNN configuration&#10;&#10;CNNWithGLasso V1.0&#10;&#10;Date: 2019.05.20">
+      <created>1558315734986</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1558315734986</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Deep learning framework with BrainNetCNN/EW and GraphCNN configuration&#10;&#10;The output of E2NGLasso is not multiplied by SICE softmax&#10;Date: 2019.05.28">
+      <created>1559028529628</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1559028529628</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Deep learning framework&#10;&#10;Date: 2019.07.19">
+      <created>1563525910796</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1563525910796</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Backup for update code to tensorflow v2.0&#10;&#10;Date: 2019.05.15">
+      <created>1573869744950</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1573869744950</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1696" height="1026" extended-state="6" />
+    <layout>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32751092" sideWeight="0.51547617" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4334061" sideWeight="0.4952381" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26200873" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.28665933" sideWeight="0.48802084" order="2" side_tool="false" content_ui="tabs" x="0" y="23" width="1680" height="987" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32922733" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.114421934" sideWeight="0.4722838" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.32980973" sideWeight="0.49791667" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2816594" sideWeight="0.4904762" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.7" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" x="6" y="6" width="1668" height="998" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16904762" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Concurrent Activities Diagram" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1720238" sideWeight="0.52771616" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32524806" sideWeight="0.4845238" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+    <layout-to-restore>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33078602" sideWeight="0.5095238" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.50873363" sideWeight="0.4952381" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.60094637" sideWeight="0.48690477" order="2" side_tool="false" content_ui="tabs" x="-182" y="425" width="1674" height="1004" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1630117" sideWeight="0.48686516" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.32980973" sideWeight="0.49791667" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3187773" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31130952" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" x="6" y="6" width="1668" height="998" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Concurrent Activities Diagram" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.15833333" sideWeight="0.51313484" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.37336245" sideWeight="0.4904762" order="3" side_tool="false" content_ui="tabs" />
+    </layout-to-restore>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/.." />
+      <path value="$PROJECT_DIR$/../acerta-abide" />
+      <path value="$PROJECT_DIR$/../Git" />
+      <path value="$PROJECT_DIR$/../3d-convolutional-network" />
+      <path value="$PROJECT_DIR$/../SRNN" />
+      <path value="$PROJECT_DIR$/../TensorFlow-Convolutional-AutoEncoder" />
+      <path value="$PROJECT_DIR$" />
+    </ignored-roots>
+    <MESSAGE value="Basic Deep Convolutional Auto-Encoders model" />
+    <MESSAGE value="Basic Deep Convolutional Auto-Encoders model -v1.1" />
+    <MESSAGE value="Basic Deep Convolutional Auto-Encoders model&#10;v1.1" />
+    <MESSAGE value="Basic Deep Convolutional Auto-Encoders model -v1.2" />
+    <MESSAGE value="Revert &quot;Basic Deep Convolutional Auto-Encoders model -v1.2&quot;&#10;&#10;This reverts commit c9b99e9" />
+    <MESSAGE value="Deep Convolutional Auto-Encoders model -v1.0&#10;&#10;Don't create folds dataset in DCAE_folds.hdf5" />
+    <MESSAGE value="Revert &quot;Deep Convolutional Auto-Encoders model -v1.0&quot;&#10;&#10;This reverts commit 8b7436b" />
+    <MESSAGE value="Deep Convolutional Auto-Encoders model -v1.0&#10;&#10;old version of prepare_data.py" />
+    <MESSAGE value="Deep Convolutional Auto-Encoders model -v1.0" />
+    <MESSAGE value="Deep Convolutional Auto-Encoders model -v1.1&#10;&#10;Change list:&#10;1. Discard some subjects with 0 value of features in dataset ABIDE II, FCP&#10;2. Split data pre-processing into 3 parts and store in 3 files: DCAE_data.hdf5, DCAE_folds.hdf5 and DCAE_scheme.hdf5&#10;3. Preprocessing data as follows:&#10;     (1) Per-example mean subtraction and unit variance&#10;     (2) Feature Standardization of pre_train_data and train data in each fold, then save the mean and std used for feature standardization of valid data and test data." />
+    <MESSAGE value="Deep Convolutional Auto-Encoders model -v1.2&#10;&#10;Change list:&#10;1. Add scheme 5: multi-view convolutional neural network with spatial pyramid pooling.&#10;2. ROIs are selected by independent two-sample t-test of functional connectivity." />
+    <MESSAGE value="Deep Convolutional Auto-Encoders model -v2.0&#10;&#10;Date: 2019.01.05" />
+    <MESSAGE value="Deep learning framework with BrainNetCNN/EW and GraphCNN configuration&#10;&#10;Date: 2019.05.15" />
+    <MESSAGE value="Deep learning framework with BrainNetCNN/EW and GraphCNN configuration&#10;&#10;CNNWithGLasso V1.0&#10;&#10;Date: 2019.05.20" />
+    <MESSAGE value="Deep learning framework with BrainNetCNN/EW and GraphCNN configuration&#10;&#10;The output of E2NGLasso is not multiplied by SICE softmax&#10;Date: 2019.05.28" />
+    <MESSAGE value="Deep learning framework&#10;&#10;Date: 2019.07.19" />
+    <MESSAGE value="Backup for update code to tensorflow v2.0&#10;&#10;Date: 2019.05.15" />
+    <option name="LAST_COMMIT_MESSAGE" value="Backup for update code to tensorflow v2.0&#10;&#10;Date: 2019.05.15" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Model/SICSVM.py</url>
+          <line>59</line>
+          <option name="timeStamp" value="5692" />
+        </line-breakpoint>
+      </breakpoints>
+      <breakpoints-dialog>
+        <breakpoints-dialog />
+      </breakpoints-dialog>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+      <option name="time" value="5693" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateCodeFragment">
+      <expression>
+        <expression-string>np.equal(    predict,labels)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>np.equal(x1=predict, x2=labels)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>np.cast(np.equal(x1=predict, x2=labels),
+                                              type=np.float)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>{result: {tag: self.results[result][tag][:self.max_epoch + 1]
+                                             for tag in self.results[result]} for result in self.results}</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>{result: {tag: self.results[results][tag][:self.max_epoch + 1]
+                                             for tag in self.results[result]} for result in self.results}</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>cross_multiply = tf.transpose(tf.matmul(tf.transpose(neighbour_vector, perm=[0, 3, 1, 2]),
+                                                    tf.transpose(neighbour_vector, perm=[0, 3, 2, 1])),
+                                          perm=[0, 2, 3, 1])</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>feed_dict = {self.input_placeholders[self.data_placeholder[key]]:
+                             batch_data['{:s} {:s}'.format(tag, key)]
+                         for key in self.data_placeholder}</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>tf.Tensor</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>tf.nn.depthwise_conv2d(input=node_features,
+                       filter=weight_c, 
+                       strides=[1,1,1,1],
+                       padding='VALID',
+                       )</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>node_features</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+    </expressions>
+    <expressions id="watch">
+      <expression>
+        <expression-string>scae_graph</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>scae.graph</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>list(result_file['BrainNetCNN'])</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>list(result_file['BrainNetCNN/2019-05-19-22-15'])</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>list(result_file)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>result_file</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>new_scheme_group[scheme_time] = exp_group</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>list(new_scheme_group[scheme_time])</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>list(new_scheme_group['2019-05-19-22-15'])</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>list(new_scheme_group)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>new_scheme_group</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Structure/classfier.py" />
+    <entry file="file://$PROJECT_DIR$/Structure/scae_tl.py" />
+    <entry file="file://$PROJECT_DIR$/Structure/utils_structure.py" />
+    <entry file="file://$PROJECT_DIR$/Layer/CNNGLasso.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7820">
+          <caret line="344" column="20" lean-forward="false" selection-start-line="344" selection-start-column="20" selection-end-line="344" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#18#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35/Lib/site-packages/tensorflow/python/ops/nn_ops.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="40503">
+          <caret line="1786" column="4" lean-forward="false" selection-start-line="1786" selection-start-column="4" selection-end-line="1786" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Layer/CNNElementWise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="322">
+          <caret line="183" column="67" lean-forward="false" selection-start-line="183" selection-start-column="67" selection-end-line="183" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Schemes/CNNGLasso.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="322">
+          <caret line="14" column="41" lean-forward="false" selection-start-line="14" selection-start-column="41" selection-end-line="14" selection-end-column="41" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35/Lib/site-packages/sklearn/covariance/empirical_covariance_.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="45" column="25" lean-forward="true" selection-start-line="45" selection-start-column="25" selection-end-line="45" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35/Lib/site-packages/numpy/ma/core.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="202">
+          <caret line="3588" column="4" lean-forward="false" selection-start-line="3588" selection-start-column="4" selection-end-line="3588" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35/Lib/site-packages/sklearn/utils/extmath.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="309">
+          <caret line="106" column="0" lean-forward="false" selection-start-line="106" selection-start-column="0" selection-end-line="106" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35/Lib/site-packages/sklearn/covariance/graph_lasso_.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="263">
+          <caret line="245" column="57" lean-forward="true" selection-start-line="245" selection-start-column="57" selection-end-line="245" selection-end-column="57" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Schemes/CNNElementWise.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1151">
+          <caret line="89" column="0" lean-forward="true" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Schemes/CNNSmallWorld.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Documents/WeChat Files/Yao19920411/FileStorage/File/2019-12/plot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="346">
+          <caret line="141" column="0" lean-forward="true" selection-start-line="141" selection-start-column="0" selection-end-line="141" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.3/system/python_stubs/-738610862/builtins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="202">
+          <caret line="773" column="8" lean-forward="false" selection-start-line="773" selection-start-column="8" selection-end-line="773" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Test/SICE_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="200">
+          <caret line="66" column="71" lean-forward="false" selection-start-line="66" selection-start-column="71" selection-end-line="66" selection-end-column="71" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Schemes/SICSVM.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="92">
+          <caret line="4" column="32" lean-forward="true" selection-start-line="4" selection-start-column="32" selection-end-line="4" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ParametersTuning.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="369">
+          <caret line="25" column="66" lean-forward="false" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="66" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Test/test_2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="69">
+          <caret line="3" column="8" lean-forward="true" selection-start-line="3" selection-start-column="8" selection-end-line="3" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Test/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="115">
+          <caret line="5" column="9" lean-forward="true" selection-start-line="5" selection-start-column="9" selection-end-line="5" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Analyse/analyse_main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../utils/Dataset/prepare_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/CNNSM.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="138">
+          <caret line="12" column="21" lean-forward="true" selection-start-line="12" selection-start-column="21" selection-end-line="12" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35-backup/Lib/site-packages/tensorflow/python/ops/gen_io_ops.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="1761" column="0" lean-forward="true" selection-start-line="1761" selection-start-column="0" selection-end-line="1761" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35-backup/Lib/site-packages/tensorflow/python/training/saver.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="526">
+          <caret line="122" column="25" lean-forward="false" selection-start-line="122" selection-start-column="25" selection-end-line="122" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35-backup/Lib/site-packages/tensorflow/python/framework/op_def_library.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="515" column="30" lean-forward="true" selection-start-line="515" selection-start-column="30" selection-end-line="515" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Log/log.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="23">
+          <caret line="21" column="8" lean-forward="false" selection-start-line="21" selection-start-column="8" selection-end-line="21" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../utils/Dataset/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1178">
+          <caret line="581" column="6" lean-forward="false" selection-start-line="581" selection-start-column="6" selection-end-line="581" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Analyse/visualize.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="460">
+          <caret line="28" column="16" lean-forward="false" selection-start-line="28" selection-start-column="16" selection-end-line="28" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../utils/Dataset/DatasetParcellation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="506">
+          <caret line="28" column="47" lean-forward="false" selection-start-line="28" selection-start-column="47" selection-end-line="28" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.3/system/python_stubs/-1542929251/builtins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="212">
+          <caret line="789" column="8" lean-forward="false" selection-start-line="789" selection-start-column="8" selection-end-line="789" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../utils/Dataset/SchemeData.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="474">
+          <caret line="158" column="0" lean-forward="true" selection-start-line="158" selection-start-column="0" selection-end-line="158" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../utils/Dataset/SparseInverseCovariance.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="690">
+          <caret line="35" column="0" lean-forward="true" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Layer/GraphNN.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="92">
+          <caret line="4" column="16" lean-forward="false" selection-start-line="4" selection-start-column="16" selection-end-line="4" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/NN.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="92">
+          <caret line="17" column="15" lean-forward="true" selection-start-line="17" selection-start-column="15" selection-end-line="17" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../utils/Dataset/DataBase.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="351" column="21" lean-forward="false" selection-start-line="350" selection-start-column="21" selection-end-line="351" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/CNNGLasso.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="18" column="16" lean-forward="false" selection-start-line="18" selection-start-column="16" selection-end-line="18" selection-end-column="16" />
+          <folding>
+            <element signature="e#0#9#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Layer/BasicLayer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="87" column="25" lean-forward="false" selection-start-line="87" selection-start-column="25" selection-end-line="87" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Schemes/DenoisedAutoEncoder.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="545">
+          <caret line="101" column="13" lean-forward="false" selection-start-line="101" selection-start-column="13" selection-end-line="101" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35/Lib/site-packages/tensorflow/python/training/optimizer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="205">
+          <caret line="309" column="6" lean-forward="false" selection-start-line="309" selection-start-column="6" selection-end-line="309" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Layer/AutoEncoder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="232">
+          <caret line="53" column="36" lean-forward="false" selection-start-line="53" selection-start-column="36" selection-end-line="53" selection-end-column="36" />
+          <folding>
+            <element signature="e#0#23#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/utils_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="393">
+          <caret line="369" column="0" lean-forward="false" selection-start-line="369" selection-start-column="0" selection-end-line="369" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.3/system/python_stubs/-738610862/numpy/core/_multiarray_umath.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="44">
+          <caret line="2865" column="4" lean-forward="false" selection-start-line="2865" selection-start-column="4" selection-end-line="2865" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35/Lib/site-packages/numpy/core/numerictypes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="842" column="30" lean-forward="true" selection-start-line="842" selection-start-column="30" selection-end-line="842" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Analyse/analyse_result.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="263" column="26" lean-forward="true" selection-start-line="263" selection-start-column="26" selection-end-line="263" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/Framework.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="267">
+          <caret line="137" column="0" lean-forward="true" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/SAE.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="713">
+          <caret line="38" column="54" lean-forward="true" selection-start-line="38" selection-start-column="54" selection-end-line="38" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://E:/Miniconda3/envs/python35/Lib/site-packages/sklearn/svm/classes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="189" column="8" lean-forward="false" selection-start-line="189" selection-start-column="8" selection-end-line="189" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/SVM.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="339">
+          <caret line="122" column="48" lean-forward="false" selection-start-line="122" selection-start-column="43" selection-end-line="122" selection-end-column="48" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/SICSVM.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="766">
+          <caret line="49" column="25" lean-forward="true" selection-start-line="49" selection-start-column="25" selection-end-line="49" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="19" column="27" lean-forward="true" selection-start-line="19" selection-start-column="27" selection-end-line="19" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

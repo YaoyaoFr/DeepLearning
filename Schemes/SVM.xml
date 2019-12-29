@@ -1,0 +1,11 @@
+<parameters>
+    <parameters>
+        <basic>
+            <dataset>ABIDE</dataset>
+            <atlas>aal90</atlas>
+            <feature>pearson correlation XXY</feature>
+            <normalization>False</normalization>
+            <lambda>1</lambda>
+        </basic>
+    </parameters>
+</parameters>

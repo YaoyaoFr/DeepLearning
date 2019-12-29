@@ -6,75 +6,74 @@ import tensorflow as tf
 
 
 class Log:
-    basic_path = 'F:/OneDriveOffL/Data/Result/DeepLearning'
-    restored_date = None
-    restored_time = None
-    sub_folder_name = None
-    pa = {'restored_epoch': 0,
-          }
+    date = None
+    clock = None
+
+    folder = None
+    subfolder = None
+
+    pa = {'restored_epoch': 0}
 
     graph = None
     sess = None
-    file_path = None
+    dir_path = None
     train_writer = None
 
     def __init__(self,
-                 graph=None,
-                 sess=None,
-                 restored_date=None,
-                 restore_time=None,
-                 sub_folder_name=None):
-        self.set_file_path(restored_date=restored_date,
-                           restore_time=restore_time,
-                           sub_folder_name=sub_folder_name,
-                           )
-        self.set_graph(graph=graph, sess=sess)
+                 dir_path: str,
+                 folder: str = None):
+        # Set dir path: [Scheme name]/[date]/[clock]/[run time]
+        self.basic_path = os.path.join(dir_path, 'Result/DeepLearning')
+        self.set_folders(folder=folder)
+        self.set_graph()
 
-    def set_graph(self, graph=None, sess=None):
-        if graph:
-            self.graph = graph
-        else:
-            self.graph = tf.Graph()
+    def set_graph(self):
+        self.graph = tf.Graph()
 
-        if not sess:
-            with tf.Session(graph=self.graph) as sess:
-                self.sess = sess
+        tf_config = tf.compat.v1.ConfigProto()
+        tf_config.gpu_options.allow_growth = True
+        self.sess = tf.Session(graph=self.graph, config=tf_config)
 
-    def set_file_path(self, restored_date=None, restore_time=None, sub_folder_name=None):
-        if restored_date:
-            self.restored_date = '{:s}'.format(restored_date)
-        if restore_time:
-            self.restored_time = '{:s}'.format(restore_time)
-        if sub_folder_name:
-            self.sub_folder_name = '{:s}'.format(sub_folder_name)
+    def set_folders(self, folder: str):
+        self.folder = folder
+        self.date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+        self.clock = time.strftime('%H-%M', time.localtime(time.time()))
 
-        if self.restored_date is None:
-            self.restored_date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+    def set_path(self,
+                 folder: str = None,
+                 date: str = None,
+                 clock: str = None,
+                 subfolder=None):
+        if folder:
+            self.folder = folder
 
-        if self.restored_time is None:
-            self.restored_time = time.strftime('%H-%M', time.localtime(time.time()))
+        if date:
+            self.date = date
 
-        self.file_path = ''
-        if self.restored_date is None or self.restored_time is None:
-            raise TypeError('File path cannot be set!')
+        if clock:
+            self.clock = clock
 
-        self.set_filepath_by_subfolder()
+        dir_path = os.path.join(self.basic_path, self.folder, self.date, self.clock)
+        if subfolder:
+            self.subfolder = subfolder
+            dir_path = os.path.join(dir_path, self.subfolder)
 
-    def set_filepath_by_subfolder(self, subfolder_name=None):
-        if subfolder_name:
-            self.sub_folder_name = subfolder_name
-        self.file_path = '/'.join([self.basic_path, self.restored_date, self.restored_time])
-        self.file_path += '/{:s}'.format(self.sub_folder_name) if self.sub_folder_name else ''
+        self.dir_path = dir_path
 
-    def get_save_dir(self):
-        save_dir = '/'.join([self.basic_path, self.restored_date, self.restored_time])
-        return save_dir
+        for subfolder in ['log', 'model', 'optimal_model']:
+            subfolder_path = os.path.join(self.dir_path, subfolder)
+            if not os.path.exists(subfolder_path):
+                os.makedirs(subfolder_path, exist_ok=True)
+
+    def reset_graph(self):
+        tf.reset_default_graph()
+        self.set_graph()
 
     def get_restored_pa(self):
         pas = {}
-        if self.sub_folder_name is None:
+        if self.subfolder is None:
             return None
-        pas_list = self.sub_folder_name.split('/')
+        pas_list = self.subfolder.split('/')
         pas['fold'] = int(pas_list[0].split(' ')[1])
         process_list = ['pre_train_SCAE', 'fine_tune_SCAE', 'pre_train_Classifier', 'fine_tune_Classifier']
         pas['process'] = process_list.index(pas_list[1])
@@ -85,10 +84,7 @@ class Log:
         return pas
 
     def write_graph(self):
-        if not os.path.exists(self.file_path):
-            os.makedirs(self.file_path)
-        print('Write Graph to File {:s}'.format(self.file_path + '\log'))
-        self.train_writer = tf.summary.FileWriter(self.file_path + '\log', graph=self.graph)
+        self.train_writer = tf.summary.FileWriter(self.dir_path + '/log', graph=self.graph)
 
     def write_log(self, res: dict,
                   epoch: int,
@@ -124,10 +120,14 @@ class Log:
     def close(self):
         self.train_writer.close()
 
-    def save_model(self, epoch, show_info: bool = True, save_path: str = None):
+    def save_model(self,
+                   epoch: int = None,
+                   show_info: bool = True,
+                   save_path: str = None):
+        assert epoch or save_path, 'At least one of save epoch and path is not None.'
+
         if save_path is None:
-            save_path = os.path.join(self.file_path,
-                                     'model/train.model_{:d}'.format(epoch))
+            save_path = os.path.join(self.dir_path, 'model', 'train.model_{:d}'.format(epoch))
         self.saver.save(self.sess, save_path)
         if show_info:
             print('Model saved in file: {:s}'.format(save_path))
@@ -147,7 +147,7 @@ class Log:
         if restored_path is None:
             if restored_epoch is None:
                 restored_epoch = self.pa['restored_epoch']
-            restored_path = os.path.join(self.file_path,
+            restored_path = os.path.join(self.dir_path,
                                          'model/train.model_{:d}'.format(restored_epoch)) if restored_epoch else None
 
         try:
@@ -167,7 +167,7 @@ class Log:
         if not epoch:
             epoch = 0
         if not save_path:
-            save_path = self.file_path
+            save_path = self.dir_path
 
         data = dict()
         data['train data'] = debug_train[5]['output']

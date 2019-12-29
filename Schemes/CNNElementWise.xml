@@ -1,0 +1,109 @@
+<parameters>
+    <parameters>
+        <basic>
+            <dataset>ABIDE</dataset>
+            <feature>pearson correlation XXY</feature>
+            <atlas>aal90</atlas>
+            <normalization>True</normalization>
+            <L2_lambda>0.0005</L2_lambda>
+        </basic>
+
+        <training>
+            <train_batch_size>96</train_batch_size>
+        </training>
+
+        <early_stop>
+            <strategy>restore</strategy>
+            <training_cycle>200</training_cycle>
+            <learning_rate>0.00001</learning_rate>
+            <min_learning_rate>0.00000011</min_learning_rate>
+            <decay_rate>0.1</decay_rate>
+            <stop_accuracy>0.7</stop_accuracy>
+            <back_epoch>3</back_epoch>
+            <tolerance_all>15</tolerance_all>
+            <save_cycle>100</save_cycle>
+        </early_stop>
+    </parameters>
+
+	<layers>
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[None,90,90,1]</input_shape>
+            <dtype>float32</dtype>
+            <scope>input_tensor</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[None,2]</input_shape>
+            <dtype>float32</dtype>
+            <scope>output_tensor</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[]</input_shape>
+            <dtype>float32</dtype>
+            <scope>learning_rate</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[]</input_shape>
+            <dtype>bool</dtype>
+            <scope>training</scope>
+        </input>
+
+        <layer>
+            <type>EdgeToNodeElementWise</type>
+            <kernel_shape>[90,90,1,64]</kernel_shape>
+            <activation>relu</activation>
+            <bias>True</bias>
+            <placeholders>[input_tensor]</placeholders>
+			<batch_normalization>False</batch_normalization>
+            <scope>E2N1</scope>
+        </layer>
+
+        <layer>
+            <type>NodeToGraph</type>
+            <kernel_shape>[90,1,64,128]</kernel_shape>
+            <activation>relu</activation>
+            <bias>True</bias>
+			<batch_normalization>False</batch_normalization>
+            <scope>N2G1</scope>
+        </layer>
+
+
+        <layer>
+            <type>Unfold</type>
+            <scope>unfold</scope>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>[128,96]</kernel_shape>
+            <activation>relu</activation>
+            <bias>True</bias>
+			<batch_normalization>False</batch_normalization>
+            <scope>hidden1</scope>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>[96,2]</kernel_shape>
+            <bias>True</bias>
+			<batch_normalization>False</batch_normalization>
+            <scope>hidden2</scope>
+        </layer>
+
+        <!--<layer>-->
+            <!--<type>FullyConnected</type>-->
+            <!--<kernel_shape>30,2</kernel_shape>-->
+            <!--<bias>True</bias>-->
+			<!--<batch_normalization>False</batch_normalization>-->
+            <!--<scope>hidden3</scope>-->
+        <!--</layer>-->
+
+
+	</layers>
+</parameters>
