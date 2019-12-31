@@ -1,12 +1,5 @@
-import numpy as np
+import operator
+a = 0.001
+b = '0.1'
 
-
-def main():
-    global a
-    a = 1
-
-def b():
-    main()
-    print(a)
-
-b()
+print(operator.le(a, b))

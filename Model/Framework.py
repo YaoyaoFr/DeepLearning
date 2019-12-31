@@ -36,7 +36,7 @@ class Framework:
         self.dataset_file_path = os.path.join(dir_path, 'Data/SchemeData.hdf5').encode()
         self.scheme = scheme
         self.spe_pas = spe_pas
-        self.log = Log(folder=self.scheme, dir_path=dir_path)
+        self.log = Log(scheme_folder=self.scheme, dir_path=dir_path)
         self.models = {
             'CNNGLasso': CNNGraphicalLasso,
             'BrainNetCNN': NeuralNetwork,
@@ -81,6 +81,8 @@ class Framework:
                                  show_info=True,
                                  if_save=if_save,
                                  )
+
+        print('Training finished, the results are saved in {:s}. '.format(self.save_scheme_name))
 
     def train_monte_calor(self,
                           run_time: int = None,

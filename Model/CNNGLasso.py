@@ -1,14 +1,15 @@
 import os
+
 import h5py
 import numpy as np
 import scipy.io as sio
 import tensorflow as tf
 
-from Log.log import Log
-from Model.utils_model import get_weights, save_weights, get_metrics
-from Dataset.utils import vector2onehot
-from Model.NN import NeuralNetwork
 from Analyse.visualize import save_or_exhibit
+from Dataset.utils import vector2onehot
+from Log.log import Log
+from Model.NN import NeuralNetwork
+from Model.utils_model import EarlyStop, get_metrics, get_weights, save_weights
 
 
 class CNNGraphicalLasso(NeuralNetwork):
@@ -110,8 +111,8 @@ class CNNGraphicalLasso(NeuralNetwork):
 
         supervised_data = {'train data': data['train data'],
                            'train label': data['train label']}
-        unsupervised_data = {'train data': np.concatenate((data['train data'], data['valid data']), axis=0),
-                             'train label': np.concatenate((data['train label'], data['valid label']), axis=0)}
+        unsupervised_data = {'train data': data['valid data'],
+                             'train label': data['valid label']}
 
         for i in range(pre_training_cycle):
             print('Pre training epoch: {:d}'.format(i + 1))
@@ -129,6 +130,56 @@ class CNNGraphicalLasso(NeuralNetwork):
                 training=False,
                 minimizer=self.minimizer_SICE,
             )
+
+    def backpropagation(self,
+                        data: dict,
+                        start_epoch: int = 0,
+                        early_stop: EarlyStop = None,
+                        ):
+        self.log.write_graph()
+        batch_size = self.pa['training']['train_batch_size']
+
+        if early_stop is None:
+            early_stop = EarlyStop(log=self.log,
+                                   data=data,
+                                   results=self.results,
+                                   pas=self.pa['early_stop'])
+
+        epoch = early_stop.epoch
+        while epoch < early_stop.training_cycle:
+            if self.pa['training']['SICE_training']:            
+                supervised_data = {'train data': data['train data'],
+                                'train label': data['train label']}
+                unsupervised_data = {'train data': data['valid data'],
+                                    'train label': data['valid label']}
+                self.backpropagation_epoch(
+                    data=supervised_data,
+                    batch_size=batch_size,
+                    learning_rate=early_stop.learning_rate,
+                    training=True,
+                    minimizer=self.minimizer_SICE,
+                )
+                self.backpropagation_epoch(
+                    data=unsupervised_data,
+                    batch_size=batch_size,
+                    learning_rate=early_stop.learning_rate,
+                    training=False,
+                    minimizer=self.minimizer_SICE,
+                )
+
+            # Training
+            self.backpropagation_epoch(data=data,
+                                       batch_size=batch_size,
+                                       learning_rate=early_stop.learning_rate,
+                                       )
+
+            # Evaluation
+            results_epoch = self.predicting(data=data, epoch=epoch)
+
+            early_stop.next(results=results_epoch)
+            epoch = early_stop.epoch
+
+        return early_stop
 
     def training_(self,
                   data: h5py.Group or dict,
@@ -409,5 +460,3 @@ class CNNGraphicalLasso(NeuralNetwork):
                             if_save=if_save,
                             if_absolute=if_absolute,
                             )
-
-

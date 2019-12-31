@@ -71,10 +71,10 @@ class NeuralNetwork(object, metaclass=ABCMeta):
         else: 
             pas = spe_pas
 
-            self.pa['early_stop'] = pas['parameters']['early_stop']
-            self.pa['training'] = pas['parameters']['training']
-            self.pa['basic'] = pas['parameters']['basic']
-            self.pa['layers'] = pas['layers']
+        self.pa['early_stop'] = pas['parameters']['early_stop']
+        self.pa['training'] = pas['parameters']['training']
+        self.pa['basic'] = pas['parameters']['basic']
+        self.pa['layers'] = pas['layers']
 
     def build_structure(self):
         parameters = list()

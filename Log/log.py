@@ -9,7 +9,7 @@ class Log:
     date = None
     clock = None
 
-    folder = None
+    scheme_folder = None
     subfolder = None
 
     pa = {'restored_epoch': 0}
@@ -21,10 +21,10 @@ class Log:
 
     def __init__(self,
                  dir_path: str,
-                 folder: str = None):
+                 scheme_folder: str = None):
         # Set dir path: [Scheme name]/[date]/[clock]/[run time]
         self.basic_path = os.path.join(dir_path, 'Result/DeepLearning')
-        self.set_folders(folder=folder)
+        self.set_folders(scheme_folder=scheme_folder)
         self.set_graph()
 
     def set_graph(self):
@@ -34,18 +34,18 @@ class Log:
         tf_config.gpu_options.allow_growth = True
         self.sess = tf.Session(graph=self.graph, config=tf_config)
 
-    def set_folders(self, folder: str):
-        self.folder = folder
+    def set_folders(self, scheme_folder: str):
+        self.scheme_folder = scheme_folder
         self.date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
         self.clock = time.strftime('%H-%M', time.localtime(time.time()))
 
     def set_path(self,
-                 folder: str = None,
+                 scheme_folder: str = None,
                  date: str = None,
                  clock: str = None,
                  subfolder=None):
-        if folder:
-            self.folder = folder
+        if scheme_folder:
+            self.scheme_folder = scheme_folder
 
         if date:
             self.date = date
@@ -53,7 +53,7 @@ class Log:
         if clock:
             self.clock = clock
 
-        dir_path = os.path.join(self.basic_path, self.folder, self.date, self.clock)
+        dir_path = os.path.join(self.basic_path, self.scheme_folder, self.date, self.clock)
         if subfolder:
             self.subfolder = subfolder
             dir_path = os.path.join(dir_path, self.subfolder)

@@ -261,15 +261,29 @@ class EarlyStop:
         print(info)
 
     def clear_models(self,
-                     save_optimal_model: bool = True):
+                     save_first_model: bool = True, 
+                     save_optimal_model: bool = True, 
+                     save_final_model: bool = True, 
+                     ):
+        optimal_dir = os.path.join(self.log.dir_path, 'optimal_model')
+        if not os.path.exists(optimal_dir):
+            os.mkdir(optimal_dir)
+
+        if save_final_model:
+            final_path = os.path.join(optimal_dir, 'train_model_final')
+            self.log.save_model(save_path=final_path)
+
+        if save_first_model:
+            self.log.restore(restored_epoch=1)
+            first_path = os.path.join(optimal_dir, 'train_model_1')
+            self.log.save_model(save_path=first_path)
+
         if save_optimal_model:
             optimal_dir = os.path.join(self.log.dir_path, 'optimal_model')
-            if not os.path.exists(optimal_dir):
-                os.mkdir(optimal_dir)
             self.log.restore(restored_epoch=self.max_epoch)
-            optimal_path = os.path.join(
-                optimal_dir, 'train_model_{:d}'.format(self.max_epoch))
+            optimal_path = os.path.join(optimal_dir, 'train_model_{:d}'.format(self.max_epoch))
             self.log.save_model(save_path=optimal_path)
+
 
         rm_dir = os.path.join(self.log.dir_path, 'model')
         shutil.rmtree(rm_dir)
@@ -360,13 +374,14 @@ def load_initial_value(type: str, name: str):
 
 
 def upper_triangle(data: dict):
+    transoformed_data = {}
     for tag in ['train', 'valid', 'test']:
         key = '{:s} data'.format(tag)
         if key not in data:
             continue
 
         d = np.squeeze(data[key], axis=-1)
-        assert np.linalg.matrix_rank(d) == 3
+        assert d.ndim == 3
 
         [_, width, height] = np.shape(d)
         assert height == width, '{:s} must be square matrix but get shape {:}.'.format(key, np.shape(d))
@@ -375,6 +390,9 @@ def upper_triangle(data: dict):
         d = np.transpose(np.transpose(d, axes=[1, 2, 0])[
                          triu_indices], axes=[1, 0])
 
-        data[key] = d
+        transoformed_data[key] = d
 
-    return data
+        key = '{:s} label'.format(tag)
+        transoformed_data[key] = data[key]
+
+    return transoformed_data

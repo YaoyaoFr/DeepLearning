@@ -5,6 +5,7 @@
             <feature>pearson correlation XXY</feature>
             <atlas>aal90</atlas>
             <normalization>True</normalization>
+            <cross_validation>5 fold</cross_validation>
             <L2_lambda>0.001</L2_lambda>
             <beta>1</beta>
             <rho>0.1</rho>

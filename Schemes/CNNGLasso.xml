@@ -6,10 +6,9 @@
             <atlas>aal90</atlas>
             <normalization>False</normalization>
             <cross_validation>5 fold</cross_validation>
-            <SICE_training>True</SICE_training>
             <lambda>0.1</lambda>
             <scheme>CNNWithGLasso</scheme>
-            <SICE_lambda>0.25</SICE_lambda>
+            <SICE_lambda>0.4</SICE_lambda>
             <load_weight>False</load_weight>
             <n_class>2</n_class>
             <discription>With Unsupervised test data</discription>
@@ -17,6 +16,7 @@
         </basic>
 
         <training>
+            <SICE_training>True</SICE_training>
             <train_batch_size>96</train_batch_size>
             <pre_learning_rate>0.01</pre_learning_rate>
             <pre_training_cycle>60</pre_training_cycle>
@@ -29,7 +29,7 @@
             <min_learning_rate>0.000001</min_learning_rate>
             <decay_rate>0.3</decay_rate>
             <stop_accuracy>0.7</stop_accuracy>
-            <back_epoch>3</back_epoch>
+            <back_epoch>2</back_epoch>
             <tolerance_all>15</tolerance_all>
             <save_cycle>100</save_cycle>
         </early_stop>
