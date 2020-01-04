@@ -1,4 +1,2 @@
-from Test.test import b
-
-b()
-print(a)
+b = 1
+print(b)

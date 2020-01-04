@@ -113,7 +113,7 @@ def analyse_result_scheme(save_path):
     for run_time in range(10):
         # F_time = results['F']['time {:d}'.format(run_time + 1)]
         # weights_SICE_time = results['weight_SICE']['time {:d}'.format(run_time + 1)]
-        for fold_index in np.arange(start=0, stop=5):
+        for fold_index in np.arange(int=0, stop=5):
             try:
                 path = os.path.join(save_path, 
                                     'time {:d}'.format(run_time + 1), 

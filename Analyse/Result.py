@@ -1,6 +1,7 @@
 import os
 import time
 import operator
+import scipy.io as sio
 
 # Plot
 import re
@@ -79,9 +80,11 @@ def screen(exp_groups: list,
             final_exp_groups.append(exp)
     return final_exp_groups
 
+
 class Result:
     def __init__(self,
                  dir_path: str = None,
+                 result_file_path: str = None,
                  result_types: list = None,
                  result_datasets: list = None,
                  ):
@@ -89,8 +92,12 @@ class Result:
             dir_path = '/'.join(__file__.split('/')[:-5])
 
         self.dir_path = dir_path
-        self.result_file_path = os.path.join(
-            dir_path, 'Result/DeepLearning/Results.hdf5').encode()
+
+        if not result_file_path:
+            self.result_file_path = os.path.join(
+                dir_path, 'Result/DeepLearning/Results.hdf5').encode()
+        else:
+            self.result_file_path = result_file_path.encode()
 
         self.result_types = result_types if result_types is not None else \
             ['Accuracy', 'Cost', 'Cross Entropy', 'L1 Penalty', 'L2 Penalty', 'Precision',
@@ -100,10 +107,10 @@ class Result:
             ['train', 'valid', 'test']
 
     def analyse_results(self,
-                        schemes: list = None, 
-                        experiment_names: list = None, 
+                        schemes: list = None,
+                        experiment_names: list = None,
                         filters: list = None,
-                        sort_pa: str = None, 
+                        sort_pa: str = None,
                         optimize_type: str = 'Cross Entropy',
                         optimize_dataset: str = 'valid',
                         optimize_epoch: int = None,
@@ -123,11 +130,10 @@ class Result:
                 scheme_group = hdf5[scheme_name]
                 for exp_name in scheme_group:
                     exp_groups.append(scheme_group[exp_name])
-        
+
         if experiment_names is not None:
             for exp_name in experiment_names:
                 exp_groups.append(hdf5[exp_name])
-
 
         if filters is not None:
             exp_groups = screen(exp_groups=exp_groups, filters=filters)
@@ -153,7 +159,7 @@ class Result:
 
     def analyse_experiment(self,
                            experiment_group: h5py.Group = None,
-                           experiment_name: str = None, 
+                           experiment_name: str = None,
                            optimize_type: str = 'Cross Entropy',
                            optimize_dataset: str = 'valid',
                            optimize_epoch: int = None,
@@ -165,6 +171,7 @@ class Result:
         if objective_types is None:
             objective_types = ['Accuracy', 'Specificity', 'Recall']
 
+        hdf5 = None
         if not experiment_group and experiment_name is not None:
             hdf5 = hdf5_handler(self.result_file_path)
             experiment_group = hdf5[experiment_name]
@@ -201,6 +208,9 @@ class Result:
                                          cross_validation=cross_validation,
                                          top=top)
 
+        if hdf5 is not None:
+            hdf5.close()
+
         return {'results': results,
                 'parameters': pas}
 
@@ -224,7 +234,8 @@ class Result:
         if 'fold' in cross_validation:
             fold_nums = int(cross_validation.split(' ')[0])
             for fold_index in range(fold_nums):
-                fold_group = time_group.require_group('fold {:d}'.format(fold_index + 1))
+                fold_group = time_group.require_group(
+                    'fold {:d}'.format(fold_index + 1))
                 optimize_epoch_tmp = optimize_epoch
 
                 if optimize_type and optimize_dataset:
@@ -336,23 +347,25 @@ class Result:
     def set_saving_group(self,
                          scheme: str,
                          current_xml: str,
-                         cross_validation):
+                         cross_validation,
+                         if_reset: bool = False):
         result_hdf5 = hdf5_handler(self.result_file_path)
         scheme_group = result_hdf5.require_group(scheme)
         scheme_groups = [scheme_group[name] for name in scheme_group]
 
-        for scheme_group in scheme_groups:
-            try:
-                xml_str = scheme_group.attrs['configurations']
-                cross_valid = scheme_group.attrs['cross validation']
-            except KeyError:
-                xml_str = ''
-                cross_valid = ''
+        if not if_reset:
+            for scheme_group in scheme_groups:
+                try:
+                    xml_str = scheme_group.attrs['configurations']
+                    cross_valid = scheme_group.attrs['cross validation']
+                except KeyError:
+                    xml_str = ''
+                    cross_valid = ''
 
-            if current_xml == xml_str and cross_validation == cross_valid:
-                print('Exist save scheme name is {:s}.'.format(
-                    scheme_group.name))
-                return scheme_group.name, xml_str
+                if current_xml == xml_str and cross_validation == cross_valid:
+                    print('Exist save scheme name is {:s}.'.format(
+                        scheme_group.name))
+                    return scheme_group.name, xml_str
 
         current_time = time.strftime(
             '%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
@@ -367,7 +380,7 @@ class Result:
                      current_xml,
                      results,
                      run_time,
-                     fold_index: int = None,
+                     fold_name: str = None,
                      show_info: bool = False):
         result_hdf5 = hdf5_handler(self.result_file_path)
         exp_group = result_hdf5.require_group('{:s}'.format(save_scheme_name))
@@ -382,11 +395,10 @@ class Result:
         time_group = exp_group.require_group('time {:d}'.format(run_time))
 
         # Get the fold group
-        if fold_index is None:
+        if fold_name is None:
             fold_group = time_group
         else:
-            fold_group = time_group.require_group(
-                'fold {:d}'.format(fold_index))
+            fold_group = time_group.require_group(fold_name)
 
         # Save results to h5py file
         for result_type in results:
@@ -451,7 +463,7 @@ class Result:
             # Filter the experimenets according to some rules
             if filters is not None:
                 exp_groups = screen(exp_groups=exp_groups, filters=filters)
-          
+
             # Writing to sheets
             scheme_sheet = wb.add_sheet(
                 sheetname=scheme, cell_overwrite_ok=True)
@@ -466,9 +478,9 @@ class Result:
                 scheme_sheet.write(index+1, 0, pa)
 
             # Sort the results accoding to value of parameter
-            exp_pas, exp_groups = self.sort(exp_groups=exp_groups, 
-                                        sort_pa=sort_pa, 
-                                        parameters=parameters)
+            exp_pas, exp_groups = self.sort(exp_groups=exp_groups,
+                                            sort_pa=sort_pa,
+                                            parameters=parameters)
 
             # Writing results
             col = 1
@@ -542,7 +554,7 @@ class Result:
         if sort_pa is not None:
             pas, exp_groups, exp_pas = [list(x) for x in zip(
                 *sorted(zip(sort_pas, exp_groups, exp_pas), key=lambda pair: pair[0]))]
-        
+
         return exp_pas, exp_groups
 
     def clear_results(self):
@@ -621,22 +633,73 @@ class Result:
         print(p_values)
         hdf5.close()
 
-    def plot_results(self, 
-                     x_axis: str, 
-                     y_axes: str or list = 'Accuracy', 
-                     optimal_axis: str = 'Accuracy', 
-                     schemes: list = None, 
-                     experiment_names: list = None, 
-                     filters: list = None, 
-                     sort_pa: str = None, 
-                     figure_name: str = 'Results.png', 
-                     ):
+    def gender_analyse(self,
+                       exp_names: list,
+                       figure_name: str = 'gender_results.png'):
 
-        results = self.analyse_results(schemes=schemes, 
-                                       experiment_names=experiment_names, 
-                                       filters=filters, 
-                                       sort_pa=sort_pa, 
-                                       show_result=False, 
+        plt.style.use('ggplot')
+
+        dir_path = os.path.join(
+            '/home/ai/data/yaoyao/Result/DeepLearning', exp_names[2])
+        male_results = sio.loadmat(os.path.join(dir_path, 'male_results.mat'))
+        female_results = sio.loadmat(
+            os.path.join(dir_path, 'female_results.mat'))
+        data_type = 'Accuracy'
+        male_data = male_results['male_{:s}'.format(data_type)]
+        female_data = female_results['female_{:s}'.format(data_type)]
+
+        fig = plt.figure(figsize=(30, 10))
+        width = 0.35
+        N = 5
+        ind = np.arange(N)
+
+        results = {}
+        for exp_str, exp_name in zip(['femal', 'male'], exp_names[:2]):
+            results[exp_str] = self.analyse_experiment(
+                experiment_name=exp_name, show_result=False)['results'][data_type]
+
+        male_mean = np.mean(results['male'], axis=0)
+        male_std = np.std(results['male'], axis=0)
+        female_mean = np.mean(results['femal'], axis=0)
+        female_std = np.std(results['femal'], axis=0)
+        ax1 = fig.add_subplot(121)
+        ax1.bar(ind+width, female_mean, width, yerr=female_std, label='female')
+        ax1.bar(ind, male_mean, width, yerr=male_std, label='male')
+        plt.xticks(ind + width / 2,
+                   tuple(['fold {:d}'.format(n+1) for n in range(N)]))
+        plt.legend(loc='best', fontsize='xx-large')
+
+        male_mean = np.mean(male_data, axis=0)
+        male_std = np.std(male_data, axis=0)
+        female_mean = np.mean(female_data, axis=0)
+        female_std = np.std(female_data, axis=0)
+
+        ax2 = fig.add_subplot(122)
+        ax2.bar(ind+width, female_mean, width, yerr=female_std, label='female')
+        ax2.bar(ind, male_mean, width, yerr=male_std, label='male')
+        plt.xticks(ind + width / 2,
+                   tuple(['fold {:d}'.format(n+1) for n in range(N)]))
+        plt.legend(loc='best', fontsize='xx-large')
+
+        save_dir_path = os.path.join(self.dir_path, 'Result/DeepLearning')
+        plt.savefig(os.path.join(save_dir_path, figure_name), dpi=1000)
+
+    def lambda_GLasso(self,
+                      x_axis: str,
+                      y_axes: str or list = 'Accuracy',
+                      optimal_axis: str = 'Accuracy',
+                      schemes: list = None,
+                      experiment_names: list = None,
+                      filters: list = None,
+                      sort_pa: str = None,
+                      figure_name: str = 'Results.png',
+                      ):
+
+        results = self.analyse_results(schemes=schemes,
+                                       experiment_names=experiment_names,
+                                       filters=filters,
+                                       sort_pa=sort_pa,
+                                       show_result=False,
                                        )
 
         # Figure style setup
@@ -650,15 +713,17 @@ class Result:
 
         if isinstance(y_axes, str):
             y_axes = [y_axes]
-    
+
         plt.ylim(bottom=0.63, top=0.68)
         lines = []
         for y_index, y_axis in enumerate(y_axes):
             color = cm.viridis((y_index + 1) / (len(y_axes) + 1))
             iter = [result['parameters'][x_axis] for result in results]
-            returnavg = [np.mean(result['results'][y_axis]) for result in results]
-            returnstd = [np.var(result['results'][y_axis]) for result in results]
-            
+            returnavg = [np.mean(result['results'][y_axis])
+                         for result in results]
+            returnstd = [np.var(result['results'][y_axis])
+                         for result in results]
+
             line, = ax.plot(iter, returnavg, color=color)
             lines.append(line)
             r1 = list(map(lambda x: x[0]-x[1], zip(returnavg, returnstd)))
@@ -669,12 +734,11 @@ class Result:
             if y_axis == optimal_axis:
                 optimal_index = np.argmax(returnavg)
                 ax.annotate('Optimal {:s} = {:.2f}'.format(x_axis_dict[x_axis], iter[optimal_index]),
-                    (iter[optimal_index],returnavg[optimal_index]),
-                    xytext=(0.3, 0.8), textcoords='axes fraction',
-                    arrowprops = dict(facecolor='grey',color='grey'))
-        
-        ax.legend(tuple(lines), tuple(y_axes))
+                            (iter[optimal_index], returnavg[optimal_index]),
+                            xytext=(0.3, 0.8), textcoords='axes fraction',
+                            arrowprops=dict(facecolor='grey', color='grey'))
 
+        ax.legend(tuple(lines), tuple(y_axes), fontsize='xx-large')
 
         save_dir_path = os.path.join(self.dir_path, 'Result/DeepLearning')
         f.savefig(os.path.join(save_dir_path, figure_name), dpi=1000)
@@ -687,31 +751,39 @@ if __name__ == '__main__':
                'SICE_lambda <= 0.2',
                ]
 
-    rt = Result()
-    # rt.write_results_to_excel(schemes=['CNNGLasso', 'CNNWithGLasso'],
-    #                           sort_pa='SICE_lambda',
-                            #   filters=filters, 
+    old_path = '/home/ai/data/yaoyao/Result/DeepLearning_old/DCAE_results.hdf5'
+    rt = Result(result_file_path=old_path)
+    # rt = Result()
+
+    # rt.write_results_to_excel(schemes=['CNNGLasso', 'CNNWithGLasso', 'DTLNN', 'FCNN', 'BrainNetCNN'],
+                              #   sort_pa='SICE_lambda',
+                            #   filters=filters,
                             #   )
-    # results = rt.analyse_results(schemes=['CNNGLasso'], 
-    #                              filters=filters, 
-    #                              sort_pa='SICE_lambda', 
-    #                              optimize_epoch=-1, 
-    #                              show_result=True, 
+    # results = rt.analyse_results(schemes=['CNNGLasso'],
+    #                              filters=filters,
+    #                              sort_pa='SICE_lambda',
+    #                              optimize_epoch=-1,
+    #                              show_result=True,
     #                              )
 
     # Plot
-    # rt.plot_results(x_axis = 'SICE_lambda',
-    #                 y_axes=['Accuracy', 'Recall', 'Specificity'], 
-    #                 schemes=['CNNGLasso'], 
-    #                 sort_pa='SICE_lambda', 
-    #                 filters=filters, 
-    #                 figure_name='Optimal_lambda.png')
+    # rt.lambda_GLasso(x_axis='SICE_lambda',
+    #                  y_axes=['Accuracy', 'Precision', 'Recall'],
+    #                  schemes=['CNNGLasso'],
+    #                  sort_pa='SICE_lambda',
+    #                  filters=filters,
+    #                  figure_name='optimal_lambda_SICE.png')
 
-    exp_name = 'CNNWithGLasso/2019-07-03-20-19-32'
-    hdf5 = hdf5_handler(rt.result_file_path)
-    print(hdf5[exp_name].attrs['configurations'])
-    # rt.analyse_experiment(experiment_name='CNNWithGLasso/2019-07-03-20-19-32')
-    # rt.plot_results(experiment_names=['CNNGLasso/2019-12-30-08-16-31'])
+    exp_name = 'CNNGLasso/2020-01-01-03-40-29'
+    rt.analyse_experiment(experiment_name=exp_name)
+
+    exp_names = [
+        'CNNGLasso/2019-12-31-20-48-41',
+        'CNNGLasso/2020-01-01-00-11-36',
+        'CNNGLasso/2020-01-01/11-19-38',
+    ]
+    # rt.gender_analyse(exp_names=exp_names)
+
 
 # analyse(dir_path=dir_path, experiments=[
 #     'CNNWithGLasso/2019-07-15-21-24-08',

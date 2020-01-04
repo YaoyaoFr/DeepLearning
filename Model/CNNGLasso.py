@@ -6,42 +6,49 @@ import scipy.io as sio
 import tensorflow as tf
 
 from Analyse.visualize import save_or_exhibit
-from Dataset.utils import vector2onehot
 from Log.log import Log
+from Model.early_stop import EarlyStop
 from Model.NN import NeuralNetwork
-from Model.utils_model import EarlyStop, get_metrics, get_weights, save_weights
+from Model.utils_model import get_metrics, get_weights, save_weights
 
 
 class CNNGraphicalLasso(NeuralNetwork):
+    """Convolutional neural network with graphical Lasso.
+
+    Arguments:
+        NeuralNetwork {[type]} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
+
+    minimizer_SICE = None
+    model_type = 'Convolutional neural network with graphical Lasso'
 
     def __init__(self,
                  dir_path: str,
                  log: Log = None,
                  scheme: int or str = 1,
-                 graph: tf.Graph = None,
-                 spe_pas: dict = None, 
+                 spe_pas: dict = None,
                  ):
-        self.log = None
-        self.graph = None
-        self.sess = None
-        self.op_layers = []
-        self.structure = {}
-        self.input_placeholders = {}
-        self.minimizer_SICE = None
-
-        tf.get_default_graph().clear_collection('SICE_loss')
         NeuralNetwork.__init__(self,
                                log=log,
                                scheme=scheme,
-                               graph=graph,
                                dir_path=dir_path,
-                               spe_pas=spe_pas, 
+                               spe_pas=spe_pas,
                                )
-        self.optimizer = {}
-        self.NN_type = 'GraphNN'
+        # self.data_placeholder.update({'covariance': 'covariance_tensor'})
 
     def build_optimizer(self, output_tensor,
-                        penalties: list = []):
+                        penalties: list = None):
+        """Build optimizer of this model, which includes Cross Entropy loss and SICE loss.
+        
+        Arguments:
+            output_tensor {[type]} -- Output or predicting of the neural network
+        
+        Keyword Arguments:
+            penalties {list} -- [description] (default: {None})
+        """
         lr_place = self.input_placeholders['learning_rate']
         output_place = self.input_placeholders['output_tensor']
         # Cost function
@@ -53,8 +60,10 @@ class CNNGraphicalLasso(NeuralNetwork):
         # Build loss function, which contains the cross entropy and regularizers.
         self.results['Cost'] = self.results['Cross Entropy']
 
-        penalties.extend(['L1', 'L2', 'SICE'])
-        coefficients = [1, 0.5, self.pa['basic']['SICE_lambda']]
+        if penalties is None:
+            penalties = ['L1', 'L2', 'SICE']
+        coefficients = [1, 0.5, self.pas['basic']['SICE_lambda']]
+
         for regularizer, coef in zip(penalties, coefficients):
             loss_name = '{:s}_loss'.format(regularizer)
             loss_collection = tf.get_collection(loss_name)
@@ -67,7 +76,8 @@ class CNNGraphicalLasso(NeuralNetwork):
         # build minimizer
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
-            self.global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
+            self.global_step = tf.Variable(
+                initial_value=0, trainable=False, name='global_step')
             optimizer = tf.train.AdamOptimizer(lr_place, name='optimizer')
 
             with tf.variable_scope('graph_nn', reuse=tf.AUTO_REUSE):
@@ -84,34 +94,59 @@ class CNNGraphicalLasso(NeuralNetwork):
                     self.minimizer_SICE = None
 
     def training(self,
-                 data: h5py.Group or dict,
+                 data: dict,
                  run_time: int = 1,
-                 fold_index: int = None,
-                 restored_path: str = None,
-                 show_info: bool = True,
+                 fold_name: str = None,
+                 if_show: bool = True,
                  ):
+        """The main training process of the neural network, which includes: 1. build structure. 
+        2. write the architecture to file. 3. Pretraining. 4. backpropagation 5. show results if permitted. 
+        6. save first, optimal and final model in the training process. 
+        
+        Arguments:
+            data {dict} -- [description]
+        
+        Keyword Arguments:
+            run_time {int} --  (default: {1})
+            fold_name {str} -- 'fold 1', 'fold 2', ... (default: {None})
+            if_show {bool} --  (default: {True})
+        
+        Returns:
+            [type] -- [description]
+        """
         with self.graph.as_default():
             self.build_structure()
 
         data = self.load_data(data)
 
-        self.pre_training(data=data)
-        early_stop = self.backpropagation(data=data)
-        self.discriminant_power_analyse(run_time=run_time, fold_index=fold_index)
-        early_stop.show_results(run_time=run_time, fold_index=fold_index)
-        early_stop.clear_models()
+        if self.pas['basic']['SICE_training']:
+            self.pre_training(data=data)
 
+        early_stop = self.backpropagation(data=data)
+        self.discriminant_power_analyse()
+
+        if if_show:
+            early_stop.show_results(run_time=run_time, fold_name=fold_name)
+
+        early_stop.clear_models()
         return early_stop.results
 
     def pre_training(self,
                      data: dict):
-        batch_size = self.pa['training']['train_batch_size']
-        pre_learning_rate = self.pa['training']['pre_learning_rate']
-        pre_training_cycle = self.pa['training']['pre_training_cycle']
+        """Pretraining for learning sparse inverse covariance matrices.
+        
+        Arguments:
+            data {dict} -- 
+        """
+        batch_size = self.pas['training']['train_batch_size']
+        pre_learning_rate = self.pas['training']['pre_learning_rate']
+        pre_training_cycle = self.pas['training']['pre_training_cycle']
 
         supervised_data = {'train data': data['train data'],
-                           'train label': data['train label']}
+                           'train label': data['train label'],
+                           'train covariance': data['train covariance']}
         unsupervised_data = {'train data': data['valid data'],
+                             'train covariance': data['valid covariance'],
                              'train label': data['valid label']}
 
         for i in range(pre_training_cycle):
@@ -133,25 +168,37 @@ class CNNGraphicalLasso(NeuralNetwork):
 
     def backpropagation(self,
                         data: dict,
-                        start_epoch: int = 0,
                         early_stop: EarlyStop = None,
                         ):
+        """Backpropagation of neural network.
+        
+        Arguments:
+            data {dict} -- Input dataset include train, valid and test data and label.
+        
+        Raises:
+            Warning: [description]
+        
+        Returns:
+            [type] -- [description]
+        """
         self.log.write_graph()
-        batch_size = self.pa['training']['train_batch_size']
+        batch_size = self.pas['training']['train_batch_size']
 
         if early_stop is None:
             early_stop = EarlyStop(log=self.log,
                                    data=data,
                                    results=self.results,
-                                   pas=self.pa['early_stop'])
+                                   pas=self.pas['early_stop'])
 
         epoch = early_stop.epoch
         while epoch < early_stop.training_cycle:
-            if self.pa['training']['SICE_training']:            
+            if self.pas['basic']['SICE_training']:
                 supervised_data = {'train data': data['train data'],
-                                'train label': data['train label']}
+                                   'train covariance': data['train covariance'],
+                                   'train label': data['train label']}
                 unsupervised_data = {'train data': data['valid data'],
-                                    'train label': data['valid label']}
+                                     'train covariance': data['valid covariance'],
+                                     'train label': data['valid label']}
                 self.backpropagation_epoch(
                     data=supervised_data,
                     batch_size=batch_size,
@@ -211,11 +258,11 @@ class CNNGraphicalLasso(NeuralNetwork):
                          show_info: bool = True,
                          ):
         self.log.write_graph()
-        train_pa = self.pa['training']
-        train_pa['SICE_training'] = self.pa['basic']['SICE_training']
-        early_stop_pa = self.pa['early_stop']
+        train_pa = self.pas['training']
+        train_pa['SICE_training'] = self.pas['basic']['SICE_training']
+        early_stop_pa = self.pas['early_stop']
 
-        early_stop_pa.update({'epoch': start_epoch,
+        early_stop_pa.update({'epoch': int_epoch,
                               'decay_count': 0,
                               'tolerant_count': 0,
                               'training_cycle': train_pa['training_cycle'],
@@ -224,10 +271,14 @@ class CNNGraphicalLasso(NeuralNetwork):
                               'stage': 0,
                               })
 
-        data_unsupervise = np.concatenate((data['valid data'], data['test data']), axis=0)
-        label_unsupervise = np.concatenate((data['valid label'], data['test label']), axis=0)
-        extra_data_unsupervise = np.concatenate((data['valid covariance'], data['test covariance']), axis=0)
-        extra_feed_unsupervise = {self.input_placeholders['sample_covariance']: extra_data_unsupervise}
+        data_unsupervise = np.concatenate(
+            (data['valid data'], data['test data']), axis=0)
+        label_unsupervise = np.concatenate(
+            (data['valid label'], data['test label']), axis=0)
+        extra_data_unsupervise = np.concatenate(
+            (data['valid covariance'], data['test covariance']), axis=0)
+        extra_feed_unsupervise = {
+            self.input_placeholders['sample_covariance']: extra_data_unsupervise}
 
         self.save_GLasso_weights_to_figure(run_time=run_time,
                                            prefix='CNNWithGLasso initialize',
@@ -274,9 +325,12 @@ class CNNGraphicalLasso(NeuralNetwork):
                                                if_show=True,
                                                )
 
-        extra_feed_train = {self.input_placeholders['sample_covariance']: data['train covariance']}
-        extra_feed_valid = {self.input_placeholders['sample_covariance']: data['valid covariance']}
-        extra_feed_test = {self.input_placeholders['sample_covariance']: data['test covariance']}
+        extra_feed_train = {
+            self.input_placeholders['sample_covariance']: data['train covariance']}
+        extra_feed_valid = {
+            self.input_placeholders['sample_covariance']: data['valid covariance']}
+        extra_feed_test = {
+            self.input_placeholders['sample_covariance']: data['test covariance']}
         epoch = early_stop_pa['epoch']
         while epoch < train_pa['training_cycle']:
             if train_pa['SICE_training']:
@@ -364,7 +418,8 @@ class CNNGraphicalLasso(NeuralNetwork):
             #                         )
 
         self.save_GLasso_weights_to_figure(run_time=run_time,
-                                           weight_names=['weight_SICE', 'weight_SICE_bn', 'weight', 'weight_multiply'],
+                                           weight_names=[
+                                               'weight_SICE', 'weight_SICE_bn', 'weight', 'weight_multiply'],
                                            prefix='CNNWithGLasso trained',
                                            # if_save=True,
                                            if_show=True,
@@ -374,9 +429,7 @@ class CNNGraphicalLasso(NeuralNetwork):
 
         return early_stop_pa['results'], early_stop_pa['max_epoch']
 
-    def discriminant_power_analyse(self,
-                                   run_time: int = 1,
-                                   fold_index: int = 1):
+    def discriminant_power_analyse(self):
         layers = self.op_layers
         weight_dict = {}
         for layer in layers:
@@ -401,8 +454,10 @@ class CNNGraphicalLasso(NeuralNetwork):
         weight = weights['E2N1']['weight_multiply']
         F = np.sum(np.abs(np.multiply(np.squeeze(weight), F)), axis=-1)
 
-        weight_names = ['weight', 'weight_SICE', 'weight_SICE_bn', 'weight_multiply']
-        results = {weight_name: np.squeeze(weights['E2N1'][weight_name]) for weight_name in weight_names}
+        weight_names = ['weight', 'weight_SICE',
+                        'weight_SICE_bn', 'weight_multiply']
+        results = {weight_name: np.squeeze(
+            weights['E2N1'][weight_name]) for weight_name in weight_names}
         results['F'] = F
 
         # save_dir_path = 'F:/OneDriveOffL/Data/Result/Net'
@@ -443,14 +498,17 @@ class CNNGraphicalLasso(NeuralNetwork):
             try:
                 weight = weights[weight_name]
             except KeyError:
-                print('Warning: {:} is not in the list {:}'.format(weight_name, weight_names))
+                print('Warning: {:} is not in the list {:}'.format(
+                    weight_name, weight_names))
                 continue
 
-            save_path = os.path.join(save_dir_path, 'time {:d}'.format(run_time))
+            save_path = os.path.join(
+                save_dir_path, 'time {:d}'.format(run_time))
 
             prefix_tmp = '{:s} {:}{:}'.format(prefix,
                                               weight_name.replace('_', ' '),
-                                              ' epoch {:d}'.format(epoch + 1) if epoch is not None else '',
+                                              ' epoch {:d}'.format(
+                                                  epoch + 1) if epoch is not None else '',
                                               )
 
             save_or_exhibit(weight=weight,

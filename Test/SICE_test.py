@@ -110,7 +110,7 @@ if True:
     plt.show()
     fig = plt.figure()
     plt.plot(obj_values_2.T)
-    plt.legend([str(i) for i in np.arange(start=int(out_channels / 2), stop=out_channels)])
+    plt.legend([str(i) for i in np.arange(int=int(out_channels / 2), stop=out_channels)])
     plt.show()
 
     softmax_values_1 = softmax_values[0, :int(out_channels / 2), :]
@@ -121,7 +121,7 @@ if True:
     plt.show()
     fig = plt.figure()
     plt.plot(softmax_values_2.T)
-    plt.legend([str(i) for i in np.arange(start=int(out_channels / 2), stop=out_channels)])
+    plt.legend([str(i) for i in np.arange(int=int(out_channels / 2), stop=out_channels)])
     plt.show()
 
     print(obj_value)

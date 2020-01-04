@@ -22,7 +22,7 @@ class SparseInverseCovarianceSVM(SupportVectorMachine):
     def training(self,
                  data: dict,
                  run_time: int = 1,
-                 fold_index: int = None,
+                 fold_name: str = None,
                  show_info: bool = True,
                  ):
         """
@@ -50,7 +50,7 @@ class SparseInverseCovarianceSVM(SupportVectorMachine):
                 self.show_results(results=result_alpha,
                                   run_time=run_time,
                                   alpha=float(alpha),
-                                  fold_index=fold_index)
+                                  fold_name=fold_name)
 
             for result_type in result_types:
                 for result_dataset in result_datasets:

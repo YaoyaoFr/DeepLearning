@@ -36,7 +36,7 @@ class FullyConnectedNeuralNetwork(NeuralNetwork):
     def training(self,
                  data: h5py.Group or dict,
                  run_time: int = 1,
-                 fold_index: int = None,
+                 fold_name: str = None,
                  restored_path: str = None,
                  show_info: bool = True):
 
@@ -47,7 +47,7 @@ class FullyConnectedNeuralNetwork(NeuralNetwork):
             self.build_structure()
             
         early_stop = self.backpropagation(data=data)
-        early_stop.show_results(run_time=run_time, fold_index=fold_index)
+        early_stop.show_results(run_time=run_time, fold_name=fold_name)
         early_stop.clear_models()
 
         return early_stop.results

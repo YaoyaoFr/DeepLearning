@@ -327,6 +327,7 @@ class EdgeToNodeGLasso(LayerObject):
         else:
             input_tensor = kwargs['output']
 
+        covariance_tensor = input_tensor
         output_tensor = kwargs['output_tensor']
         training = kwargs['training']
 
@@ -342,7 +343,7 @@ class EdgeToNodeGLasso(LayerObject):
         # weight = tf.transpose(weight, perm=[1, 0, 2, 3])
 
         input_slices = tf.split(input_tensor, axis=1, num_or_size_splits=shape[1])
-        covariance_slices = tf.split(input_tensor, axis=1, num_or_size_splits=self.pa['kernel_shape'][0])
+        covariance_slices = tf.split(covariance_tensor, axis=1, num_or_size_splits=self.pa['kernel_shape'][0])
         weight_SICE_slices = tf.split(self.weight_SICE, axis=0, num_or_size_splits=self.pa['kernel_shape'][0])
 
         output = []
@@ -355,7 +356,7 @@ class EdgeToNodeGLasso(LayerObject):
             self.tensors['weight_multiply'] = self.weight
         weight_slices = tf.split(self.weight, axis=0, num_or_size_splits=self.pa['kernel_shape'][0])
 
-        for input_slice, weight_slice, in zip(covariance_slices,
+        for input_slice, weight_slice, in zip(input_slices,
                                               weight_slices,
                                               ):
             feature_map = self.pa['conv_fun'](input_slice,

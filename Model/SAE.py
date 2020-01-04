@@ -14,28 +14,21 @@ class StackedAutoEncoders(NeuralNetwork):
                  dir_path: str,
                  log: Log = None,
                  scheme: int or str = 1,
-                 graph: tf.Graph = None,
                  spe_pas: dict = None, 
                  ):
-        self.log = None
-        self.graph = None
-        self.sess = None
-        self.tensors = {}
-        self.op_layers = []
-        self.input_placeholders = {}
-
         NeuralNetwork.__init__(self,
                                log=log,
                                dir_path=dir_path,
                                scheme=scheme,
-                               graph=graph,
-                               spe_pas=spe_pas, 
+                               spe_pas=spe_pas,
                                )
         self.auto_encoders = [layer for layer in self.op_layers if 'AE' in layer.pa['scope']]
 
         self.NN_type = 'DAE'
 
-    def load_parameters(self, scheme: str, spe_pas: dict = None):
+    def load_parameters(self,
+                        scheme: str,
+                        spe_pas: dict = None):
         """
         Load parameters from configuration file (.xml)
         :param scheme: file path of configuration file
@@ -48,13 +41,13 @@ class StackedAutoEncoders(NeuralNetwork):
         while True:
             str = 'early_stop{:d}'.format(autoencoder_index)
             if str in pas['parameters']:
-                self.pa[str] = pas['parameters'][str]
+                self.pas[str] = pas['parameters'][str]
                 autoencoder_index += 1
             else:
                 break
-        self.pa['training'] = pas['parameters']['training']
-        self.pa['basic'] = pas['parameters']['basic']
-        self.pa['layers'] = pas['layers']
+        self.pas['training'] = pas['parameters']['training']
+        self.pas['basic'] = pas['parameters']['basic']
+        self.pas['layers'] = pas['layers']
 
     def build_structure(self):
 
@@ -134,7 +127,7 @@ class StackedAutoEncoders(NeuralNetwork):
     def training(self,
                  data: h5py.Group or dict,
                  run_time: int = 1,
-                 fold_index: int = None,
+                 fold_name: str = None,
                  restored_path: str = None,
                  show_info: bool = True):
 
@@ -150,7 +143,7 @@ class StackedAutoEncoders(NeuralNetwork):
                 early_stop = EarlyStop(log=self.log,
                                        data=data,
                                        results=self.results,
-                                       pas=self.pa['early_stop{:d}'.format(autoencoder_index + 1)])
+                                       pas=self.pas['early_stop{:d}'.format(autoencoder_index + 1)])
                 self.backpropagation(data=data,
                                      early_stop=early_stop
                                      )
@@ -159,9 +152,9 @@ class StackedAutoEncoders(NeuralNetwork):
             early_stop = EarlyStop(log=self.log,
                                    data=data,
                                    results=self.results,
-                                   pas=self.pa['early_stop0'])
+                                   pas=self.pas['early_stop0'])
             early_stop = self.backpropagation(data=data,
                                               early_stop=early_stop)
 
-        early_stop.show_results(run_time=run_time, fold_index=fold_index)
+        early_stop.show_results(run_time=run_time, fold_name=fold_name)
         return early_stop.results

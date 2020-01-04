@@ -8,15 +8,15 @@
             <cross_validation>5 fold</cross_validation>
             <lambda>0.1</lambda>
             <scheme>CNNWithGLasso</scheme>
-            <SICE_lambda>0.4</SICE_lambda>
+            <SICE_lambda>0.04</SICE_lambda>
             <load_weight>False</load_weight>
+            <SICE_training>True</SICE_training>
             <n_class>2</n_class>
             <discription>With Unsupervised test data</discription>
             <L2_lambda>0.0005</L2_lambda>
         </basic>
 
         <training>
-            <SICE_training>True</SICE_training>
             <train_batch_size>96</train_batch_size>
             <pre_learning_rate>0.01</pre_learning_rate>
             <pre_training_cycle>60</pre_training_cycle>
@@ -24,12 +24,12 @@
 
         <early_stop>
             <strategy>restore</strategy>
-            <training_cycle>1000</training_cycle>
+            <training_cycle>100</training_cycle>
             <learning_rate>0.00005</learning_rate>
             <min_learning_rate>0.000001</min_learning_rate>
             <decay_rate>0.3</decay_rate>
             <stop_accuracy>0.7</stop_accuracy>
-            <back_epoch>2</back_epoch>
+            <back_epoch>3</back_epoch>
             <tolerance_all>15</tolerance_all>
             <save_cycle>100</save_cycle>
         </early_stop>
@@ -42,6 +42,14 @@
             <dtype>float32</dtype>
             <scope>input_tensor</scope>
         </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[None,90,90,1]</input_shape>
+            <dtype>float32</dtype>
+            <scope>covariance_tensor</scope>
+        </input>
+
 
         <input>
             <type>Placeholder</type>
@@ -71,7 +79,7 @@
             <strides>[1,1,1,1]</strides>
             <padding>VALID</padding>
             <bias>True</bias>
-            <placeholders>[input_tensor,output_tensor]</placeholders>
+            <placeholders>[input_tensor,output_tensor,covariance_tensor]</placeholders>
             <batch_normalization>False</batch_normalization>
             <scope>E2N1</scope>
         </layer>

@@ -40,7 +40,7 @@ class SupportVectorMachine(object, metaclass=ABCMeta):
         """
         if not spe_pas:
             pas = parse_xml_file(os.path.join(self.project_path, 'Schemes/{:s}.xml'.format(scheme)))
-        self.pa['basic'] = pas['parameters']['basic']
+        self.pas['basic'] = pas['parameters']['basic']
 
     def build_structure(self):
         self.classifier = LinearSVC(penalty='l2')
@@ -49,7 +49,7 @@ class SupportVectorMachine(object, metaclass=ABCMeta):
     def training(self,
                  data: h5py.Group or dict,
                  run_time: int = 1,
-                 fold_index: int = None,
+                 fold_name: str = None,
                  show_info: bool = True,
                  ):
         self.build_structure()
@@ -59,7 +59,7 @@ class SupportVectorMachine(object, metaclass=ABCMeta):
         if show_info:
             self.show_results(results=results,
                               run_time=run_time,
-                              fold_index=fold_index)
+                              fold_name=fold_name)
 
         return results
 
@@ -121,13 +121,13 @@ class SupportVectorMachine(object, metaclass=ABCMeta):
     def show_results(results: dict,
                      run_time: int,
                      alpha: float = None,
-                     fold_index: int = None):
+                     fold_name: str = None):
         info = 'Time: {:d}\t'.format(run_time)
         if alpha:
             info += 'alpha: {:f}\t'.format(alpha)
 
-        if fold_index:
-            info += 'Fold: {:d}\t'.format(fold_index)
+        if fold_name is not None:
+            info += '{:s}\t'.format(fold_name)
         for tag in ['Accuracy', 'Cross Entropy']:
             try:
                 info += '{:s}: {:.5f}\t'.format(tag,
