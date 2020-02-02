@@ -12,8 +12,6 @@ class Log:
     scheme_folder = None
     subfolder = None
 
-    pa = {'restored_epoch': 0}
-
     graph = None
     sess = None
     dir_path = None
@@ -31,10 +29,10 @@ class Log:
     def set_graph(self):
         """Get a new graph and session
         """
-        self.graph = tf.Graph()
-
         tf_config = tf.compat.v1.ConfigProto()
         tf_config.gpu_options.allow_growth = True
+
+        self.graph = tf.get_default_graph()
         self.sess = tf.Session(graph=self.graph, config=tf_config)
 
     def set_folders(self, scheme_folder: str):
@@ -65,12 +63,15 @@ class Log:
 
         self.dir_path = path
 
-        for subfolder in ['log', 'model', 'optimal_model']:
-            subfolder_path = os.path.join(self.dir_path, subfolder)
-            if not os.path.exists(subfolder_path):
-                os.makedirs(subfolder_path, exist_ok=True)
+        if not os.path.exists(self.dir_path):
+            for subfolder in ['log', 'model', 'optimal_model']:
+                subfolder_path = os.path.join(self.dir_path, subfolder)
+                if not os.path.exists(subfolder_path):
+                    os.makedirs(subfolder_path, exist_ok=True)
 
     def reset_graph(self):
+        """Clear the default graph.
+        """
         tf.reset_default_graph()
         self.set_graph()
 
@@ -143,11 +144,10 @@ class Log:
             print('Model saved in file: {:s}'.format(save_path))
         return save_path
 
-    def restore(self,
-                restored_epoch: int = None,
-                restored_path: str = None,
-                restored_dir: str = 'model',
-                initialize: bool = True) -> int:
+    def restore_model(self,
+                      restored_epoch: int = None,
+                      restored_path: str = None,
+                      restored_dir: str = 'model') -> int:
         """
         Restored neural network model with restore parameters.
         :param restored_epoch: Restored model by epoch
@@ -156,23 +156,14 @@ class Log:
         :return: The training epoch of restored model.
         """
         if restored_path is None:
-            if restored_epoch is None:
-                restored_epoch = self.pa['restored_epoch']
             restored_path = os.path.join(self.dir_path,
-                                         '{:s}/train_model_{:}'.format(restored_dir, restored_epoch)) if restored_epoch else None
+                                         '{:s}/train.model_{:}'.format(restored_dir, restored_epoch)) if restored_epoch else None
 
         try:
             self.saver.restore(self.sess, restored_path)
-            restored_epoch = int(restored_path.split('_')[-1])
             print('Model restored from file: {:s}'.format(restored_path))
         except Exception as e:
             print(e)
-            return 0
-
-        if initialize:
-            self.pa['restored_epoch'] = None
-
-        return restored_epoch if restored_epoch else 0
 
     def save_features(self, debug_train, debug_test, train_label, test_label, epoch=None, save_path=None):
         if not epoch:

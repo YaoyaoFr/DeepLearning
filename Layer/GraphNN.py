@@ -24,43 +24,43 @@ class GraphConnected(LayerObject):
                                  })
         self.tensors = {}
 
-        self.pa = self.set_parameters(arguments=arguments,
+        self.parameters = self.set_parameters(arguments=arguments,
                                       parameters=parameters)
 
         # Mask the weight by adj_matrix with depth
         adj_matrix = AAL().get_adj_matrix(metric='Adjacent')
-        self.pa['adj_matrix'] = adj_matrix
+        self.parameters['adj_matrix'] = adj_matrix
 
-        if 'depth' in self.pa:
-            graph_matrix = self.pa['adj_matrix']
-            for _ in range(self.pa['depth'] - 1):
-                graph_matrix = np.matmul(graph_matrix, self.pa['adj_matrix'])
+        if 'depth' in self.parameters:
+            graph_matrix = self.parameters['adj_matrix']
+            for _ in range(self.parameters['depth'] - 1):
+                graph_matrix = np.matmul(graph_matrix, self.parameters['adj_matrix'])
             graph_matrix[graph_matrix != 0] = 1
-            self.pa['graph_matrix'] = graph_matrix
+            self.parameters['graph_matrix'] = graph_matrix
 
         # build kernel
-        assert len(self.pa['kernel_shape']) == 2
-        assert 'channel' in self.pa, 'The number of channels must be fed.'
+        assert len(self.parameters['kernel_shape']) == 2
+        assert 'channel' in self.parameters, 'The number of channels must be fed.'
 
         weights = self.get_initial_weight()
-        self.weight = [weights[..., index] * adj_matrix for index in range(self.pa['channel'])]
+        self.weight = [weights[..., index] * adj_matrix for index in range(self.parameters['channel'])]
         self.tensors['weight'] = self.weight
 
         for w in self.weight:
-            L2 = tf.contrib.layers.l2_regularizer(self.pa['L2_lambda'])(w)
+            L2 = tf.contrib.layers.l2_regularizer(self.parameters['L2_lambda'])(w)
             tf.add_to_collection('L2_loss', L2)
 
         # build bias
-        num_output_channels = self.pa['kernel_shape'][-1]
-        if self.pa['bias']:
-            if self.pa['load_bias']:
+        num_output_channels = self.parameters['kernel_shape'][-1]
+        if self.parameters['bias']:
+            if self.parameters['load_bias']:
                 initializer = load_initial_value(type='bias',
-                                                 name=self.pa['scope'])
+                                                 name=self.parameters['scope'])
         else:
             initializer = tf.constant(0.0, shape=[num_output_channels])
 
         self.bias = tf.Variable(initial_value=initializer,
-                                name=self.pa['scope'] + '/bias',
+                                name=self.parameters['scope'] + '/bias',
                                 )
         self.tensors['bias'] = self.bias
 
@@ -72,8 +72,8 @@ class GraphConnected(LayerObject):
         assert len(input_tensor.get_shape().as_list()) == 4
         assert len(input_place.get_shape().as_list()) == 4 and input_place.get_shape().as_list()[-1] == 1
         channel = input_tensor.get_shape().as_list()[-1]
-        assert channel == 1 or channel == self.pa['channel'], \
-            'The channel of input_placeholders must be 1 or {:d}, which is {:d}'.format(self.pa['channel'], channel)
+        assert channel == 1 or channel == self.parameters['channel'], \
+            'The channel of input_placeholders must be 1 or {:d}, which is {:d}'.format(self.parameters['channel'], channel)
 
         # G_hats = tf.pow(x=tf.subtract(1 + 1e-5, tf.square(input_tensor)),
         #                 y=-1 / 2)
@@ -87,7 +87,7 @@ class GraphConnected(LayerObject):
 
         output = []
         middle_variables = []
-        for channel_index in range(self.pa['channel']):
+        for channel_index in range(self.parameters['channel']):
             G = input_tensor[..., 0] if channel == 1 else input_tensor[..., channel_index]
             R = input_place[..., 0]
             W = self.weight[channel_index]
@@ -109,32 +109,32 @@ class GraphConnected(LayerObject):
                     # 'item4': item4,
                     # 'item5': item5,
                 })
-            o = tf.expand_dims(R * self.pa['graph_matrix'] - item2, axis=-1)
+            o = tf.expand_dims(R * self.parameters['graph_matrix'] - item2, axis=-1)
             output.append(o)
         output = tf.concat(output, axis=-1)
         self.tensors['middle_var'] = middle_variables
         self.tensors['output_matmul'] = output
 
         # bias
-        if self.pa['bias']:
+        if self.parameters['bias']:
             output = output + self.bias
             self.tensors['output_bias'] = output
 
         # batch_normalization
-        if self.pa['batch_normalization']:
+        if self.parameters['batch_normalization']:
             output = tf.cond(training,
                              lambda: self.batch_normalization(x=output,
-                                                              scope=self.pa['scope'] + '/bn',
+                                                              scope=self.parameters['scope'] + '/bn',
                                                               is_training=True),
                              lambda: self.batch_normalization(x=output,
-                                                              scope=self.pa['scope'] + '/bn',
+                                                              scope=self.parameters['scope'] + '/bn',
                                                               is_training=False))
             self.tensors.update(output)
             output = self.tensors['output_bn']
 
         # activation
-        if self.pa['activation']:
-            output = self.pa['activation'](output)
+        if self.parameters['activation']:
+            output = self.parameters['activation'](output)
             self.tensors['output_activation'] = output
 
         self.tensors['output'] = output
@@ -148,18 +148,18 @@ class GraphConnected(LayerObject):
     def generate_weight_by_adj(self,
                                adj_matrix: np.ndarray = None,
                                ):
-        if self.pa['load_weight']:
+        if self.parameters['load_weight']:
             initializer = load_initial_value(type='weight',
-                                             name=self.pa['scope'])
+                                             name=self.parameters['scope'])
         else:
             # The graph convolution cannot be initialized by the conventional method, must be redesigned.
             # kernel_shape = [count_nonzero]
-            # kernel_shape.extend(self.pa['kernel_shape'][2:])
-            initializer = self.get_initial_weight(kernel_shape=self.pa['kernel_shape'])
+            # kernel_shape.extend(self.parameters['kernel_shape'][2:])
+            initializer = self.get_initial_weight(kernel_shape=self.parameters['kernel_shape'])
 
         # sparse_all = matrix_to_sparse(adj_sum)
         #
-        # slice_shape = self.pa['kernel_shape'][2:]
+        # slice_shape = self.parameters['kernel_shape'][2:]
         # indices_repeat = np.concatenate([sparse_all['indices'] for _ in range(np.prod(slice_shape))],
         #                                 axis=0)
         # for index in slice_shape:
@@ -174,11 +174,11 @@ class GraphConnected(LayerObject):
         # self.weight = tf.sparse_to_dense(sparse_values=tf.reshape(tf.Variable(initial_value=initializer),
         #                                                           shape=[-1]),
         #                                  sparse_indices=indices_repeat,
-        #                                  output_shape=self.pa['kernel_shape'],
+        #                                  output_shape=self.parameters['kernel_shape'],
         #                                  )
         if adj_matrix is None:
-            adj_matrix = AAL().get_adj_matrix(nearest_k=self.pa['nearest_k'],
-                                              # depth=self.pa['depth'],
+            adj_matrix = AAL().get_adj_matrix(nearest_k=self.parameters['nearest_k'],
+                                              # depth=self.parameters['depth'],
                                               depth=0,
                                               ).astype(dtype=np.float32)
         if len(np.shape(adj_matrix)) == 3:
@@ -203,7 +203,7 @@ class GraphConnected(LayerObject):
                 #
                 # w = tf.sparse_to_dense(sparse_indices=indices_repeat,
                 #                        sparse_values=values,
-                #                        output_shape=self.pa['kernel_shape'],
+                #                        output_shape=self.parameters['kernel_shape'],
                 #                        )
                 w = self.weight * adj_slice
                 weights.append(w)
@@ -215,16 +215,16 @@ class GraphConnected(LayerObject):
                            mode: str = 'fan_in',
                            distribution: str = None,
                            ):
-        kernel_shape = self.pa['kernel_shape']
-        channel = self.pa['channel']
+        kernel_shape = self.parameters['kernel_shape']
+        channel = self.parameters['channel']
 
         assert len(kernel_shape) == 2, 'The rank of kernel must be 3.'
         fan_in = kernel_shape[0]
         fan_out = kernel_shape[1]
 
-        if 'adj_matrix' in self.pa and 'depth' in self.pa:
-            adj_matrix = self.pa['adj_matrix']
-            depth = self.pa['depth']
+        if 'adj_matrix' in self.parameters and 'depth' in self.parameters:
+            adj_matrix = self.parameters['adj_matrix']
+            depth = self.parameters['depth']
             current_graph = adj_matrix
             for _ in range(depth - 2):
                 current_graph = np.matmul(current_graph, adj_matrix)
@@ -236,8 +236,8 @@ class GraphConnected(LayerObject):
 
         if distribution is None:
             distribution = 'uniform'
-            if self.pa['activation']:
-                if self.pa['activation']._tf_api_names[0] == 'nn.relu':
+            if self.parameters['activation']:
+                if self.parameters['activation']._tf_api_names[0] == 'nn.relu':
                     distribution = 'norm'
 
         weights = []
@@ -257,7 +257,7 @@ class GraphConnected(LayerObject):
             weights.append(tf.Variable(initial_value=initial_value))
         weights = tf.concat(weights,
                             axis=1,
-                            name=self.pa['scope'] + 'weight')
+                            name=self.parameters['scope'] + 'weight')
 
         return weights
 
@@ -304,8 +304,8 @@ class GraphConnected(LayerObject):
                 mean, var = tf.nn.moments(x, list(np.arange(len(shape) - 1)))
                 results['mean0'] = mean
                 results['var0'] = var
-                if 'graph_matrix' in self.pa:
-                    matrix = self.pa['graph_matrix']
+                if 'graph_matrix' in self.parameters:
+                    matrix = self.parameters['graph_matrix']
                     N = np.prod(np.shape(matrix))
                     N_1 = np.count_nonzero(matrix)
                     a = N / N_1
@@ -334,7 +334,7 @@ class GraphConnected(LayerObject):
                                                    variance_epsilon=epsilon)
                 results['output_bn_without_mask'] = output
                 try:
-                    graph_matrix = self.pa['graph_matrix']
+                    graph_matrix = self.parameters['graph_matrix']
                     graph_matrix = np.expand_dims(np.expand_dims(graph_matrix, axis=0), axis=-1)
                     output = output * graph_matrix
                 except KeyError:

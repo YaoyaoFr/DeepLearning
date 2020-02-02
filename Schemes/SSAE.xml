@@ -1,0 +1,116 @@
+<parameters>
+    <parameters>
+        <basic>
+            <dataset>ABIDE</dataset>
+            <feature>pearson correlation XXY</feature>
+            <atlas>aal90</atlas>
+            <normalization>True</normalization>
+            <cross_validation>5 fold</cross_validation>
+        </basic>
+
+        <training>
+            <train_batch_size>96</train_batch_size>
+        </training>
+
+        <early_stop0>
+            <strategy>basic</strategy>
+            <save_cycle>20</save_cycle>
+            <training_cycle>10000</training_cycle>
+            <learning_rate>0.0001</learning_rate>
+        </early_stop0>
+
+        <early_stop1>
+            <strategy>basic</strategy>
+            <save_cycle>20</save_cycle>
+            <training_cycle>10000</training_cycle>
+            <learning_rate>0.0001</learning_rate>
+        </early_stop1>
+
+        <early_stop2>
+            <strategy>basic</strategy>
+            <save_cycle>20</save_cycle>
+            <training_cycle>10000</training_cycle>
+            <learning_rate>0.0001</learning_rate>
+        </early_stop2>
+
+        <early_stop3>
+            <strategy>basic</strategy>
+            <save_cycle>20</save_cycle>
+            <training_cycle>10000</training_cycle>
+            <learning_rate>0.0001</learning_rate>
+        </early_stop3>
+    </parameters>
+
+	<layers>
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[None,4005]</input_shape>
+            <dtype>float32</dtype>
+            <scope>input_tensor</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[None,2]</input_shape>
+            <dtype>float32</dtype>
+            <scope>output_tensor</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[]</input_shape>
+            <dtype>float32</dtype>
+            <scope>learning_rate</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[]</input_shape>
+            <dtype>bool</dtype>
+            <scope>training</scope>
+        </input>
+
+        <layer>
+            <type>AutoEncoder</type>
+            <kernel_shape>[4005,300]</kernel_shape>
+            <activation>sigmoid</activation>
+            <bias>True</bias>
+            <placeholders>[input_tensor]</placeholders>
+			<batch_normalization>False</batch_normalization>
+            <rho>0.5</rho>
+            <beta>0.01</beta>
+            <scope>AE1</scope>
+        </layer>
+
+        <layer>
+            <type>AutoEncoder</type>
+            <kernel_shape>[300,128]</kernel_shape>
+            <activation>sigmoid</activation>
+            <bias>True</bias>
+			<batch_normalization>False</batch_normalization>
+            <rho>0.5</rho>
+            <beta>0.01</beta>
+            <scope>AE2</scope>
+        </layer>
+
+        <layer>
+            <type>AutoEncoder</type>
+            <kernel_shape>[128,96]</kernel_shape>
+            <activation>sigmoid</activation>
+            <bias>True</bias>
+			<batch_normalization>False</batch_normalization>
+            <rho>0.5</rho>
+            <beta>0.01</beta>
+            <scope>AE3</scope>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>[96,2]</kernel_shape>
+            <bias>True</bias>
+			<batch_normalization>False</batch_normalization>
+            <scope>hidden1</scope>
+        </layer>
+
+	</layers>
+</parameters>

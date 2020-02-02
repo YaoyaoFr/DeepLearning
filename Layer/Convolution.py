@@ -1,13 +1,12 @@
 import tensorflow as tf
 
-from tensorflow.python.ops import nn_ops, nn
 from Layer.LayerObject import LayerObject
 from Model.utils_model import get_initial_weight, load_initial_value
 
 
 class Convolution(LayerObject):
     """
-
+    Convolutional layer.
     """
     required_pa = ['kernel_shape']
 
@@ -22,81 +21,75 @@ class Convolution(LayerObject):
                                  'padding': 'VALID',
                                  'activation': None,
                                  'scope': 'conv',
-                                 'conv_fun': nn_ops.Convolution,
-                                 # 'conv_fun': tf.nn.conv2d,
+                                 'conv_fun': tf.nn.conv2d,
                                  'data_format': 'NHWC',
                                  })
-        self.tensors = {}
-        self.pa = self.set_parameters(arguments=arguments, parameters=parameters)
+        self.set_parameters(arguments=arguments, parameters=parameters)
 
         # Weight initializer
-        initializer = self.get_initial_weight(kernel_shape=self.pa['kernel_shape'])
+        initializer = self.get_initial_weight(
+            kernel_shape=self.parameters['kernel_shape'])
         # Load weight
-        if self.pa['load_weight']:
+        if self.parameters['load_weight']:
             initializer = load_initial_value(type='weight',
-                                             name=self.pa['scope'])
+                                             name=self.parameters['scope'])
 
         # build kernel
         self.weight = tf.Variable(initial_value=initializer,
-                                  name=self.pa['scope'] + '/kernel',
+                                  name=self.parameters['scope'] + '/kernel',
                                   )
-        self.tensors['weight'] = self.weight
+        self.trainable_pas['weight'] = self.weight
 
         # build bias
-        num_output_channels = self.pa['kernel_shape'][-1]
-        if self.pa['bias']:
-            if self.pa['load_bias']:
+        num_output_channels = self.parameters['kernel_shape'][-1]
+        if self.parameters['bias']:
+            if self.parameters['load_bias']:
                 initializer = load_initial_value(type='bias',
-                                                 name=self.pa['scope'])
+                                                 name=self.parameters['scope'])
             else:
                 initializer = tf.constant(0.0, shape=[num_output_channels])
             self.bias = tf.Variable(initial_value=initializer,
-                                    name=self.pa['scope'] + '/bias',
+                                    name=self.parameters['scope'] + '/bias',
                                     )
-            self.tensors['bias'] = self.bias
+            self.trainable_pas['bias'] = self.bias
 
     def build(self, **kwargs):
-        if 'output' in kwargs:
-            input_tensor = kwargs['output']
+        """Convolution process
+        
+        Returns:
+            [type] -- [description]
+        """
+        input_tensor = kwargs.get('output')
         self.tensors['input'] = input_tensor
 
-        training = kwargs['training']
+        training = kwargs.get('training')
 
-        self.pa['conv_fun'] = self.pa['conv_fun'](input_shape=input_tensor.shape,
-                                                  filter_shape=self.weight.shape,
-                                                  data_format=self.pa['data_format'],
-                                                  padding=self.pa['padding'],
-                                                  )
-
-        # convolution
-        output = self.pa['conv_fun'](input_tensor,
-                                     self.weight,
-                                     )
-        # output = self.pa['conv_fun'](input_tensor,
-        #                              self.weight,
-        #                              strides=self.pa['strides'],
-        #                              padding=self.pa['padding'])
+        # Convolution
+        output = self.parameters['conv_fun'](input_tensor,
+                                             self.weight,
+                                             strides=self.parameters['strides'],
+                                             padding=self.parameters['padding'])
 
         self.tensors['output_conv'] = output
 
         # bias
-        if self.pa['bias']:
-            output = nn.bias_add(value=output,
-                                 bias=self.bias,
-                                 data_format=self.pa['data_format'])
+        if self.parameters['bias']:
+            output = tf.nn.bias_add(value=output,
+                                    bias=self.bias,
+                                    data_format=self.parameters['data_format'])
             self.tensors['output_bias'] = output
 
         # batch_normalization
-        if self.pa['batch_normalization']:
+        if self.parameters['batch_normalization']:
             output = self.batch_normalization(tensor=output,
-                                              scope=self.pa['scope'] + '/bn',
+                                              scope=self.parameters['scope'] + '/bn',
                                               training=training)
             self.tensors.update(output)
             output = self.tensors['output_bn']
 
         # activation
-        if self.pa['activation']:
-            output = self.pa['activation'](output)
+        if self.parameters['activation']:
+            output = self.parameters['activation'](output)
             self.tensors['output_activation'] = output
 
         self.tensors['output'] = output
@@ -124,76 +117,78 @@ class Convolutions(LayerObject):
                                  'conv_fun': tf.layers.conv2d,
                                  }
                                 )
-        self.pa = self.set_parameters(arguments=arguments)
+        self.parameters = self.set_parameters(arguments=arguments)
 
         if parameters is not None:
             if 'ROIs' in parameters:
-                self.pa['num'] = len(parameters['ROIs'])
+                self.parameters['num'] = len(parameters['ROIs'])
             elif 'input_num' in parameters:
-                self.pa['num'] = parameters['input_num']
+                self.parameters['num'] = parameters['input_num']
 
         # Weight initializer
-        if self.pa['activation']:
-            activation = self.pa['activation']._tf_api_names[0]
+        if self.parameters['activation']:
+            activation = self.parameters['activation']._tf_api_names[0]
         else:
             activation = ''
-        initializer = get_initial_weight(kernel_shape=self.pa['kernel_shape'],
+        initializer = get_initial_weight(kernel_shape=self.parameters['kernel_shape'],
                                          activation=activation)
         # Load weight
-        if self.pa['load_weight']:
+        if self.parameters['load_weight']:
             initializer = load_initial_value(type='weight',
-                                             name=self.pa['scope'])
+                                             name=self.parameters['scope'])
 
         # build kernel
         self.kernel = [tf.Variable(initial_value=initializer,
-                                   name=self.pa['scope'] + '/kernel_{:d}'.format(index + 1),
+                                   name=self.parameters['scope'] +
+                                   '/kernel_{:d}'.format(index + 1),
                                    dtype=tf.float32
                                    )
-                       for index in range(self.pa['num'])]
+                       for index in range(self.parameters['num'])]
         self.tensors['weight'] = self.kernel
 
         # build bias
-        num_output_channels = self.pa['kernel_shape'][-1]
+        num_output_channels = self.parameters['kernel_shape'][-1]
 
-        if self.pa['bias']:
-            if self.pa['load_bias']:
+        if self.parameters['bias']:
+            if self.parameters['load_bias']:
                 initializer = load_initial_value(type='bias',
-                                                 name=self.pa['scope'])
+                                                 name=self.parameters['scope'])
             else:
                 initializer = tf.constant(0.0, shape=[num_output_channels])
             self.bias = [tf.Variable(initial_value=initializer,
-                                     name=self.pa['scope'] + '/bias',
-                                     ) for _ in range(self.pa['num'])]
+                                     name=self.parameters['scope'] + '/bias',
+                                     ) for _ in range(self.parameters['num'])]
             self.tensors['bias'] = self.bias
 
     def build(self, input_tensors, output_shape=None, training=True):
         self.tensors['input'] = input_tensors
 
         # convolution
-        self.pa['conv_fun'] = self.pa['conv_fun'](input_shape=input_tensors.shape,
-                                                  filter_shape=self.weight.shape,
-                                                  data_format=self.pa['data_format'],
-                                                  padding=self.pa['padding'],
-                                                  )
+        self.parameters['conv_fun'] = self.parameters['conv_fun'](input_shape=input_tensors.shape,
+                                                                  filter_shape=self.weight.shape,
+                                                                  data_format=self.parameters['data_format'],
+                                                                  padding=self.parameters['padding'],
+                                                                  )
 
-        outputs = [self.pa['conv_fun'](inp=input_tensor,
-                                       filter=kernel)
+        outputs = [self.parameters['conv_fun'](inp=input_tensor,
+                                               filter=kernel)
                    for input_tensor, kernel in zip(input_tensors, self.kernel)]
         self.tensors['output_conv'] = outputs
 
         # bias
-        if self.pa['bias']:
-            outputs = [outputs[index] + self.bias[index] for index in range(len(outputs))]
+        if self.parameters['bias']:
+            outputs = [outputs[index] + self.bias[index]
+                       for index in range(len(outputs))]
             self.tensors['output_bias'] = outputs
 
         # batch_normalization
-        if self.pa['batch_normalization']:
+        if self.parameters['batch_normalization']:
             output_bn = []
             aft_mean = []
             aft_var = []
             for index, output in enumerate(outputs):
                 output = self.batch_normalization(tensor=output,
-                                                  scope='{:s}/bn_{:d}'.format(self.pa['scope'],
+                                                  scope='{:s}/bn_{:d}'.format(self.parameters['scope'],
                                                                               index + 1),
                                                   training=training,
                                                   )
@@ -205,8 +200,9 @@ class Convolutions(LayerObject):
             self.tensors['aft_var'] = aft_var
 
         # activation
-        if self.pa['activation']:
-            outputs = [self.pa['activation'](output) for output in outputs]
+        if self.parameters['activation']:
+            outputs = [self.parameters['activation']
+                       (output) for output in outputs]
         self.tensors['output_activation'] = outputs
 
         self.tensors['output'] = outputs
@@ -226,7 +222,7 @@ class DeConvolution(LayerObject):
         self.tensors = dict()
         self.kernel = None
         self.bias = True
-        self.padding = 'SAME'
+        self.parametersdding = 'SAME'
         self.activation = tf.nn.relu
 
         self.kernel_shape = arguments['kernel_shape']
@@ -239,7 +235,7 @@ class DeConvolution(LayerObject):
         if 'strides' in arguments:
             self.strides = arguments['strides']
         if 'padding' in arguments:
-            self.padding = arguments['padding']
+            self.parametersdding = arguments['padding']
         if 'activation' in arguments:
             self.activation = arguments['activation']
 
@@ -273,7 +269,7 @@ class DeConvolution(LayerObject):
                                filter=self.kernel,
                                output_shape=output_shape,
                                strides=self.strides,
-                               padding=self.padding)
+                               padding=self.parametersdding)
         self.tensors['output_conv'] = output
 
         # bias
@@ -318,7 +314,7 @@ class DepthwiseConvolution(LayerObject):
             self.strides = arguments['strides']
         if 'batch_normalization' in arguments:
             self.batch_normalization = arguments
-        self.padding = arguments['padding']
+        self.parametersdding = arguments['padding']
         self.activation = arguments['activation']
         self.scope = arguments['scope']
 
@@ -358,12 +354,14 @@ class DepthwiseConvolution(LayerObject):
 
         # convolution
         _, _, _, num_input_channels, num_output_channels = self.kernel.get_shape()
-        input_tensor_slices = tf.split(value=input_tensor, num_or_size_splits=num_input_channels, axis=-1)
-        kernel_slices = tf.split(value=self.kernel, num_or_size_splits=num_input_channels, axis=-2)
+        input_tensor_slices = tf.split(
+            value=input_tensor, num_or_size_splits=num_input_channels, axis=-1)
+        kernel_slices = tf.split(
+            value=self.kernel, num_or_size_splits=num_input_channels, axis=-2)
         output_tensor_slices = [tf.nn.conv3d(input=input_tensor_slice,
                                              filter=kernel_slice,
                                              strides=self.strides,
-                                             padding=self.padding
+                                             padding=self.parametersdding
                                              )
                                 for input_tensor_slice, kernel_slice in zip(input_tensor_slices, kernel_slices)]
         output = tf.concat(values=output_tensor_slices, axis=-1)
@@ -420,7 +418,7 @@ class DepthwiseDeConvolution(LayerObject):
             self.strides = arguments['strides']
         if 'batch_normalization' in arguments:
             self.batch_normalization = arguments
-        self.padding = arguments['padding']
+        self.parametersdding = arguments['padding']
         self.activation = arguments['activation']
         self.scope = arguments['scope']
 
@@ -461,14 +459,16 @@ class DepthwiseDeConvolution(LayerObject):
 
         # convolution
         num_input_channels, num_output_channels = self.kernel_shape[-2:]
-        input_tensor_slices = tf.split(value=input_tensor, num_or_size_splits=num_input_channels, axis=-1)
-        kernel_slices = tf.split(value=self.kernel, num_or_size_splits=num_input_channels, axis=-2)
+        input_tensor_slices = tf.split(
+            value=input_tensor, num_or_size_splits=num_input_channels, axis=-1)
+        kernel_slices = tf.split(
+            value=self.kernel, num_or_size_splits=num_input_channels, axis=-2)
         output_shape[-1] = 1
         output_tensor_slices = [self.conv_fun(value=input_tensor_slice,
                                               filter=kernel_slice,
                                               output_shape=output_shape,
                                               strides=self.strides,
-                                              padding=self.padding)
+                                              padding=self.parametersdding)
                                 for input_tensor_slice, kernel_slice in zip(input_tensor_slices, kernel_slices)]
         output = tf.concat(values=output_tensor_slices, axis=-1)
         self.tensors['output_conv'] = output

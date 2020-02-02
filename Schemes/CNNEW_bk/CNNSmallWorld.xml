@@ -1,0 +1,118 @@
+<parameters>
+    <parameters>
+        <basic>
+            <dataset>ABIDE</dataset>
+            <feature>pearson correlation</feature>
+            <scheme>CNNSmallWorld</scheme>
+            <n_class>2</n_class>
+            <L2_lambda>0.0005</L2_lambda>
+        </basic>
+
+        <training>
+            <train_batch_size>96</train_batch_size>
+            <test_cycle>1</test_cycle>
+            <training_cycle>1000</training_cycle>
+        </training>
+
+        <early_stop>
+            <early_stop>False</early_stop>
+            <decay_dataset>valid</decay_dataset>
+            <decay_type>Cost</decay_type>
+            <restore_epoch>3</restore_epoch>
+            <early_stop_acc>0.7</early_stop_acc>
+            <learning_rate>0.000005</learning_rate>
+            <min_learning_rate>0.000001</min_learning_rate>
+            <decay_rate>0.3</decay_rate>
+            <decay_step>100</decay_step>
+            <early_stop_step>0</early_stop_step>
+            <stop_patience>30</stop_patience>
+            <save_cycle>1000</save_cycle>
+        </early_stop>
+    </parameters>
+
+    <layers>
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[None,2]</input_shape>
+            <dtype>float32</dtype>
+            <scope>output_tensor</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[]</input_shape>
+            <dtype>float32</dtype>
+            <scope>learning_rate</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[]</input_shape>
+            <dtype>bool</dtype>
+            <scope>training</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[None,90,90,1]</input_shape>
+            <dtype>float32</dtype>
+            <scope>input_tensor</scope>
+        </input>
+
+
+        <layer>
+            <type>EdgeToNodeCrossSlide</type>
+            <kernel_shape>[90,90,1,64]</kernel_shape>
+            <bias>True</bias>
+            <placeholders>[input_tensor]</placeholders>
+            <scope>E2NCS1</scope>
+        </layer>
+
+        <layer>
+            <type>SelfAttentionGraphPooling</type>
+            <kernel_shape>[64,30]</kernel_shape>
+            <tensors>[adjacency_matrix,node_features]</tensors>
+            <scope>SAG1</scope>
+        </layer>
+
+        <layer>
+            <type>EdgeToNodeCrossSlide</type>
+            <kernel_shape>[30,30,1,64]</kernel_shape>
+            <tensors>[adjacency_matrix]</tensors>
+            <bias>True</bias>
+            <scope>E2NCS2</scope>
+        </layer>
+
+        <layer>
+            <type>SelfAttentionGraphPooling</type>
+            <kernel_shape>[64,1]</kernel_shape>
+            <tensors>[adjacency_matrix,node_features]</tensors>
+            <scope>SAG2</scope>
+        </layer>
+
+
+        <layer>
+            <type>Unfolds</type>
+            <scope>unfolds</scope>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>[64,96]</kernel_shape>
+            <activation>relu</activation>
+            <bias>True</bias>
+            <batch_normalization>False</batch_normalization>
+            <scope>hidden1</scope>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>[96,2]</kernel_shape>
+            <bias>True</bias>
+            <batch_normalization>False</batch_normalization>
+            <scope>hidden2</scope>
+        </layer>
+
+
+    </layers>
+</parameters>

@@ -4,6 +4,7 @@ Returns:
     [type] -- [description]
 """
 import os
+import shutil
 import collections
 import numpy as np
 
@@ -23,7 +24,9 @@ PARAMETERS = ['strategy',
               'optimize_dataset',
               ]
 
-REQUIRED_ATTRS = {'basic': ['learning_rate'],
+REQUIRED_ATTRS = {'basic': ['learning_rate',
+                            'training_cycle',
+                            'save_cycle'],
                   'early_stop': ['save_cycle',
                                  'tolerance_all',
                                  'learning_rate',
@@ -119,6 +122,15 @@ class EarlyStop:
         """
         self.optimal_epoch = self.epoch
         self.epoch += 1
+
+        if 'decay_step' in self.parameters and 'decay_rate' in self.parameters:
+            decay_step = self.parameters['decay_step']
+            decay_rate = self.parameters['decay_rate']
+            if (self.epoch + 1) % decay_step == 0:
+                self.parameters['learning_rate'] *= decay_rate
+                print('Change learning rate to {:.5f}.'.format(
+                    self.parameters['learning_rate']))
+
         return
 
     def early_stop(self,
@@ -142,7 +154,7 @@ class EarlyStop:
         tolerance_all = self.parameters['tolerance_all']
         training_cycle = self.parameters['training_cycle']
 
-        if self.epoch + 1 % decay_step == 0:
+        if (self.epoch + 1) % decay_step == 0:
             self.parameters['learning_rate'] *= decay_rate
             print('Change learning rate to {:.5f}.'.format(
                 self.parameters['learning_rate']))
@@ -174,9 +186,8 @@ class EarlyStop:
                 return
 
         # Parameters used in this strategy
-        decay_step = self.parameters['decay_step']
         decay_rate = self.parameters['decay_rate']
-        optimize_dataset = self.parameters['optimize_data']
+        optimize_dataset = self.parameters['optimize_dataset']
         optimize_type = self.parameters['optimize_type']
         tolerance_all = self.parameters['tolerance_all']
         training_cycle = self.parameters['training_cycle']
@@ -186,6 +197,8 @@ class EarlyStop:
         if results[optimize_dataset][optimize_type] < np.min(
                 np.array(self.results[optimize_type][optimize_dataset])[:-1]):
             self.optimal_epoch = self.epoch
+            self.optimal_epochs.append(self.epoch)
+            self.log.save_model(epoch=self.epoch)
             self.overfitting_count = 0
         else:
             self.overfitting_count += 1
@@ -207,7 +220,7 @@ class EarlyStop:
                     self.optimal_epochs = self.optimal_epochs[:back_epoch + 1]
                 self.epoch = self.optimal_epoch
 
-                self.log.restore(restored_epoch=self.optimal_epoch)
+                self.log.restore_model(restored_epoch=self.optimal_epoch)
                 self.overfitting_count = 0
                 self.results = {result: {tag: self.results[result][tag][:self.optimal_epoch]
                                          for tag in self.results[result]}
@@ -219,7 +232,7 @@ class EarlyStop:
                            results: dict,
                            ):
         """Show results in this epoch
-        
+
         Arguments:
             results {dict} -- [description]
         """
@@ -242,10 +255,10 @@ class EarlyStop:
                      run_time: int,
                      fold_name: str = None):
         """Show results at the end of training process
-        
+
         Arguments:
             run_time {int} -- 
-        
+
         Keyword Arguments:
             fold_name {str} --  (default: {None})
         """
@@ -266,7 +279,7 @@ class EarlyStop:
                      save_final_model: bool = True,
                      ):
         """Save the first, optimal and final saved models.
-        
+
         Keyword Arguments:
             save_first_model {bool} -- [description] (default: {True})
             save_optimal_model {bool} -- [description] (default: {True})
@@ -281,13 +294,13 @@ class EarlyStop:
             self.log.save_model(save_path=final_path)
 
         if save_first_model:
-            self.log.restore(restored_epoch=1)
+            self.log.restore_model(restored_epoch=1)
             first_path = os.path.join(optimal_dir, 'train_model_first')
             self.log.save_model(save_path=first_path)
 
         if save_optimal_model:
             optimal_dir = os.path.join(self.log.dir_path, 'optimal_model')
-            self.log.restore(restored_epoch=self.optimal_epoch)
+            self.log.restore_model(restored_epoch=self.optimal_epoch)
             optimal_path = os.path.join(optimal_dir, 'train_model_optimal')
             self.log.save_model(save_path=optimal_path)
 

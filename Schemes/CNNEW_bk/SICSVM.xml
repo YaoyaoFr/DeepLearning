@@ -1,0 +1,12 @@
+<parameters>
+    <parameters>
+        <basic>
+            <dataset>ABIDE</dataset>
+            <atlas>aal90</atlas>
+            <feature>sparse inverse covariance XXY</feature>
+            <normalization>False</normalization>
+            <cross_validation>5 fold</cross_validation>
+            <lambda>1</lambda>
+        </basic>
+    </parameters>
+</parameters>

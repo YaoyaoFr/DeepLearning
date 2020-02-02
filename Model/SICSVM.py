@@ -1,6 +1,10 @@
+import collections
+
 import h5py
 import numpy as np
 import tensorflow as tf
+
+from Dataset.utils import hdf5_handler
 from Log.log import Log
 from Model.SVM import SupportVectorMachine
 
@@ -13,7 +17,7 @@ class SparseInverseCovarianceSVM(SupportVectorMachine):
                  dir_path: str,
                  log: Log = None,
                  graph: tf.Graph = None,
-                 spe_pas: dict = None, 
+                 spe_pas: dict = None,
                  ):
         SupportVectorMachine.__init__(self,
                                       scheme=scheme,
@@ -23,7 +27,7 @@ class SparseInverseCovarianceSVM(SupportVectorMachine):
                  data: dict,
                  run_time: int = 1,
                  fold_name: str = None,
-                 show_info: bool = True,
+                 if_show: bool = True,
                  ):
         """
         group scheme
@@ -37,10 +41,11 @@ class SparseInverseCovarianceSVM(SupportVectorMachine):
                     -data   test label
         """
         self.build_structure()
-        result_types = {'Accuracy', 'Precision', 'Recall','Specificity', 'F1 Score'}
+        result_types = {'Accuracy', 'Precision',
+                        'Recall', 'Specificity', 'F1 Score'}
         result_datasets = {'train', 'valid', 'test'}
-        results = {result_type: {result_dataset: [] for result_dataset in result_datasets} for 
-                        result_type in result_types}
+        results = {result_type: {result_dataset: [] for result_dataset in result_datasets} for
+                   result_type in result_types}
         for alpha in data:
             alpha_group = data[alpha]
 
@@ -54,16 +59,17 @@ class SparseInverseCovarianceSVM(SupportVectorMachine):
 
             for result_type in result_types:
                 for result_dataset in result_datasets:
-                    results[result_type][result_dataset].append(result_alpha[result_dataset][result_type])
+                    results[result_type][result_dataset].append(
+                        result_alpha[result_dataset][result_type])
         return results
 
-    
     @staticmethod
-    def load_dataset(hdf5_file, 
-                     scheme: str):
-        dataset = {}
+    def load_dataset(scheme: str,
+                     hdf5_file_path: str):
+        dataset = collections.OrderedDict()
+        hdf5 = hdf5_handler(hdf5_file_path)
+        scheme_group = hdf5['scheme {:s}'.format(scheme)]
 
-        scheme_group = hdf5_file['scheme {:s}'.format(scheme)]
         for fold_index in range(5):
             fold_dataset = {}
             fold_group = scheme_group['fold {:d}'.format(fold_index+1)]
@@ -80,6 +86,6 @@ class SparseInverseCovarianceSVM(SupportVectorMachine):
                             continue
                 fold_dataset[alpha] = alpha_dataset
             dataset['fold {:d}'.format(fold_index + 1)] = fold_dataset
-        hdf5_file.close()
+        hdf5.close()
 
         return dataset

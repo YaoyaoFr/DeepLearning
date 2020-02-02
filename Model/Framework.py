@@ -5,7 +5,6 @@
 import os
 import re
 
-import h5py
 import numpy as np
 
 from Analyse.Result import Result
@@ -14,7 +13,6 @@ from Dataset.utils import hdf5_handler
 from Log.log import Log
 from Model.CNNGLasso import CNNGraphicalLasso
 from Model.CNNSM import CNNSmallWorld
-from Model.DTLNN import DeepTransferLearningNN
 from Model.FCNN import FullyConnectedNeuralNetwork
 from Model.NN import NeuralNetwork
 from Model.SAE import StackedAutoEncoders
@@ -25,7 +23,6 @@ from Schemes.xml_parse import parse_str
 
 
 class Framework:
-    scae = None
     model = None
     scheme = None
     spe_pas = None
@@ -33,6 +30,7 @@ class Framework:
 
     def __init__(self,
                  dir_path: str = '/home/ai/data/yaoyao',
+                 dataset: str = 'ABIDE_Initiative',
                  scheme: int or str = 'BrainNetCNN',
                  spe_pas: dict = None,
                  ):
@@ -43,23 +41,26 @@ class Framework:
         self.dataset_file_path = os.path.join(
             dir_path, 'Data/SchemeData.hdf5').encode()
         self.scheme = scheme
+        self.dataset = dataset
         self.spe_pas = spe_pas
         # Here should keep the date of log and save_scheme be the same.
         self.log = Log(scheme_folder=self.scheme, dir_path=dir_path)
+        self.configurations = self.get_configurations(spe_pas=spe_pas)
+        self.set_parameters()
+
         self.models = {
             'CNNGLasso': CNNGraphicalLasso,
             'BrainNetCNN': NeuralNetwork,
             'CNNElementWise': NeuralNetwork,
             'CNNSmallWorld': CNNSmallWorld,
             'DeepNeuralNetwork': NeuralNetwork,
+            'SSAE': StackedAutoEncoders, 
             'DenoisedAutoEncoder': StackedAutoEncoders,
             'SICSVM': SparseInverseCovarianceSVM,
             'SVM': SupportVectorMachine,
-            'DTLNN': DeepTransferLearningNN,
+            'DTLNN': StackedAutoEncoders,
             'FCNN': FullyConnectedNeuralNetwork,
         }
-        configurations = self.get_configurations(spe_pas=spe_pas)
-        self.set_parameters(configurations=configurations)
 
     def training(self,
                  start_time: int = 1,
@@ -83,13 +84,13 @@ class Framework:
                                        if_show=True,
                                        if_save=if_save,
                                        )
-            elif self.cross_validation == '5 fold':
+            elif 'fold' in self.cross_validation:
                 self.train_folds(run_time=run_time,
                                  if_show=True,
                                  if_save=if_save,
                                  )
 
-        print('Training finished, the results are saved in {:s} of file {:s}. '.format(
+        print('Training finished, the results are saved in {:} of file {:}. '.format(
             self.save_scheme_name, self.result.result_file_path))
 
     def train_monte_calor(self,
@@ -97,15 +98,21 @@ class Framework:
                           if_show: bool = True,
                           if_save: bool = False,
                           ):
+        """Training the model based on Monte Calor cross validation strategy.
+
+        Keyword Arguments:
+            run_time {int} -- [description] (default: {None})
+            if_show {bool} -- [description] (default: {True})
+            if_save {bool} -- [description] (default: {False})
+        """
         # Preparing dataset
-        sd = SchemeData(dir_path=self.dir_path)
-        basic_pa = parse_str(self.current_xml)['parameters']['basic']
-        data = sd.monte_calor_cross_validation(run_time=run_time,
-                                               normalization=basic_pa['normalization'],
-                                               dataset=basic_pa['dataset'],
-                                               atlas=basic_pa['atlas'],
-                                               feature=basic_pa['feature'])
-        del sd
+        scheme_data = SchemeData(dir_path=self.dir_path)
+        basic_pa = parse_str(self.configurations)['parameters']['basic']
+        data = scheme_data.monte_calor_cross_validation(run_time=run_time,
+                                                        normalization=basic_pa['normalization'],
+                                                        dataset=basic_pa['dataset'],
+                                                        atlas=basic_pa['atlas'],
+                                                        feature=basic_pa['feature'])
 
         # Preparing log director
         self.log.set_path(subfolder='time {:d}'.format(run_time))
@@ -127,7 +134,7 @@ class Framework:
         if if_save:
             self.result.save_results(save_scheme_name=self.save_scheme_name,
                                      cross_validation=self.cross_validation,
-                                     current_xml=self.current_xml,
+                                     current_xml=self.configurations,
                                      results=results,
                                      run_time=run_time)
 
@@ -137,15 +144,17 @@ class Framework:
                     if_show: bool = True,
                     ):
         """Train model fold by fold. This part is mainly focus on load dataset from hdf5 file.
-        
+
         Keyword Arguments:
             run_time {int} -- [description] (default: {None})
             if_save {bool} -- [description] (default: {False})
             show_info {bool} -- [description] (default: {True})
         """
-        #Preparing dataset according to scheme
+        # Preparing dataset according to scheme
         dataset = self.models[self.scheme].load_dataset(
-            hdf5_file_path=self.dataset_file_path, scheme=self.scheme)
+            hdf5_file_path=self.dataset_file_path,
+            scheme=self.scheme,
+            dataset=self.dataset)
 
         for fold_name, fold_data in dataset.items():
             self.train_fold(run_time=run_time,
@@ -161,7 +170,7 @@ class Framework:
                    if_show: bool = True,
                    if_save: bool = True,
                    ):
-        """Train fold 
+        """Train fold.
 
         Arguments:
             run_time {int} -- Current run time
@@ -181,7 +190,7 @@ class Framework:
         # Preparing tensorflow graph
         self.log.reset_graph()
 
-        #Preparing dataset according to scheme
+        # Preparing dataset according to scheme
         if fold_data is None:
             fold_data = self.models[self.scheme].load_dataset(
                 hdf5_file_path=self.dataset_file_path, scheme=self.scheme)[fold_name]
@@ -196,12 +205,13 @@ class Framework:
         results = self.model.training(data=fold_data,
                                       run_time=run_time,
                                       fold_name=fold_name,
-                                      show_info=if_show)
+                                      if_show=if_show)
 
         if if_save:
             self.result.save_results(save_scheme_name=self.save_scheme_name,
                                      cross_validation=self.cross_validation,
-                                     current_xml=self.current_xml,
+                                     current_xml=self.configurations,
+                                     dataset=self.dataset,
                                      results=results,
                                      run_time=run_time,
                                      fold_name=fold_name)
@@ -209,6 +219,15 @@ class Framework:
 
     def get_configurations(self,
                            spe_pas: dict = None):
+        """Get the string of configurations. If specify paramters manually, the corresponding 
+        part in the configuration string is replaced by new parameters.
+
+        Keyword Arguments:
+            spe_pas {dict} -- Specify parameters (default: {None})
+
+        Returns:
+            [type] -- [description]
+        """
         scheme_file_path = os.path.join(self.project_path,
                                         'Schemes/{:s}.xml'.format(self.scheme))
         configurations = open(scheme_file_path).read()
@@ -224,17 +243,18 @@ class Framework:
 
         return configurations
 
-    def set_parameters(self,
-                       configurations: str):
+    def set_parameters(self):
         """Setting parameters by string.
-
-        Arguments:
-            configurations {str} -- [String with xml format]
 
         Raises:
             Warning: [Whether the cross validation strategy in the formatting xml files]
         """
-        pas = parse_str(configurations)
+        pas = parse_str(self.configurations)
+
+        #Set dataset name from parameters
+        if 'scheme' in pas['parameters']['basic']:
+            self.scheme = pas['parameters']['basic']['scheme']
+
         try:
             self.cross_validation = pas['parameters']['basic']['cross_validation']
         except KeyError:
@@ -243,57 +263,8 @@ class Framework:
                 'The cross validation should be given in configurations. ')
 
         # Saving group and parameters
-        self.save_scheme_name, self.current_xml = self.result.set_saving_group(
+        self.save_scheme_name = self.result.set_saving_group(
             self.scheme,
-            configurations,
-            self.cross_validation)
+            self.configurations,
+            self.log)
     # To be continue
-
-    def evalution_trained_models(self,
-                                 exp_date: str,
-                                 exp_clock: str,
-                                 if_results_reset: bool = True,
-                                 start_time: int = 1,
-                                 stop_time: int = 10,
-                                 if_save: bool = False,
-                                 ):
-        log = Log(dir_path=self.dir_path, scheme_folder=self.scheme)
-        log.set_path(date=exp_date, clock=exp_clock)
-        self.log = log
-
-        # Preparing dataset
-        sd = SchemeData(dir_path=self.dir_path)
-        gender_hdf5 = hdf5_handler(sd.hdf5_path)[
-            'scheme gender {:s}'.format(self.scheme)]
-
-        for gender in ['male', 'femal']:
-            gender_group = gender_hdf5.require_group(gender)
-            dataset = self.models[self.scheme].load_dataset(
-                scheme_group=gender_group)
-            # Evaluation
-            for run_time in np.arange(start=start_time, stop=stop_time + 1):
-                print('Run times: {:d}...'.format(run_time))
-
-                for fold_index in np.arange(5) + 1:
-                    # Preparing dataset
-                    data = dataset['fold {:d}'.format(fold_index)]
-
-                    # Preparing log director
-                    self.log.set_path(
-                        subfolder='time {:d}/fold {:d}'.format(run_time, fold_index))
-                    # Preparing tensorflow graph
-                    self.log.reset_graph()
-
-                    # Rebuild the structure and log
-                    self.model = self.models[self.scheme](scheme=self.scheme,
-                                                          log=self.log,
-                                                          dir_path=self.dir_path,
-                                                          spe_pas=self.spe_pas,
-                                                          )
-                    with self.model.log.graph.as_default():
-                        self.model.build_structure()
-                    self.model.log.restore(
-                        restored_dir='optimal_model', restored_epoch='final')
-
-                    result_fold = self.model.predicting(data=data, epoch=0)
-                    print(result_fold)

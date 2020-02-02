@@ -6,7 +6,7 @@ from Layer.LayerObject import LayerObject
 
 class AutoEncoder(LayerObject):
     """
-
+    Autoencoder layer.
     """
     required_pa = ['kernel_shape']
 
@@ -20,38 +20,38 @@ class AutoEncoder(LayerObject):
                                  'activation': None,
                                  'L2_lambda': 5e-3,
                                  'load_weight': False,
+                                 'beta': 1,
+                                 'rho': 0.1,
                                  'scope': 'AE',
                                  })
-        self.tensors = {}
-        self.pa = self.set_parameters(arguments=arguments,
-                                      parameters=parameters)
+        self.set_parameters(arguments=arguments,
+                            parameters=parameters)
 
         self.input_tensor = tf.placeholder(
-            dtype=tf.float32, shape=[None, self.pa['kernel_shape'][0]])
+            dtype=tf.float32, shape=[None, self.parameters['kernel_shape'][0]])
         self.output_tensor = tf.placeholder(
-            dtype=tf.float32, shape=[None, self.pa['kernel_shape'][0]])
+            dtype=tf.float32, shape=[None, self.parameters['kernel_shape'][0]])
 
         # Encoding layer
-        arguments['scope'] = self.pa['scope'] + '/enc'
+        arguments['scope'] = self.parameters['scope'] + '/enc'
         self.encode_layer = FullyConnected(arguments=arguments,
                                            parameters=parameters)
+        self.trainable_pas.update({'enc/{:s}'.format(parameter):
+                                   self.encode_layer.trainable_pas[parameter]
+                                   for parameter in self.encode_layer.trainable_pas})
 
         # Decoding layer
-        arguments['scope'] = self.pa['scope'] + 'dec'
+        arguments['scope'] = self.parameters['scope'] + 'dec'
         if 'placeholders' in arguments:
             arguments.pop('placeholders')
         decoding_kernel_shape = [
-            self.pa['kernel_shape'][1], self.pa['kernel_shape'][0]]
+            self.parameters['kernel_shape'][1], self.parameters['kernel_shape'][0]]
         arguments['kernel_shape'] = decoding_kernel_shape
         self.decode_layer = FullyConnected(arguments=arguments,
                                            parameters=parameters)
-
-        # Building trainable variables
-        self.variables = []
-        for layer in [self.encode_layer, self.decode_layer]:
-            self.variables.append(layer.tensors['weight'])
-            if 'bias' in layer.tensors:
-                self.variables.append(layer.tensors['bias'])
+        self.trainable_pas.update({'dec/{:s}'.format(parameter):
+                                   self.encode_layer.trainable_pas[parameter]
+                                   for parameter in self.encode_layer.trainable_pas})
 
     def build(self, *args, **kwargs):
         if 'input_tensor' in kwargs:
@@ -73,12 +73,13 @@ class AutoEncoder(LayerObject):
         self.tensors['output'] = tensors['output']
 
         # Sparsity penalty
-        if 'rho' in self.pa and 'beta' in self.pa:
+        if 'rho' in self.parameters and 'beta' in self.parameters:
             rho_ = tf.reduce_mean(tensors['output'], axis=0)
-            rho = self.pa['rho']
+            rho = self.parameters['rho']
             sparsity_penalty = tf.reduce_sum(
                 rho * tf.log(tf.div(rho, rho_) + (1-rho) * tf.log(tf.div(1-rho, 1-rho_))))
-            tf.add_to_collection('Sparsity_loss', self.pa['beta'] * sparsity_penalty)
+            tf.add_to_collection(
+                'Sparsity_loss', self.parameters['beta'] * sparsity_penalty)
 
         self.decode_layer(tensors=tensors,
                           placeholders=placeholders)

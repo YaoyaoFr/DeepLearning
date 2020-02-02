@@ -5,6 +5,7 @@ from abc import ABCMeta
 import h5py
 import numpy as np
 import tensorflow as tf
+import scipy.io as sio
 
 from Dataset.utils import hdf5_handler
 from Layer.LayerConstruct import build_layer
@@ -63,22 +64,21 @@ class NeuralNetwork(object, metaclass=ABCMeta):
         self.set_graph(log=log)
         self.load_parameters(scheme=scheme, spe_pas=spe_pas)
 
-        with self.log.graph.as_default():
-            # Build the input layers
-            for placeholder_pa in self.pas['layers']['input']:
-                layer = build_layer(arguments=placeholder_pa,
-                                    parameters=self.pas['basic'])
-                self.input_placeholders[placeholder_pa['scope']] = layer()
+        # Build the input layers
+        for placeholder_pa in self.pas['layers']['input']:
+            layer = build_layer(arguments=placeholder_pa,
+                                parameters=self.pas['basic'])
+            self.input_placeholders[placeholder_pa['scope']] = layer()
 
-            # Build the operation layers
-            for layer_pa in self.pas['layers']['layer']:
-                layer = build_layer(arguments=layer_pa,
-                                    parameters=self.pas['basic'])
-                self.op_layers.append(layer)
+        # Build the operation layers
+        for layer_pa in self.pas['layers']['layer']:
+            layer = build_layer(arguments=layer_pa,
+                                parameters=self.pas['basic'])
+            self.op_layers.append(layer)
 
     def set_graph(self,
                   log: Log):
-        """Set the log instance, session, and most important, the default graph for neural network model. 
+        """Set the log instance, session, and most important, the default graph for neural network model.
 
         Arguments:
             log {Log} -- [description]
@@ -120,9 +120,13 @@ class NeuralNetwork(object, metaclass=ABCMeta):
                   placeholders=self.input_placeholders)
             input_tensors = layer.tensors
 
-            self.tensors[layer.pa['scope']] = input_tensors
-            self.trainable_pas.update(layer.trainble_pa)
-        print('Build {:s}.'.format(self.NN_type))
+            scope = layer.parameters['scope']
+            self.tensors[scope] = input_tensors
+            train_pas = {'{:s}/{:s}'.format(scope, p): layer.trainable_pas[p]
+                         for p in layer.trainable_pas}
+            self.trainable_pas.update(train_pas)
+
+        print('Build {:s}.'.format(self.model_type))
 
         # Build the optimizers of neural network
         output_tensor = input_tensors['output']
@@ -133,14 +137,14 @@ class NeuralNetwork(object, metaclass=ABCMeta):
             self.initialization()
 
         self.log.saver = tf.train.Saver(
-            self.trainable_pas.values, max_to_keep=1000, name='saver')
+            self.trainable_pas, max_to_keep=1000, name='saver')
 
     def initialization(self,
-                       init_op: tf.Operation = None, 
+                       init_op: tf.Operation = None,
                        name: str = '',
                        ):
         """Initialization all the trainable variables
-        
+
         Keyword Arguments:
             init_op {[type]} -- [description] (default: {None})
             name {str} -- [description] (default: {''})
@@ -188,7 +192,6 @@ class NeuralNetwork(object, metaclass=ABCMeta):
             self.results['Cost'] += 0.5 * loss
 
         # build minimizer
-
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
             self.global_step = tf.Variable(
@@ -208,24 +211,23 @@ class NeuralNetwork(object, metaclass=ABCMeta):
                  fold_name: str = None,
                  if_show: bool = True,
                  ):
-        """The main training process of the neural network, which includes: 1. build structure. 
-        2. write the architecture to file. 3. backpropagation 4. show results if permitted. 
-        5. save first, optimal and final model in the training process. 
-        
+        """The main training process of the neural network, which includes: 1. build structure.
+        2. write the architecture to file. 3. backpropagation 4. show results if permitted.
+        5. save first, optimal and final model in the training process.
+
         Arguments:
             data {dict} -- [description]
-        
+
         Keyword Arguments:
             run_time {int} --  (default: {1})
             fold_name {str} -- 'fold 1', 'fold 2', ... (default: {None})
             if_show {bool} --  (default: {True})
-        
+
         Returns:
             [type] -- [description]
         """
-        with self.log.graph.as_default():
-            self.build_structure()
-            self.log.write_graph()
+        self.build_structure()
+        self.log.write_graph()
 
         early_stop = self.backpropagation(data=data)
 
@@ -237,24 +239,26 @@ class NeuralNetwork(object, metaclass=ABCMeta):
 
     def backpropagation(self,
                         data: dict,
+                        early_stop: EarlyStop = None,
                         ):
         """Backpropagation of neural network.
-        
+
         Arguments:
             data {dict} -- Input dataset include train, valid and test data and label.
-        
+
         Raises:
             Warning: [description]
-        
+
         Returns:
             [type] -- [description]
         """
         batch_size = self.pas['training']['train_batch_size']
 
-        early_stop = EarlyStop(log=self.log,
-                                data=data,
-                                results=self.results,
-                                pas=self.pas['early_stop'])
+        if early_stop is None:
+            early_stop = EarlyStop(log=self.log,
+                                   data=data,
+                                   results=self.results,
+                                   pas=self.pas['early_stop'])
 
         epoch = early_stop.epoch
         training_cycle = early_stop.parameters['training_cycle']
@@ -280,12 +284,12 @@ class NeuralNetwork(object, metaclass=ABCMeta):
                               minimizer=None
                               ):
         """Feed data and labels, then run the optimizer with session
-        
+
         Arguments:
             data {dict} -- dataset
             batch_size {int} -- batch size of training process
             learning_rate {float} -- learning rate of the optimization
-        
+
         Keyword Arguments:
             training {bool} --  (default: {True})
             minimizer {[type]} --  (default: {None})
@@ -320,20 +324,26 @@ class NeuralNetwork(object, metaclass=ABCMeta):
     def predicting(self,
                    data: np.ndarray,
                    epoch: int,
+                   restored_model: str = None,
                    if_save: bool = False,
                    ):
         """Predicting the result of train, valid and test dataset
-        
+
         Arguments:
-            data {np.ndarray} -- 
-            epoch {int} -- 
-        
+            data {np.ndarray} --
+            epoch {int} --
+
         Keyword Arguments:
             if_save {bool} --  (default: {False})
-        
+
         Returns:
             [type] -- [description]
         """
+        if restored_model is not None:
+            restored_path = os.path.join(self.log.dir_path,
+                                         'optimal_model',
+                                         'train_model_{:s}'.format(restored_model))
+            self.log.restore_model(restored_path=restored_path)
 
         results_epoch = {}
         for tag in ['train', 'valid', 'test']:
@@ -356,17 +366,17 @@ class NeuralNetwork(object, metaclass=ABCMeta):
                     get_tensors: bool = True,
                     ):
         """Feed the data into model and obtain the result
-        
+
         Arguments:
-            epoch {int} -- 
-            data {np.ndarray} -- 
-        
+            epoch {int} --
+            data {np.ndarray} --
+
         Keyword Arguments:
             tag {str} -- 'train', 'valid' and 'test' (default: {'valid'})
             if_save {bool} --  (default: {True})
             show_info {bool} --  (default: {True})
             get_tensors {bool} -- (default: {True})
-        
+
         Returns:
             [type] -- [description]
         """
@@ -383,11 +393,14 @@ class NeuralNetwork(object, metaclass=ABCMeta):
             fetches['tensors'] = self.tensors
 
         # Feedforward
-        result_batch = self.sess.run(fetches=fetches,
-                                     feed_dict=feed_dict,
-                                     )
+        results = self.sess.run(fetches=fetches,
+                                feed_dict=feed_dict,
+                                )
 
-        results = result_batch['results']
+        if get_tensors:
+            tensors = results['tensors']
+
+        results = results['results']
 
         self.log.write_log(res=results,
                            epoch=epoch,
@@ -396,16 +409,50 @@ class NeuralNetwork(object, metaclass=ABCMeta):
                            show_info=show_info)
         return results
 
+    def get_parameters(self,
+                       restored_model: str = None,
+                       if_save: bool = False,
+                       ):
+        """Predicting the result of train, valid and test dataset
+
+        Arguments:
+            data {np.ndarray} --
+            epoch {int} --
+
+        Keyword Arguments:
+            if_save {bool} --  (default: {False})
+
+        Returns:
+            [type] -- [description]
+        """
+        if restored_model is None:
+            self.initialization()
+            restored_model = 'random_initial'
+        else:
+            restored_path = os.path.join(self.log.dir_path,
+                                         'optimal_model',
+                                         'train_model_{:s}'.format(restored_model))
+            self.log.restore_model(restored_path=restored_path)
+
+        parameters = self.log.sess.run(self.trainable_pas)
+
+        if if_save:
+            save_path = os.path.join(self.log.dir_path,
+                                     '{:s}_parameters.mat'.format(restored_model))
+            sio.savemat(save_path, parameters)
+
+        return parameters
+
     def load_data(self,
                   fold: h5py.Group or dict):
         """Loading data according to input placeholders
-        
+
         Arguments:
             fold {h5py.Groupordict} -- [description]
-        
+
         Raises:
             Warning: [description]
-        
+
         Returns:
             [type] -- [description]
         """
@@ -425,6 +472,7 @@ class NeuralNetwork(object, metaclass=ABCMeta):
 
     @staticmethod
     def load_dataset(scheme: str,
+                     dataset: str,
                      hdf5_file_path: str):
         """Loading data in each fold from hdf5 file.
 
@@ -436,9 +484,10 @@ class NeuralNetwork(object, metaclass=ABCMeta):
             [type] -- [Dictionary of dataset. Key is 'fold 1', 'fold 2', etc]
         """
 
-        dataset = collections.OrderedDict()
-        hdf5_file = hdf5_handler(hdf5_file_path)
-        scheme_group = hdf5_file['scheme {:s}'.format(scheme)]
+        data = collections.OrderedDict()
+        hdf5 = hdf5_handler(hdf5_file_path)
+
+        scheme_group = hdf5['{:s}/scheme {:s}'.format(dataset, scheme)]
 
         fold_list = list(scheme_group)
         fold_list.sort()
@@ -446,7 +495,7 @@ class NeuralNetwork(object, metaclass=ABCMeta):
             fold_dataset = {}
             for tag in scheme_group[fold_name]:
                 fold_dataset[tag] = np.array(scheme_group[fold_name][tag])
-            dataset[fold_name] = (fold_dataset)
+            data[fold_name] = (fold_dataset)
 
-        hdf5_file.close()
-        return dataset
+        hdf5.close()
+        return data

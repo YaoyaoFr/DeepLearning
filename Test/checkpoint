@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/ai/data/yaoyao/Program/Python/DeepLearning/Test/test.model"
+all_model_checkpoint_paths: "/home/ai/data/yaoyao/Program/Python/DeepLearning/Test/test.model"

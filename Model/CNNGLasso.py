@@ -22,7 +22,6 @@ class CNNGraphicalLasso(NeuralNetwork):
         [type] -- [description]
     """
 
-    minimizer_SICE = None
     model_type = 'Convolutional neural network with graphical Lasso'
 
     def __init__(self,
@@ -37,15 +36,18 @@ class CNNGraphicalLasso(NeuralNetwork):
                                dir_path=dir_path,
                                spe_pas=spe_pas,
                                )
-        # self.data_placeholder.update({'covariance': 'covariance_tensor'})
+
+        self.minimizer_SICE = None
+        self.data_placeholder = {'covariance': 'covariance_tensor',
+                                 'label': 'output_tensor'}
 
     def build_optimizer(self, output_tensor,
                         penalties: list = None):
         """Build optimizer of this model, which includes Cross Entropy loss and SICE loss.
-        
+
         Arguments:
             output_tensor {[type]} -- Output or predicting of the neural network
-        
+
         Keyword Arguments:
             penalties {list} -- [description] (default: {None})
         """
@@ -58,11 +60,10 @@ class CNNGraphicalLasso(NeuralNetwork):
         self.prediction = tf.nn.softmax(output_tensor)
 
         # Build loss function, which contains the cross entropy and regularizers.
-        self.results['Cost'] = self.results['Cross Entropy']
 
         if penalties is None:
-            penalties = ['L1', 'L2', 'SICE']
-        coefficients = [1, 0.5, self.pas['basic']['SICE_lambda']]
+            penalties = ['L2', 'SICE']
+        coefficients = [0.5, self.pas['basic']['SICE_lambda']]
 
         for regularizer, coef in zip(penalties, coefficients):
             loss_name = '{:s}_loss'.format(regularizer)
@@ -70,8 +71,9 @@ class CNNGraphicalLasso(NeuralNetwork):
             loss = tf.Variable(0.0, trainable=False)
             if len(loss_collection) > 0:
                 loss = tf.add_n(loss_collection)
-            self.results['{:s} Penalty'.format(regularizer)] = loss
-            self.results['Cost'] += coef * loss
+            self.results['{:s} Penalty'.format(regularizer)] = loss * coef
+        self.results['Cost'] = self.results['Cross Entropy'] + \
+            self.results['L2 Penalty']
 
         # build minimizer
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -90,8 +92,6 @@ class CNNGraphicalLasso(NeuralNetwork):
                                                              global_step=self.global_step,
                                                              name='minimizer_SICE',
                                                              )
-                else:
-                    self.minimizer_SICE = None
 
     def training(self,
                  data: dict,
@@ -102,20 +102,19 @@ class CNNGraphicalLasso(NeuralNetwork):
         """The main training process of the neural network, which includes: 1. build structure. 
         2. write the architecture to file. 3. Pretraining. 4. backpropagation 5. show results if permitted. 
         6. save first, optimal and final model in the training process. 
-        
+
         Arguments:
             data {dict} -- [description]
-        
+
         Keyword Arguments:
             run_time {int} --  (default: {1})
             fold_name {str} -- 'fold 1', 'fold 2', ... (default: {None})
             if_show {bool} --  (default: {True})
-        
+
         Returns:
             [type] -- [description]
         """
-        with self.graph.as_default():
-            self.build_structure()
+        self.build_structure()
 
         data = self.load_data(data)
 
@@ -134,7 +133,7 @@ class CNNGraphicalLasso(NeuralNetwork):
     def pre_training(self,
                      data: dict):
         """Pretraining for learning sparse inverse covariance matrices.
-        
+
         Arguments:
             data {dict} -- 
         """
@@ -142,15 +141,12 @@ class CNNGraphicalLasso(NeuralNetwork):
         pre_learning_rate = self.pas['training']['pre_learning_rate']
         pre_training_cycle = self.pas['training']['pre_training_cycle']
 
-        supervised_data = {'train data': data['train data'],
-                           'train label': data['train label'],
+        supervised_data = {'train label': data['train label'],
                            'train covariance': data['train covariance']}
-        unsupervised_data = {'train data': data['valid data'],
-                             'train covariance': data['valid covariance'],
+        unsupervised_data = {'train covariance': data['valid covariance'],
                              'train label': data['valid label']}
 
-        for i in range(pre_training_cycle):
-            print('Pre training epoch: {:d}'.format(i + 1))
+        for epoch in range(pre_training_cycle):
             self.backpropagation_epoch(
                 data=supervised_data,
                 batch_size=batch_size,
@@ -165,59 +161,66 @@ class CNNGraphicalLasso(NeuralNetwork):
                 training=False,
                 minimizer=self.minimizer_SICE,
             )
+            results = self.predicting(data=data, epoch=epoch+1)
+            print('Train: {:.5f}\tValid: {:.5f}\tTest: {:.5f}'.format(
+                results['train']['SICE Penalty'],
+                results['valid']['SICE Penalty'],
+                results['test']['SICE Penalty']
+            ))
 
     def backpropagation(self,
                         data: dict,
-                        early_stop: EarlyStop = None,
                         ):
         """Backpropagation of neural network.
-        
+
         Arguments:
             data {dict} -- Input dataset include train, valid and test data and label.
-        
+
         Raises:
             Warning: [description]
-        
+
         Returns:
             [type] -- [description]
         """
         self.log.write_graph()
         batch_size = self.pas['training']['train_batch_size']
 
-        if early_stop is None:
-            early_stop = EarlyStop(log=self.log,
-                                   data=data,
-                                   results=self.results,
-                                   pas=self.pas['early_stop'])
+        early_stop = EarlyStop(log=self.log,
+                               data=data,
+                               results=self.results,
+                               pas=self.pas['early_stop'])
 
         epoch = early_stop.epoch
-        while epoch < early_stop.training_cycle:
+        training_cycle = early_stop.parameters['training_cycle']
+        while epoch < training_cycle:
+            learning_rate = early_stop.parameters['learning_rate']
             if self.pas['basic']['SICE_training']:
-                supervised_data = {'train data': data['train data'],
-                                   'train covariance': data['train covariance'],
+                supervised_data = {'train covariance': data['train covariance'],
                                    'train label': data['train label']}
-                unsupervised_data = {'train data': data['valid data'],
-                                     'train covariance': data['valid covariance'],
-                                     'train label': data['valid label']}
+                unsupervised_data = {'train covariance': np.concatenate((data['valid covariance'],
+                                                                         data['test covariance'])),
+                                     'train label': np.concatenate((data['valid label'],
+                                                                    data['test label'])),
+                                     }
                 self.backpropagation_epoch(
                     data=supervised_data,
                     batch_size=batch_size,
-                    learning_rate=early_stop.learning_rate,
+                    learning_rate=learning_rate,
                     training=True,
                     minimizer=self.minimizer_SICE,
                 )
                 self.backpropagation_epoch(
                     data=unsupervised_data,
                     batch_size=batch_size,
-                    learning_rate=early_stop.learning_rate,
-                    training=False,
+                    learning_rate=learning_rate,
+                    training=True,
                     minimizer=self.minimizer_SICE,
                 )
 
             # Training
             self.backpropagation_epoch(data=data,
                                        batch_size=batch_size,
-                                       learning_rate=early_stop.learning_rate,
+                                       learning_rate=learning_rate,
                                        )
 
             # Evaluation
@@ -228,252 +231,46 @@ class CNNGraphicalLasso(NeuralNetwork):
 
         return early_stop
 
-    def training_(self,
-                  data: h5py.Group or dict,
-                  run_time: int = 1,
-                  fold_index: int = 1,
-                  restored_path: str = None,
-                  show_info: bool = True,
-                  ):
-        with self.graph.as_default():
-            self.build_structure()
-
-        data = self.load_data(data)
-
-        results = self.backpropagation(data=data,
-                                       fold_index=fold_index,
-                                       run_time=run_time,
-                                       start_epoch=start_epoch,
-                                       show_info=show_info,
-                                       )
-
-        return results
-
-    def backpropagation_(self,
-                         data: dict,
-                         fold_index: int = 1,
-                         run_time: int = 1,
-                         start_epoch: int = 0,
-                         regions: int or list = None,
-                         show_info: bool = True,
-                         ):
-        self.log.write_graph()
-        train_pa = self.pas['training']
-        train_pa['SICE_training'] = self.pas['basic']['SICE_training']
-        early_stop_pa = self.pas['early_stop']
-
-        early_stop_pa.update({'epoch': int_epoch,
-                              'decay_count': 0,
-                              'tolerant_count': 0,
-                              'training_cycle': train_pa['training_cycle'],
-                              'learning_rate': early_stop_pa['learning_rate']
-                              if 'learning_rate' in early_stop_pa else early_stop_pa['learning_rates'][0],
-                              'stage': 0,
-                              })
-
-        data_unsupervise = np.concatenate(
-            (data['valid data'], data['test data']), axis=0)
-        label_unsupervise = np.concatenate(
-            (data['valid label'], data['test label']), axis=0)
-        extra_data_unsupervise = np.concatenate(
-            (data['valid covariance'], data['test covariance']), axis=0)
-        extra_feed_unsupervise = {
-            self.input_placeholders['sample_covariance']: extra_data_unsupervise}
-
-        self.save_GLasso_weights_to_figure(run_time=run_time,
-                                           prefix='CNNWithGLasso initialize',
-                                           # if_show=True,
-                                           # if_save=True,
-                                           )
-
-        for i in range(train_pa['pretraining_cycle']):
-            print('Pre training epoch: {:d}'.format(i + 1))
-            self.backpropagation_epoch(
-                epoch=i + 1,
-                data=data,
-                learning_rate=early_stop_pa['pre_learning_rate'],
-                train_pa=train_pa,
-                training=True,
-                save_info=False,
-                show_info=False,
-                get_tensors=False,
-                minimizer=self.optimizer['minimizer_SICE'],
-            )
-            self.backpropagation_epoch(
-                data=data,
-                learning_rate=early_stop_pa['pre_learning_rate'],
-                train_pa=train_pa,
-                training=False,
-                save_info=False,
-                show_info=False,
-                get_tensors=False,
-                minimizer=self.optimizer['minimizer_SICE'],
-                epoch=i + 1,
-            )
-
-            # if (i + 1) % 20 == 0:
-            #     self.analyse_weight(run_time=run_time,
-            #                         fold_index=fold_index,
-            #                         prefix='CNNWithGLasso pretraining',
-            #                         epoch=i + 1,
-            #                         save=True,
-            #                         )
-        if train_pa['pretraining_cycle'] > 0:
-            self.save_GLasso_weights_to_figure(run_time=run_time,
-                                               prefix='CNNWithGLasso pre trained',
-                                               # if_save=True,
-                                               if_show=True,
-                                               )
-
-        extra_feed_train = {
-            self.input_placeholders['sample_covariance']: data['train covariance']}
-        extra_feed_valid = {
-            self.input_placeholders['sample_covariance']: data['valid covariance']}
-        extra_feed_test = {
-            self.input_placeholders['sample_covariance']: data['test covariance']}
-        epoch = early_stop_pa['epoch']
-        while epoch < train_pa['training_cycle']:
-            if train_pa['SICE_training']:
-                self.backpropagation_epoch(
-                    data=data,
-                    learning_rate=early_stop_pa['learning_rate_SICE'] if 'learning_rate_SICE' in early_stop_pa else
-                    early_stop_pa['learning_rate'],
-                    train_pa=train_pa,
-                    training=True,
-                    save_info=False,
-                    show_info=False,
-                    minimizer=self.optimizer['minimizer_SICE'],
-                    epoch=epoch + 1,
-                    feed_dict_extra=extra_feed_train,
-                )
-                self.backpropagation_epoch(
-                    data=data,
-                    learning_rate=early_stop_pa['learning_rate'],
-                    train_pa=train_pa,
-                    training=True,
-                    save_info=False,
-                    show_info=False,
-                    minimizer=self.optimizer['minimizer_SICE'],
-                    feed_dict_extra=extra_feed_unsupervise,
-                    epoch=epoch + 1
-                )
-
-            results_train = self.backpropagation_epoch(data=data,
-                                                       learning_rate=early_stop_pa['learning_rate'],
-                                                       train_pa=train_pa,
-                                                       epoch=epoch + 1,
-                                                       get_tensors=True,
-                                                       show_info=False,
-                                                       feed_dict_extra=extra_feed_train,
-                                                       )
-
-            if (epoch + 1) % train_pa['test_cycle'] == 0:
-                # Valid
-                results_valid = self.feedforward(data=data,
-                                                 epoch=epoch + 1,
-                                                 tag='Valid',
-                                                 get_tensors=False,
-                                                 show_info=False,
-                                                 )
-                # Test
-                results_test = self.feedforward(data=data,
-                                                epoch=epoch + 1,
-                                                tag='Test',
-                                                get_tensors=False,
-                                                show_info=False,
-                                                )
-
-                if show_info:
-                    print(
-                        'Epoch: {:d}\t'
-                        # 'Norm: {:f}\t'
-                        # 'SICE Penalty: {:5e}\r\n\t\t'
-                        'Train cost: {:f}\taccuracy: {:f}\t'
-                        'Valid cost: {:f}\taccuracy: {:f}\t'
-                        'Test cost: {:f}\taccuracy: {:f}'.format(
-                            epoch + 1,
-                            # np.mean(result['tensors']['E2NGLasso1']['Norm 1']),
-                            # np.mean(result['results']['SICE Penalty']),
-                            results_train['Cross Entropy'],
-                            results_train['Accuracy'],
-                            results_valid['Cross Entropy'],
-                            results_valid['Accuracy'],
-                            results_test['Cross Entropy'],
-                            results_test['Accuracy']))
-
-                early_stop_pa = early_stop(log=self.log,
-                                           epoch=epoch,
-                                           pa=early_stop_pa,
-                                           results_train=results_train,
-                                           results_valid=results_valid,
-                                           results_test=results_test,
-                                           )
-                epoch = early_stop_pa['epoch']
-            # if (epoch + 1) % 20 == 0:
-            #     self.analyse_weight(run_time=run_time,
-            #                         fold_index=fold_index,
-            #                         prefix='CNNWithGLasso training',
-            #                         epoch=epoch + 1,
-            #                         save=True,
-            #                         )
-
-        self.save_GLasso_weights_to_figure(run_time=run_time,
-                                           weight_names=[
-                                               'weight_SICE', 'weight_SICE_bn', 'weight', 'weight_multiply'],
-                                           prefix='CNNWithGLasso trained',
-                                           # if_save=True,
-                                           if_show=True,
-                                           )
-        save_weights(self.op_layers, self.sess)
-        # self.discriminant_power_analyse(run_time=run_time, fold_index=fold_index)
-
-        return early_stop_pa['results'], early_stop_pa['max_epoch']
-
     def discriminant_power_analyse(self):
-        layers = self.op_layers
-        weight_dict = {}
-        for layer in layers:
-            weights = {}
-            for tensors_name in layer.tensors:
-                if 'weight' in tensors_name:
-                    weights[tensors_name] = layer.tensors[tensors_name]
-            weight_dict[layer.pa['scope']] = weights
-        weights = self.sess.run(weight_dict)
+        """Analyse important edges for discrimination.
+        """
 
-        F = np.array([1, -1])
+        weights = self.log.sess.run(self.trainable_pas)
+
+        z = np.array([1, -1])
         for layer_scope in ['hidden2', 'hidden1']:
-            weight = weights[layer_scope]['weight']
-            F = np.matmul(weight, F)
+            weight = weights['{:s}/weight'.format(layer_scope)]
+            z = np.matmul(weight, z)
 
         # N2G
-        weight = weights['N2G1']['weight']
-        F = np.multiply(weight, F)
-        F = np.squeeze(np.sum(np.absolute(F), axis=-1))
+        weight = weights['N2G1/weight']
+        z = np.multiply(weight, z)
+        z = np.squeeze(np.sum(np.absolute(z), axis=-1))
 
         # E2N
-        weight = weights['E2N1']['weight_multiply']
-        F = np.sum(np.abs(np.multiply(np.squeeze(weight), F)), axis=-1)
+        weight = weights['E2N1/weight_multiply']
+        z = np.sum(np.abs(np.multiply(np.squeeze(weight), z)), axis=-1)
 
         weight_names = ['weight', 'weight_SICE',
                         'weight_SICE_bn', 'weight_multiply']
         results = {weight_name: np.squeeze(
             weights['E2N1'][weight_name]) for weight_name in weight_names}
-        results['F'] = F
+        results['F'] = z
 
         # save_dir_path = 'F:/OneDriveOffL/Data/Result/Net'
         save_path = os.path.join(self.log.dir_path, 'parameters.mat')
 
         sio.savemat(save_path, results)
 
-    def save_GLasso_weights_to_figure(self,
-                                      run_time: int = 0,
-                                      epoch: int = None,
-                                      weight_names: list = None,
-                                      if_show: bool = False,
-                                      if_save: bool = False,
-                                      if_absolute: bool = False,
-                                      prefix: str = None,
-                                      ):
+    def save_weights_to_figure(self,
+                               run_time: int = 0,
+                               epoch: int = None,
+                               weight_names: list = None,
+                               if_show: bool = False,
+                               if_save: bool = False,
+                               if_absolute: bool = False,
+                               prefix: str = None,
+                               ):
         """
         Save or exhibit the weights in node-to-edge layer
         :param run_time: Run time
@@ -518,3 +315,39 @@ class CNNGraphicalLasso(NeuralNetwork):
                             if_save=if_save,
                             if_absolute=if_absolute,
                             )
+
+    def get_parameters(self,
+                       restored_model: str = None,
+                       if_save: bool = False,
+                       ):
+        """Predicting the result of train, valid and test dataset
+
+        Arguments:
+            data {np.ndarray} --
+            epoch {int} --
+
+        Keyword Arguments:
+            if_save {bool} --  (default: {False})
+
+        Returns:
+            [type] -- [description]
+        """
+        if restored_model is None:
+            self.initialization()
+            restored_model = 'random_initial'
+        else:
+            restored_path = os.path.join(self.log.dir_path,
+                                         'optimal_model',
+                                         'train_model_{:s}'.format(restored_model))
+            self.log.restore_model(restored_path=restored_path)
+
+        trainable_pas = self.trainable_pas
+        trainable_pas['E2N1/weight_multiply'] = self.tensors['E2N1']['weight_multiply']
+        parameters = self.log.sess.run(self.trainable_pas)
+
+        if if_save:
+            save_path = os.path.join(self.log.dir_path,
+                                     '{:s}_parameters.mat'.format(restored_model))
+            sio.savemat(save_path, parameters)
+
+        return parameters

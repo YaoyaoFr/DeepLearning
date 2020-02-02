@@ -29,36 +29,36 @@ class EdgeToCluster(LayerObject):
                                  })
         self.tensors = {}
 
-        self.pa = self.set_parameters(arguments=arguments,
+        self.parameters = self.set_parameters(arguments=arguments,
                                       parameters=parameters)
         # Cluster kernel
-        [width, height, in_channels, out_channels] = self.pa['kernel_shape']
+        [width, height, in_channels, out_channels] = self.parameters['kernel_shape']
         kernel_shape_row = [1, height, in_channels, 1]
         self.weight_row = tf.Variable(initial_value=self.get_initial_weight(kernel_shape=kernel_shape_row),
-                                      name=self.pa['scope'] + '/kernel_row',
+                                      name=self.parameters['scope'] + '/kernel_row',
                                       )
         self.tensors['weight_row'] = self.weight_row
-        L2_weight_row = tf.contrib.layers.l2_regularizer(self.pa['L2_lambda'])(self.weight_row)
+        L2_weight_row = tf.contrib.layers.l2_regularizer(self.parameters['L2_lambda'])(self.weight_row)
         tf.add_to_collection('L2_loss', L2_weight_row)
 
         kernel_shape_col = [width, 1, 1, out_channels]
         self.weight_col = tf.Variable(initial_value=self.get_initial_weight(kernel_shape=kernel_shape_col),
-                                      name=self.pa['scope'] + '/kernel_col')
+                                      name=self.parameters['scope'] + '/kernel_col')
         self.tensors['weight_col'] = self.weight_col
-        L2_weight_col = tf.contrib.layers.l2_regularizer(self.pa['L2_lambda'])(self.weight_col)
+        L2_weight_col = tf.contrib.layers.l2_regularizer(self.parameters['L2_lambda'])(self.weight_col)
         tf.add_to_collection('L2_loss', L2_weight_col)
 
         # build bias
-        out_channels = self.pa['kernel_shape'][-1]
+        out_channels = self.parameters['kernel_shape'][-1]
 
-        if self.pa['bias']:
+        if self.parameters['bias']:
             initializer = tf.constant(0.0, shape=[out_channels, ])
-            if self.pa['load_bias']:
+            if self.parameters['load_bias']:
                 initializer = load_initial_value(type='bias',
-                                                 name=self.pa['scope'])
+                                                 name=self.parameters['scope'])
 
             self.bias = tf.Variable(initial_value=initializer,
-                                    name=self.pa['scope'] + '/bias',
+                                    name=self.parameters['scope'] + '/bias',
                                     )
             self.tensors['bias'] = self.bias
 
@@ -81,23 +81,23 @@ class EdgeToCluster(LayerObject):
                                           perm=[0, 2, 3, 1])
             cluster_adjacency = tf.multiply(adjacency_matrix, cross_multiply)
             cluster_adjacency_list.append(cluster_adjacency)
-            node_feature_row = self.pa['conv_fun'](input=cluster_adjacency,
+            node_feature_row = self.parameters['conv_fun'](input=cluster_adjacency,
                                                    filter=self.weight_row,
-                                                   strides=self.pa['strides'],
-                                                   padding=self.pa['padding'])
-            node_feature = self.pa['conv_fun'](input=node_feature_row,
+                                                   strides=self.parameters['strides'],
+                                                   padding=self.parameters['padding'])
+            node_feature = self.parameters['conv_fun'](input=node_feature_row,
                                                filter=self.weight_col,
-                                               strides=self.pa['strides'],
-                                               padding=self.pa['padding'])
-            if self.pa['use_bias']:
+                                               strides=self.parameters['strides'],
+                                               padding=self.parameters['padding'])
+            if self.parameters['use_bias']:
                 node_feature = tf.nn.bias_add(node_feature, self.bias)
             node_features.append(node_feature)
         node_features = tf.concat(node_features, axis=-2)
         node_features = tf.squeeze(node_features, axis=-3)
         self.tensors['cluster_adjacency'] = cluster_adjacency_list
 
-        if self.pa['activation']:
-            node_features = self.pa['activation'](node_features)
+        if self.parameters['activation']:
+            node_features = self.parameters['activation'](node_features)
 
         self.tensors['node_features'] = node_features
 
@@ -118,16 +118,16 @@ class SelfAttentionGraphPooling(LayerObject):
                                  'scope': 'SAGPool',
                                  })
         self.tensors = {}
-        self.pa = self.set_parameters(arguments=arguments,
+        self.parameters = self.set_parameters(arguments=arguments,
                                       parameters=parameters)
 
         # Attention kernel
-        initializer_att = self.get_initial_weight(kernel_shape=self.pa['kernel_shape'])
+        initializer_att = self.get_initial_weight(kernel_shape=self.parameters['kernel_shape'])
         self.weight_att = tf.Variable(initial_value=initializer_att,
-                                      name=self.pa['scope'] + '/kernel',
+                                      name=self.parameters['scope'] + '/kernel',
                                       )
         self.tensors['weight_att'] = self.weight_att
-        L2_att = tf.contrib.layers.l2_regularizer(self.pa['L2_lambda'])(self.weight_att)
+        L2_att = tf.contrib.layers.l2_regularizer(self.parameters['L2_lambda'])(self.weight_att)
         tf.add_to_collection('L2_loss', L2_att)
 
     def build(self, *args, **kwargs):
@@ -141,13 +141,13 @@ class SelfAttentionGraphPooling(LayerObject):
         adjacency_matrix = tf.squeeze(adjacency_matrix, axis=-1)
         y = tf.matmul(adjacency_matrix, node_features)
         cluster_mapping = tf.matmul(tf.reshape(y,
-                                               shape=[-1, self.pa['kernel_shape'][0]]),
+                                               shape=[-1, self.parameters['kernel_shape'][0]]),
                                     self.weight_att)
 
-        if self.pa['activation']:
-            cluster_mapping = self.pa['activation'](cluster_mapping)
+        if self.parameters['activation']:
+            cluster_mapping = self.parameters['activation'](cluster_mapping)
 
-        cluster_mapping = tf.reshape(cluster_mapping, shape=[-1, num_nodes, self.pa['kernel_shape'][-1]])
+        cluster_mapping = tf.reshape(cluster_mapping, shape=[-1, num_nodes, self.parameters['kernel_shape'][-1]])
         cluster_mapping = tf.nn.softmax(cluster_mapping, axis=-1)
         self.tensors['cluster_mapping'] = cluster_mapping
 

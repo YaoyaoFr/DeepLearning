@@ -110,8 +110,8 @@ def get_metrics(output_tensor: tf.Tensor,
 
         TP = tf.count_nonzero(predict * labels)
         TN = tf.count_nonzero((predict - 1) * (labels - 1))
-        FN = tf.count_nonzero(predict * (labels - 1))
-        FP = tf.count_nonzero((predict - 1) * labels)
+        FP = tf.count_nonzero(predict * (labels - 1))
+        FN = tf.count_nonzero((predict - 1) * labels)
 
         precision = 0
         recall = 0
@@ -166,25 +166,21 @@ def load_initial_value(type: str, name: str):
 
 def upper_triangle(data: dict):
     transoformed_data = {}
-    for tag in ['train', 'valid', 'test']:
-        key = '{:s} data'.format(tag)
-        if key not in data:
-            continue
+    for key in data:
+        if 'data' in key:
+            d = np.squeeze(data[key], axis=-1)
+            assert d.ndim == 3
 
-        d = np.squeeze(data[key], axis=-1)
-        assert d.ndim == 3
+            [_, width, height] = np.shape(d)
+            assert height == width, '{:s} must be square matrix but get shape {:}.'.format(
+                key, np.shape(d))
 
-        [_, width, height] = np.shape(d)
-        assert height == width, '{:s} must be square matrix but get shape {:}.'.format(
-            key, np.shape(d))
+            triu_indices = np.triu_indices(n=height, k=1)
+            d = np.transpose(np.transpose(d, axes=[1, 2, 0])[
+                triu_indices], axes=[1, 0])
 
-        triu_indices = np.triu_indices(n=height, k=1)
-        d = np.transpose(np.transpose(d, axes=[1, 2, 0])[
-                         triu_indices], axes=[1, 0])
-
-        transoformed_data[key] = d
-
-        key = '{:s} label'.format(tag)
-        transoformed_data[key] = data[key]
+            transoformed_data[key] = d
+        elif 'label' in key:
+            transoformed_data[key] = data[key]
 
     return transoformed_data

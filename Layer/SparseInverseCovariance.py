@@ -20,11 +20,11 @@ class EdgeToNodeWithGLasso(LayerObject):
                                  })
         self.tensors = {}
 
-        self.pa = self.set_parameters(arguments=arguments,
+        self.parameters = self.set_parameters(arguments=arguments,
                                       parameters=parameters)
 
-        n_features, n_features, in_channels, out_channels = self.pa['kernel_shape']
-        out_channels *= self.pa['n_class']
+        n_features, n_features, in_channels, out_channels = self.parameters['kernel_shape']
+        out_channels *= self.parameters['n_class']
 
         initializer = self.get_initial_weight(kernel_shape=[n_features, n_features, in_channels, out_channels],
                                               loc=0)
@@ -40,7 +40,7 @@ class EdgeToNodeWithGLasso(LayerObject):
 
         self.weight_SICE = tf.transpose(a=tf.matmul(a=L_tril,
                                                     b=tf.transpose(L_tril, perm=[0, 1, 3, 2]),
-                                                    name=self.pa['scope'] + 'weight_SICE'),
+                                                    name=self.parameters['scope'] + 'weight_SICE'),
                                         perm=[3, 2, 0, 1])
         self.tensors['weight_SICE'] = self.weight_SICE
 
@@ -60,18 +60,18 @@ class EdgeToNodeWithGLasso(LayerObject):
         # Since the weights are naturally symmetric, it does not need to transpose
         # weight = tf.transpose(weight, perm=[1, 0, 2, 3])
 
-        covariance_slices = tf.split(covariance_tensor, axis=1, num_or_size_splits=self.pa['kernel_shape'][0])
-        weight_SICE_slices = tf.split(self.weight_SICE, axis=0, num_or_size_splits=self.pa['kernel_shape'][0])
+        covariance_slices = tf.split(covariance_tensor, axis=1, num_or_size_splits=self.parameters['kernel_shape'][0])
+        weight_SICE_slices = tf.split(self.weight_SICE, axis=0, num_or_size_splits=self.parameters['kernel_shape'][0])
 
         # Build sparse inverse covariance matrix regularization
 
         output_SICE = []
         for covariance_slice, weight_SICE_slice in zip(covariance_slices,
                                                        weight_SICE_slices):
-            feature_map_SICE = self.pa['conv_fun'](covariance_slice,
+            feature_map_SICE = self.parameters['conv_fun'](covariance_slice,
                                                    weight_SICE_slice,
-                                                   strides=self.pa['strides'],
-                                                   padding=self.pa['padding'],
+                                                   strides=self.parameters['strides'],
+                                                   padding=self.parameters['padding'],
                                                    )
             output_SICE.append(feature_map_SICE)
         output_SICE = tf.concat(output_SICE, axis=1)
@@ -92,13 +92,13 @@ class EdgeToNodeWithGLasso(LayerObject):
 
         # Reshape the regularizer to shape of [batch_size, n_class, out_channels] and softmax
         regularizer_softmax = tf.transpose(tf.nn.softmax(tf.reshape(SICE_regularizer_norm,
-                                                                    shape=[-1, self.pa['n_class'],
-                                                                           self.pa['kernel_shape'][3]]),
+                                                                    shape=[-1, self.parameters['n_class'],
+                                                                           self.parameters['kernel_shape'][3]]),
                                                          axis=-1),
                                            perm=[2, 0, 1])
 
         # label_unsupervise = tf.reduce_sum(tf.reshape(SICE_regularizer_norm,
-        #                                              shape=[-1, self.pa['n_class'], self.pa['kernel_shape'][3]]),
+        #                                              shape=[-1, self.parameters['n_class'], self.parameters['kernel_shape'][3]]),
         #                                   axis=-1)
         #
         # label_unsupervise = tf.cast(tf.concat(
@@ -114,18 +114,18 @@ class EdgeToNodeWithGLasso(LayerObject):
                                       )
         # Reshape to previous shape
         regularizer_softmax = tf.reshape(tf.transpose(regularizer_softmax, perm=[1, 2, 0]),
-                                         shape=[-1, self.pa['n_class'] * self.pa['kernel_shape'][3]])
+                                         shape=[-1, self.parameters['n_class'] * self.parameters['kernel_shape'][3]])
         self.tensors['Regularizer softmax'] = regularizer_softmax
 
         #
         SICE_regularizer = self.tensors['Log determinant'] + \
                            self.tensors['Trace'] + \
-                           self.pa['lambda'] * self.tensors['Norm 1']
+                           self.parameters['lambda'] * self.tensors['Norm 1']
         tf.add_to_collection('SICE_loss', tf.reduce_mean(tf.multiply(SICE_regularizer, regularizer_softmax)))
-        # tf.add_to_collection('L1_loss', self.pa['lambda'] * tf.reduce_mean(self.tensors['Norm 1']))
+        # tf.add_to_collection('L1_loss', self.parameters['lambda'] * tf.reduce_mean(self.tensors['Norm 1']))
 
         # output = tf.transpose(tf.multiply(tf.transpose(output, perm=[1, 2, 0, 3]), regularizer_softmax),
-        #                       perm=[2, 0, 1, 3]) * self.pa['kernel_shape'][3] * self.pa['n_class']
+        #                       perm=[2, 0, 1, 3]) * self.parameters['kernel_shape'][3] * self.parameters['n_class']
         # self.tensors['output_regularized_conv'] = output
 
         return self.weight_SICE
@@ -139,7 +139,7 @@ class EdgeToNodeWithGLasso(LayerObject):
                            ):
         rank = len(kernel_shape)
         assert rank in {2, 3, 4, 5}, 'The rank of kernel expected in {2, 3, 4, 5} but go {:d}'.format(rank)
-        assert 'activation' in self.pa, 'The activation function must be given. '
+        assert 'activation' in self.parameters, 'The activation function must be given. '
 
         if rank == 2:
             fan_in = kernel_shape[0] + kernel_shape[1]

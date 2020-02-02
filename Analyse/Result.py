@@ -1,24 +1,25 @@
-import os
-import time
 import operator
-import scipy.io as sio
-
+import os
 # Plot
 import re
-import seaborn as sns
+import shutil
+import time
+import collections
+
+import h5py
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.style as style
-import matplotlib.cm as cm
-import shutil
-
-import numpy
-import xlwt
-import h5py
 import numpy as np
-
+import scipy.io as sio
+import seaborn as sns
+import xlwt
 from scipy import stats
-from Schemes.xml_parse import parse_xml_file, parse_str
-from Dataset.utils import hdf5_handler, create_dataset_hdf5
+
+from Log.log import Log
+from Dataset.utils import create_dataset_hdf5, hdf5_handler
+from Schemes.xml_parse import parse_str, parse_xml_file
+
 
 """
 Results.hdf5
@@ -117,10 +118,10 @@ class Result:
                         objective_types: list = None,
                         objective_dataset: str = 'test',
                         show_result: bool = True,
-                        top: int = 10,
+                        top: int = None,
                         ):
         if objective_types is None:
-            objective_types = ['Accuracy', 'Specificity', 'Recall']
+            objective_types = ['Accuracy', 'Recall', 'Specificity']
 
         hdf5 = hdf5_handler(self.result_file_path)
 
@@ -169,7 +170,7 @@ class Result:
                            top: int = 10,
                            ):
         if objective_types is None:
-            objective_types = ['Accuracy', 'Specificity', 'Recall']
+            objective_types = ['Accuracy', 'Recall', 'Specificity']
 
         hdf5 = None
         if not experiment_group and experiment_name is not None:
@@ -178,13 +179,14 @@ class Result:
 
         pas = self.analyse_configuration(experiment_group=experiment_group,
                                          show_parameters=show_result)
-        if 'strategy' in pas and pas['strategy'] == 'basic':
-            optimize_type = None
-            optimize_dataset = None
-            optimize_epoch = np.inf
+        # if 'strategy' in pas and pas['strategy'] == 'basic':
+        #     optimize_type = None
+        #     optimize_dataset = None
+        #     optimize_epoch = np.inf
 
         cross_validation = experiment_group.attrs['cross validation']
-        results = {objective_type: [] for objective_type in objective_types}
+        results = collections.OrderedDict(
+            {objective_type: [] for objective_type in objective_types})
         for run_time in experiment_group:
             time_group = experiment_group.require_group(run_time)
             result = self.analyse_run_time(time_group=time_group,
@@ -197,8 +199,8 @@ class Result:
                                            )
             for objective_type in objective_types:
                 results[objective_type].append(result[objective_type])
-        results = {objective_type: np.array(
-            results[objective_type]) for objective_type in results}
+        results = collections.OrderedDict({objective_type: np.array(
+            results[objective_type]) for objective_type in results})
 
         if show_result:
             print('Experiment: {:s}\t'
@@ -232,10 +234,8 @@ class Result:
         result = {objective_type: [] for objective_type in objective_types}
 
         if 'fold' in cross_validation:
-            fold_nums = int(cross_validation.split(' ')[0])
-            for fold_index in range(fold_nums):
-                fold_group = time_group.require_group(
-                    'fold {:d}'.format(fold_index + 1))
+            for fold_index in range(len(time_group)):
+                fold_group = time_group['fold {:d}'.format(fold_index + 1)]
                 optimize_epoch_tmp = optimize_epoch
 
                 if optimize_type and optimize_dataset:
@@ -346,38 +346,43 @@ class Result:
 
     def set_saving_group(self,
                          scheme: str,
-                         current_xml: str,
-                         cross_validation,
+                         configurations: str,
+                         log: Log,
                          if_reset: bool = False):
         result_hdf5 = hdf5_handler(self.result_file_path)
         scheme_group = result_hdf5.require_group(scheme)
-        scheme_groups = [scheme_group[name] for name in scheme_group]
+        exp_groups = [scheme_group[name] for name in scheme_group]
 
         if not if_reset:
-            for scheme_group in scheme_groups:
+            for exp_group in exp_groups:
                 try:
-                    xml_str = scheme_group.attrs['configurations']
-                    cross_valid = scheme_group.attrs['cross validation']
-                except KeyError:
+                    xml_str = exp_group.attrs['configurations']
+                    cross_valid = exp_group.attrs['cross validation']
+                    cross_validation = parse_str(configurations)[
+                        'parameters']['basic']['cross_validation']
+                    if configurations == xml_str and cross_validation == cross_valid:
+                        print('Exist save scheme name is {:s}.'.format(
+                            exp_group.name))
+
+                        save_scheme_name = exp_group.name
+                        result_hdf5.close()
+                        return save_scheme_name
+                except Exception:
                     xml_str = ''
                     cross_valid = ''
+                    continue
 
-                if current_xml == xml_str and cross_validation == cross_valid:
-                    print('Exist save scheme name is {:s}.'.format(
-                        scheme_group.name))
-                    return scheme_group.name, xml_str
-
-        current_time = time.strftime(
-            '%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
-        save_scheme_name = '{:s}/{:s}'.format(scheme, current_time)
         result_hdf5.close()
+
+        save_scheme_name = '{:s}/{:s}-{:s}'.format(scheme, log.date, log.clock)
         print('New save scheme name is {:s}.'.format(save_scheme_name))
-        return save_scheme_name, current_xml
+        return save_scheme_name
 
     def save_results(self,
                      save_scheme_name,
                      cross_validation,
                      current_xml,
+                     dataset,
                      results,
                      run_time,
                      fold_name: str = None,
@@ -385,6 +390,8 @@ class Result:
         result_hdf5 = hdf5_handler(self.result_file_path)
         exp_group = result_hdf5.require_group('{:s}'.format(save_scheme_name))
 
+        if 'dataset' not in exp_group.attrs:
+            exp_group.attrs['dataset'] = dataset
         if 'cross validation' not in exp_group.attrs:
             exp_group.attrs['cross validation'] = cross_validation
         if 'configurations' not in exp_group.attrs:
@@ -658,16 +665,24 @@ class Result:
             results[exp_str] = self.analyse_experiment(
                 experiment_name=exp_name, show_result=False)['results'][data_type]
 
+        FONT_SIZE = {'legend': 24,
+                     'xticks': 24,
+                     'yticks': 22,
+                     'ylabel': 24}
+
         male_mean = np.mean(results['male'], axis=0)
         male_std = np.std(results['male'], axis=0)
         female_mean = np.mean(results['femal'], axis=0)
         female_std = np.std(results['femal'], axis=0)
         ax1 = fig.add_subplot(121)
-        ax1.bar(ind+width, female_mean, width, yerr=female_std, label='female')
         ax1.bar(ind, male_mean, width, yerr=male_std, label='male')
+        ax1.bar(ind+width, female_mean, width, yerr=female_std, label='female')
         plt.xticks(ind + width / 2,
-                   tuple(['fold {:d}'.format(n+1) for n in range(N)]))
-        plt.legend(loc='best', fontsize='xx-large')
+                   tuple(['fold {:d}'.format(n+1) for n in range(N)]), size=FONT_SIZE['xticks'])
+        plt.ylabel('Accuracy', fontdict={
+                   'family': 'Times New Roman', 'size': FONT_SIZE['ylabel']})
+        plt.yticks(size=FONT_SIZE['yticks'])
+        plt.legend(loc='best', fontsize=FONT_SIZE['legend'])
 
         male_mean = np.mean(male_data, axis=0)
         male_std = np.std(male_data, axis=0)
@@ -675,11 +690,14 @@ class Result:
         female_std = np.std(female_data, axis=0)
 
         ax2 = fig.add_subplot(122)
-        ax2.bar(ind+width, female_mean, width, yerr=female_std, label='female')
         ax2.bar(ind, male_mean, width, yerr=male_std, label='male')
+        ax2.bar(ind+width, female_mean, width, yerr=female_std, label='female')
         plt.xticks(ind + width / 2,
-                   tuple(['fold {:d}'.format(n+1) for n in range(N)]))
-        plt.legend(loc='best', fontsize='xx-large')
+                   tuple(['fold {:d}'.format(n+1) for n in range(N)]), size=FONT_SIZE['xticks'])
+        plt.ylabel('Accuracy', fontdict={
+                   'family': 'Times New Roman', 'size': FONT_SIZE['ylabel']})
+        plt.yticks(size=FONT_SIZE['yticks'])
+        plt.legend(loc='best', fontsize=FONT_SIZE['legend'])
 
         save_dir_path = os.path.join(self.dir_path, 'Result/DeepLearning')
         plt.savefig(os.path.join(save_dir_path, figure_name), dpi=1000)
@@ -745,26 +763,27 @@ class Result:
 
 
 if __name__ == '__main__':
-    filters = ['run_times == 100',
-               'cross_validation == Monte Calor',
-               'SICE_lambda >= 0.01',
-               'SICE_lambda <= 0.2',
+    filters = ['run_times == 50',
+               'cross_validation == 1 fold',
+               #    'SICE_lambda >= 0.01',
+               #    'SICE_lambda <= 0.2',
                ]
 
-    old_path = '/home/ai/data/yaoyao/Result/DeepLearning_old/DCAE_results.hdf5'
-    rt = Result(result_file_path=old_path)
-    # rt = Result()
+    # old_hdf5_path = '/home/ai/data/yaoyao/Result/DeepLearning_old/DCAE_results.hdf5'
+    # rt = Result(result_file_path=old_hdf5_path)
+    rt = Result()
 
     # rt.write_results_to_excel(schemes=['CNNGLasso', 'CNNWithGLasso', 'DTLNN', 'FCNN', 'BrainNetCNN'],
-                              #   sort_pa='SICE_lambda',
-                            #   filters=filters,
-                            #   )
-    # results = rt.analyse_results(schemes=['CNNGLasso'],
-    #                              filters=filters,
-    #                              sort_pa='SICE_lambda',
-    #                              optimize_epoch=-1,
-    #                              show_result=True,
-    #                              )
+    #   sort_pa='SICE_lambda',
+    #   filters=filters,
+    #   )
+    results = rt.analyse_results(schemes=['SSAE'],
+                                 #  filters=filters,
+                                 #  sort_pa='SICE_lambda',
+                                 optimize_dataset='test',
+                                 optimize_type='Accuracy',
+                                 show_result=True,
+                                 )
 
     # Plot
     # rt.lambda_GLasso(x_axis='SICE_lambda',
@@ -774,25 +793,15 @@ if __name__ == '__main__':
     #                  filters=filters,
     #                  figure_name='optimal_lambda_SICE.png')
 
-    exp_name = 'CNNGLasso/2020-01-01-03-40-29'
-    rt.analyse_experiment(experiment_name=exp_name)
+    # exp_name = 'CNNGLasso/2020-01-07-15-30-06'
+    # rt.analyse_experiment(experiment_name=exp_name, top=5)
 
-    exp_names = [
-        'CNNGLasso/2019-12-31-20-48-41',
-        'CNNGLasso/2020-01-01-00-11-36',
-        'CNNGLasso/2020-01-01/11-19-38',
-    ]
+    # Plot the results of gender analysis
+    # old_hdf5_path = '/home/ai/data/yaoyao/Result/DeepLearning_old/DCAE_results.hdf5'
+    # rt = Result(result_file_path=old_hdf5_path)
+    # exp_names = [
+    #     'CNNGLasso/2019-12-31-20-48-41',
+    #     'CNNGLasso/2020-01-01-00-11-36',
+    #     'CNNGLasso/2020-01-01/11-19-38',
+    # ]
     # rt.gender_analyse(exp_names=exp_names)
-
-
-# analyse(dir_path=dir_path, experiments=[
-#     'CNNWithGLasso/2019-07-15-21-24-08',
-#     '/BrainNetCNNEW/2019-05-30-16-47',
-#     'BrainNetCNN/2019-12-15-14-34-13',
-#     'DTLNN/2019-12-24-10-43-54',
-#     'DenoisedAutoEncoder/2019-12-25-08-37-45',
-#     ])
-# analyse(dir_path=dir_path, experiments=[
-#     'BrainNetCNNEW', 'CNNGLasso', 'CNNWithGLasso', 'BrainNetCNN', 'DTLNN', 'DenoisedAutoEncoder'
-# ])
-# analyse(dir_path=dir_path, experiments=['SICSVM'])

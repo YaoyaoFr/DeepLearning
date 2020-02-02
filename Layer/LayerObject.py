@@ -1,3 +1,4 @@
+import collections
 import numpy as np
 import scipy.io as sio
 import tensorflow as tf
@@ -8,16 +9,19 @@ from Model.utils_model import load_initial_value
 
 class LayerObject(object, metaclass=ABCMeta):
     """
-
+    Basic layer object
     """
 
     def __init__(self):
-        self.initializer = None
         self.optional_pa = {'load_weight': False,
                             'load_bias': False,
                             'L2_lambda': 5e-3,
                             }
-        pass
+        self.required_pa = {}
+
+        self.parameters = {}
+        self.tensors = collections.OrderedDict()
+        self.trainable_pas = collections.OrderedDict()
 
     @abstractmethod
     def build(self, *args, **kwargs):
@@ -38,14 +42,14 @@ class LayerObject(object, metaclass=ABCMeta):
         new_kwargs = {}
 
         # Data load from tensors of previous layer
-        if 'tensors' in self.pa:
-            tensor_names = self.pa['tensors']
+        if 'tensors' in self.parameters:
+            tensor_names = self.parameters['tensors']
             for tensor_name in tensor_names:
                 new_kwargs[tensor_name] = tensors[tensor_name]
 
         # Data load from placeholders
-        if 'placeholders' in self.pa:
-            for placeholder_name in self.pa['placeholders']:
+        if 'placeholders' in self.parameters:
+            for placeholder_name in self.parameters['placeholders']:
                 new_kwargs[placeholder_name] = placeholders[placeholder_name]
 
         if len(new_kwargs) == 0:
@@ -57,8 +61,6 @@ class LayerObject(object, metaclass=ABCMeta):
 
     def set_parameters(self, arguments: dict,
                        parameters: dict = None):
-        pa = {}
-
         if parameters is not None:
             arguments.update(parameters)
 
@@ -67,12 +69,12 @@ class LayerObject(object, metaclass=ABCMeta):
         for arg in self.required_pa:
             assert arg in arguments, 'The required argument {:s} missed.'.format(arg)
 
-            pa[arg] = arguments[arg]
+            self.parameters[arg] = arguments[arg]
 
         for arg in self.optional_pa:
-            pa[arg] = self.optional_pa[arg]
+            self.parameters[arg] = self.optional_pa[arg]
 
-        return pa
+        return self.parameters
 
     def get_initial_weight(self,
                            kernel_shape: list,
@@ -81,7 +83,7 @@ class LayerObject(object, metaclass=ABCMeta):
                            ):
         rank = len(kernel_shape)
         assert rank in {2, 3, 4, 5}, 'The rank of kernel expected in {2, 3, 4, 5} but go {:d}'.format(rank)
-        assert 'activation' in self.pa, 'The activation function must be given. '
+        assert 'activation' in self.parameters, 'The activation function must be given. '
 
         if rank == 2:
             fan_in = kernel_shape[0] + kernel_shape[1]

@@ -16,22 +16,22 @@ from Model.utils_model import upper_triangle
 class SupportVectorMachine(object, metaclass=ABCMeta):
     classifier = None
     NN_type = 'Support Vector Machine'
-    pa = {}
 
     def __init__(self,
                  scheme: str,
                  dir_path: str,
                  log: Log = None,
                  graph: tf.Graph = None,
-                 spe_pas: dict = None, 
+                 spe_pas: dict = None,
                  ):
-
+        self.pas = {}
         self.scheme = scheme
-        self.project_path = os.path.join(dir_path, 'Program/Python/DeepLearning')
+        self.project_path = os.path.join(
+            dir_path, 'Program/Python/DeepLearning')
         self.load_parameters(scheme=scheme, spe_pas=spe_pas)
 
-    def load_parameters(self, 
-                        scheme: str, 
+    def load_parameters(self,
+                        scheme: str,
                         spe_pas: dict = None):
         """
         Load parameters from configuration file (.xml)
@@ -39,7 +39,8 @@ class SupportVectorMachine(object, metaclass=ABCMeta):
         :return:
         """
         if not spe_pas:
-            pas = parse_xml_file(os.path.join(self.project_path, 'Schemes/{:s}.xml'.format(scheme)))
+            pas = parse_xml_file(os.path.join(
+                self.project_path, 'Schemes/{:s}.xml'.format(scheme)))
         self.pas['basic'] = pas['parameters']['basic']
 
     def build_structure(self):
@@ -50,7 +51,7 @@ class SupportVectorMachine(object, metaclass=ABCMeta):
                  data: h5py.Group or dict,
                  run_time: int = 1,
                  fold_name: str = None,
-                 show_info: bool = True,
+                 if_show: bool = True,
                  ):
         self.build_structure()
 
@@ -79,10 +80,12 @@ class SupportVectorMachine(object, metaclass=ABCMeta):
         results = {}
         for tag in ['train', 'valid', 'test']:
             try:
-                prediction = self.classifier.predict(data['{:s} data'.format(tag)])
+                prediction = self.classifier.predict(
+                    data['{:s} data'.format(tag)])
                 label = data['{:s} label'.format(tag)]
 
-                results[tag] = self.get_metrics(predict=prediction, labels=label)
+                results[tag] = self.get_metrics(
+                    predict=prediction, labels=label)
             except KeyError:
                 continue
         return results
@@ -141,29 +144,8 @@ class SupportVectorMachine(object, metaclass=ABCMeta):
         if isinstance(data, h5py.Group):
             data = {tag: np.array(data[tag]) for tag in data}
 
-        data.update({tag: onehot2vector(data[tag]) for tag in data if 'label' in tag})
+        data.update({tag: onehot2vector(data[tag])
+                     for tag in data if 'label' in tag})
         data = upper_triangle(data=data)
 
         return data
-
-    
-    @staticmethod
-    def load_dataset(hdf5_file, 
-                     scheme: str):
-        dataset = {}
-
-        scheme_group = hdf5_file['scheme {:s}'.format(scheme)]
-        for fold_index in range(5):
-            fold_dataset = {}
-            fold_group = scheme_group['fold {:d}'.format(fold_index+1)]
-            for tag in ['train', 'valid', 'test']:
-                for data_type in ['data', 'label']:
-                    str = '{:s} {:s}'.format(tag, data_type)
-                    try:
-                        fold_dataset[str] = np.array(fold_group[str])
-                    except KeyError:
-                        continue
-            dataset['fold {:d}'.format(fold_index + 1)] = fold_dataset
-        hdf5_file.close()
-
-        return dataset

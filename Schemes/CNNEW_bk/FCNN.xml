@@ -1,0 +1,77 @@
+<parameters>
+    <parameters>
+        <basic>
+            <dataset>ABIDE</dataset>
+            <feature>pearson correlation XXY</feature>
+            <atlas>aal90</atlas>
+            <normalization>True</normalization>
+            <cross_validation>5 fold</cross_validation>
+        </basic>
+
+        <training>
+            <train_batch_size>96</train_batch_size>
+        </training>
+
+        <early_stop>
+            <strategy>early_stop</strategy>
+            <training_cycle>100</training_cycle>
+            <learning_rate>0.0005</learning_rate>
+            <decay_rate>1</decay_rate>
+            <decay_step>100</decay_step>
+            <save_cycle>100</save_cycle>
+            <tolerance_all>15</tolerance_all>
+        </early_stop>
+    </parameters>
+
+	<layers>
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[None,4005]</input_shape>
+            <dtype>float32</dtype>
+            <scope>input_tensor</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[None,2]</input_shape>
+            <dtype>float32</dtype>
+            <scope>output_tensor</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[]</input_shape>
+            <dtype>float32</dtype>
+            <scope>learning_rate</scope>
+        </input>
+
+        <input>
+            <type>Placeholder</type>
+            <input_shape>[]</input_shape>
+            <dtype>bool</dtype>
+            <scope>training</scope>
+        </input>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>[4005,300]</kernel_shape>
+            <activation>sigmoid</activation>
+            <placeholders>[input_tensor]</placeholders>
+            <scope>hidden1</scope>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>[300,96]</kernel_shape>
+            <activation>sigmoid</activation>
+            <scope>hidden2</scope>
+        </layer>
+
+        <layer>
+            <type>FullyConnected</type>
+            <kernel_shape>[96,2]</kernel_shape>
+            <scope>hidden3</scope>
+        </layer>
+
+	</layers>
+</parameters>

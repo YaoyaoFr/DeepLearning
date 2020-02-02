@@ -15,20 +15,20 @@ class Placeholder(LayerObject):
 
     def __init__(self,
                  arguments,
-                 parameters=None,
+                 parameters: dict = None,
                  ):
         LayerObject.__init__(self)
         self.optional_pa.update({'dtype': tf.float32,
                                  'scope': 'input',
                                  })
-        self.pa = self.set_parameters(arguments=arguments)
+        self.set_parameters(arguments=arguments, parameters=parameters)
 
-    def build(self):
-        return tf.placeholder(dtype=self.pa['dtype'],
-                                        shape=self.pa['input_shape'],
-                                        name=self.pa['scope'])
+    def build(self, *args, **kwargs):
+        return tf.placeholder(dtype=self.parameters['dtype'],
+                              shape=self.parameters['input_shape'],
+                              name=self.parameters['scope'])
 
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         return self.build()
 
 
@@ -48,19 +48,19 @@ class Placeholders(LayerObject):
                                  'input_num': 0,
                                  'input_shape': [],
                                  })
-        self.pa = self.set_parameters(arguments=arguments,
-                                      parameters=parameters,
-                                      )
+        self.parameters = self.set_parameters(arguments=arguments,
+                                              parameters=parameters,
+                                              )
 
-        if 'input_shape' in self.pa and 'input_num' in self.pa:
-            input_shape = self.pa['input_shape']
-            input_num = self.pa['input_num']
+        if 'input_shape' in self.parameters and 'input_num' in self.parameters:
+            input_shape = self.parameters['input_shape']
+            input_num = self.parameters['input_num']
             self.input_shapes = [input_shape for _ in range(input_num)]
 
     def build(self):
-        return [tf.placeholder(dtype=self.pa['dtype'],
+        return [tf.placeholder(dtype=self.parameters['dtype'],
                                shape=input_shape,
-                               name='{:s}_{:d}'.format(self.pa['scope'], index + 1))
+                               name='{:s}_{:d}'.format(self.parameters['scope'], index + 1))
                 for index, input_shape in enumerate(self.input_shapes)]
 
     def call(self):
@@ -81,44 +81,42 @@ class FullyConnected(LayerObject):
         self.optional_pa.update({'bias': True,
                                  'batch_normalization': False,
                                  'activation': None,
-                                 'L2_lambda': None,
                                  'load_weight': False,
                                  'scope': 'FC',
                                  })
-        self.tensors = {}
-        self.pa = self.set_parameters(arguments=arguments,
-                                      parameters=parameters)
+        self.set_parameters(arguments=arguments,
+                            parameters=parameters)
 
-        initializer = self.get_initial_weight(kernel_shape=self.pa['kernel_shape'],
+        initializer = self.get_initial_weight(kernel_shape=self.parameters['kernel_shape'],
                                               distribution='norm')
         # Load weight
-        if self.pa['load_weight']:
+        if self.parameters['load_weight']:
             initializer = load_initial_value(type='weight',
-                                             name=self.pa['scope'])
+                                             name=self.parameters['scope'])
 
         # build weights
         self.weight = tf.Variable(initial_value=initializer,
-                                  name=self.pa['scope'] + '/kernel',
+                                  name=self.parameters['scope'] + '/kernel',
                                   trainable=True,
                                   )
-        self.tensors['weight'] = self.weight
+        self.trainable_pas['weight'] = self.weight
 
-        if self.pa['L2_lambda']:
-            L2 = tf.contrib.layers.l2_regularizer(0.5 * self.pa['L2_lambda'])(self.weight)
-            tf.add_to_collection('L2_loss', L2)
+        l2_loss = tf.contrib.layers.l2_regularizer(
+            self.parameters['L2_lambda'])(self.weight)
+        tf.add_to_collection('L2_loss', l2_loss)
 
         # build bias
-        num_output_channels = self.pa['kernel_shape'][-1]
-        if self.pa['bias']:
-            if self.pa['load_bias']:
+        num_output_channels = self.parameters['kernel_shape'][-1]
+        if self.parameters['bias']:
+            if self.parameters['load_bias']:
                 initializer = load_initial_value(type='bias',
-                                                 name=self.pa['scope'])
+                                                 name=self.parameters['scope'])
             else:
                 initializer = tf.constant(0.0, shape=[num_output_channels])
             self.bias = tf.Variable(initial_value=initializer,
-                                    name=self.pa['scope'] + '/bias',
+                                    name=self.parameters['scope'] + '/bias',
                                     )
-            self.tensors['bias'] = self.bias
+            self.trainable_pas['bias'] = self.bias
 
     def build(self, *args, **kwargs):
         input_tensor = kwargs['output' if 'output' in kwargs else 'input_tensor']
@@ -130,21 +128,21 @@ class FullyConnected(LayerObject):
         self.tensors['output_matmul'] = output
 
         # bias
-        if self.pa['bias']:
+        if self.parameters['bias']:
             output = output + self.bias
             self.tensors['output_bias'] = output
 
         # batch normalization
-        if self.pa['batch_normalization']:
+        if self.parameters['batch_normalization']:
             output_bn = self.batch_normalization(tensor=output,
-                                                 scope=self.pa['scope'] + '/bn',
+                                                 scope=self.parameters['scope'] + '/bn',
                                                  training=training)['output_bn']
             self.tensors['output_bn'] = output_bn
             output = output_bn
 
         # activation
-        if self.pa['activation']:
-            output = self.pa['activation'](output)
+        if self.parameters['activation']:
+            output = self.parameters['activation'](output)
             self.tensors['output_activation'] = output
 
         self.tensors['output'] = output
@@ -166,8 +164,8 @@ class Unfold(LayerObject):
         LayerObject.__init__(self)
 
         self.tensors = {}
-        self.pa = self.set_parameters(arguments=arguments,
-                                      parameters=parameters)
+        self.parameters = self.set_parameters(arguments=arguments,
+                                              parameters=parameters)
 
     def build(self, *args, **kwargs):
         if 'input_tensor' in kwargs:
@@ -206,6 +204,7 @@ class Fold(LayerObject):
     def call(self, input_tensor, output_shape, training=True):
         return self.build(input_tensor, output_shape=output_shape)
 
+
 class Softmax(LayerObject):
     """
 
@@ -219,7 +218,7 @@ class Softmax(LayerObject):
         LayerObject.__init__(self)
 
         self.tensors = {}
-        self.pa = self.set_parameters(arguments=arguments)
+        self.parameters = self.set_parameters(arguments=arguments)
 
     def build(self, input_tensor, output_shape=None):
         self.tensors['input'] = input_tensor
@@ -250,16 +249,16 @@ class MaxPooling(LayerObject):
                  ):
         LayerObject.__init__(self)
         self.tensors = {}
-        self.pa = self.set_parameters(arguments=arguments)
+        self.parameters = self.set_parameters(arguments=arguments)
 
     def build(self, input_tensor, output_shape=None):
         self.tensors['input'] = input_tensor
 
         # max pool
-        output = self.pa['pool_fun'](input_tensor,
-                                     ksize=self.pa['kernel_shape'],
-                                     strides=self.pa['strides'],
-                                     padding=self.pa['padding'])
+        output = self.parameters['pool_fun'](input_tensor,
+                                             ksize=self.parameters['kernel_shape'],
+                                             strides=self.parameters['strides'],
+                                             padding=self.parameters['padding'])
         self.tensors['output'] = output
 
         return output
@@ -286,16 +285,16 @@ class MaxPoolings(LayerObject):
         LayerObject.__init__(self)
 
         self.tensors = {}
-        self.pa = self.set_parameters(arguments=arguments)
+        self.parameters = self.set_parameters(arguments=arguments)
 
     def build(self, input_tensors, output_shape=None):
         self.tensors['input'] = input_tensors
 
         # max pool
-        output = [self.pa['pool_fun'](input_tensor,
-                                      ksize=self.pa['kernel_shape'],
-                                      strides=self.pa['strides'],
-                                      padding=self.pa['padding'])
+        output = [self.parameters['pool_fun'](input_tensor,
+                                              ksize=self.parameters['kernel_shape'],
+                                              strides=self.parameters['strides'],
+                                              padding=self.parameters['padding'])
                   for input_tensor in input_tensors]
         self.tensors['output'] = output
 
@@ -330,9 +329,12 @@ class SpatialPyramidPool3D(LayerObject):
 
             spps = []
             for i in range(len(self.kernel_shape)):
-                h_strd = h_size = math.ceil(float(conv_size[0]) / self.kernel_shape[i])
-                w_strd = w_size = math.ceil(float(conv_size[1]) / self.kernel_shape[i])
-                d_strd = d_size = math.ceil(float(conv_size[2]) / self.kernel_shape[i])
+                h_strd = h_size = math.ceil(
+                    float(conv_size[0]) / self.kernel_shape[i])
+                w_strd = w_size = math.ceil(
+                    float(conv_size[1]) / self.kernel_shape[i])
+                d_strd = d_size = math.ceil(
+                    float(conv_size[2]) / self.kernel_shape[i])
                 pad_h = int(self.kernel_shape[i] * h_size - conv_size[0])
                 pad_w = int(self.kernel_shape[i] * w_size - conv_size[1])
                 pad_d = int(self.kernel_shape[i] * d_size - conv_size[2])
@@ -345,8 +347,10 @@ class SpatialPyramidPool3D(LayerObject):
                                                 [0, 0]]
                                            ))
                 max_pool = tf.nn.max_pool3d(input=new_previous_conv,
-                                            ksize=[1, h_size, h_size, d_size, 1],
-                                            strides=[1, h_strd, w_strd, d_strd, 1],
+                                            ksize=[1, h_size,
+                                                   h_size, d_size, 1],
+                                            strides=[1, h_strd,
+                                                     w_strd, d_strd, 1],
                                             padding='SAME',
                                             name='{:s}_{:d}'.format(self.scope, index + 1))
                 new_shape = max_pool.get_shape().as_list()
@@ -402,7 +406,8 @@ class UnPooling(LayerObject):
         kernel_width, kernel_height = self.kernel_shape
 
         # build kernel
-        kernel_value = np.zeros((kernel_width, kernel_height, num_channels, num_channels), dtype=input_dtype_as_numpy)
+        kernel_value = np.zeros(
+            (kernel_width, kernel_height, num_channels, num_channels), dtype=input_dtype_as_numpy)
         kernel_value[0, 0, :, :] = np.eye(num_channels, num_channels)
         kernel = tf.constant(kernel_value, name=self.scope + '/kernel')
 
@@ -410,7 +415,8 @@ class UnPooling(LayerObject):
         output = tf.nn.conv2d_transpose(input_tensor,
                                         kernel,
                                         output_shape=output_shape,
-                                        strides=(1, kernel_width, kernel_height, 1),
+                                        strides=(1, kernel_width,
+                                                 kernel_height, 1),
                                         padding='VALID')
         self.tensors['output'] = output
         return output
@@ -449,7 +455,8 @@ class UnPooling3D(LayerObject):
         output = tf.nn.conv3d_transpose(input_tensor,
                                         kernel,
                                         output_shape=output_shape,
-                                        strides=(1, kernel_width, kernel_height, kernel_depth, 1),
+                                        strides=(
+                                            1, kernel_width, kernel_height, kernel_depth, 1),
                                         padding='VALID')
         self.tensors['output'] = output
         return output

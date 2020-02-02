@@ -4,7 +4,8 @@ import tensorflow as tf
 
 from Log.log import Log
 from Schemes.xml_parse import parse_xml_file
-from Model.utils_model import EarlyStop, get_metrics, upper_triangle
+from Model.utils_model import get_metrics, upper_triangle
+from Model.early_stop import EarlyStop
 from Model.NN import NeuralNetwork
 
 
